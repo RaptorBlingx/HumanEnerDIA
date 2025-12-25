@@ -54,6 +54,14 @@
             return; // Don't create floating button if navbar button exists
         }
         
+        // Check if floating button already exists
+        const existingFloatBtn = document.getElementById('ovos-enable-voice');
+        if (existingFloatBtn) {
+            existingFloatBtn.style.display = 'flex';
+            existingFloatBtn.classList.remove('hidden');
+            return; // Don't create duplicate
+        }
+        
         // Fallback: Create floating button for pages without navbar
         const btnHTML = `
             <button id="ovos-enable-voice" class="ovos-enable-voice">
@@ -1139,11 +1147,11 @@
     }
 
     function showWakeWordIndicator() {
-        // Remove enable buttons if exists
+        // Hide enable buttons if exists (don't remove - just hide)
         const navBtn = document.getElementById('ovos-enable-voice-nav');
         const floatBtn = document.getElementById('ovos-enable-voice');
-        if (navBtn) navBtn.remove();
-        if (floatBtn) floatBtn.remove();
+        if (navBtn) navBtn.style.display = 'none';
+        if (floatBtn) floatBtn.style.display = 'none';
         
         // Create indicator
         const indicatorHTML = `
@@ -1164,15 +1172,18 @@
         // Stop wake word recognition
         stopWakeWord();
         wakeWordEnabled = false;
+        voicePermissionGranted = false;
         
         // Remove indicator
         const indicator = document.getElementById('ovos-wakeword-indicator');
         if (indicator) indicator.remove();
         
-        // Show enable button again
+        // Show enable button again (will show existing button, not create new one)
         createEnableVoiceButton();
         const enableBtn = document.getElementById('ovos-enable-voice-nav') || document.getElementById('ovos-enable-voice');
         if (enableBtn) {
+            // Remove old listener to avoid duplicates
+            enableBtn.removeEventListener('click', enableVoiceAssistant);
             enableBtn.addEventListener('click', enableVoiceAssistant);
         }
         
@@ -1198,15 +1209,13 @@
             const indicator = document.getElementById('ovos-wakeword-indicator');
             if (indicator) indicator.remove();
             
-            // Show enable button again
-            const navBtn = document.getElementById('ovos-enable-voice-nav');
-            const floatBtn = document.getElementById('ovos-enable-voice');
-            if (!navBtn && !floatBtn) {
-                createEnableVoiceButton();
-                const enableBtn = document.getElementById('ovos-enable-voice-nav') || document.getElementById('ovos-enable-voice');
-                if (enableBtn) {
-                    enableBtn.addEventListener('click', enableVoiceAssistant);
-                }
+            // Show enable button again (will show existing button, not create new one)
+            createEnableVoiceButton();
+            const enableBtn = document.getElementById('ovos-enable-voice-nav') || document.getElementById('ovos-enable-voice');
+            if (enableBtn) {
+                // Remove old listener to avoid duplicates
+                enableBtn.removeEventListener('click', enableVoiceAssistant);
+                enableBtn.addEventListener('click', enableVoiceAssistant);
             }
             
         } else {

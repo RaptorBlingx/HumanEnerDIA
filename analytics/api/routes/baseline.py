@@ -197,11 +197,16 @@ async def train_baseline(request: TrainBaselineRequest):
     try:
         logger.info(f"[TRAIN-API] Received training request: machine_id={request.machine_id}, start={request.start_date}, end={request.end_date}, drivers={request.drivers}")
         
+        # Deduplicate drivers (e.g., both "production_count" and "total_production" map to same column)
+        drivers = list(dict.fromkeys(request.drivers)) if request.drivers else None
+        if drivers and len(drivers) != len(request.drivers or []):
+            logger.info(f"[TRAIN-API] Deduplicated drivers: {len(request.drivers)} -> {len(drivers)} unique columns")
+        
         result = await baseline_service.train_baseline(
             machine_id=request.machine_id,
             start_date=request.start_date,
             end_date=request.end_date,
-            drivers=request.drivers
+            drivers=drivers
         )
         
         logger.info(f"[TRAIN-API] Training completed successfully")
@@ -567,6 +572,123 @@ async def get_model_details(
     except Exception as e:
         logger.error(f"Error retrieving model: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.put("/baseline/model/{model_id}/activate", tags=["Baseline"])
+async def activate_model(model_id: UUID = Path(..., description="Model UUID to activate")):
+    """
+    Activate a specific baseline model (sets it as the active model).
+    
+    Deactivates all other models for the same machine/energy_source and activates the selected one.
+    
+    **Use Cases:**
+    - Revert to a previous model after testing
+    - Activate better-performing older model
+    - Switch between seasonal models
+    
+    **Returns:**
+    - Updated model with is_active=true
+    - Message confirming activation
+    """
+    try:
+        # Get model details first
+        model = await baseline_service.get_model_details(model_id)
+        if not model:
+            raise HTTPException(status_code=404, detail="Model not found")
+        
+        machine_id = model['machine_id']
+        energy_source_id = model.get('energy_source_id')
+        
+        # Deactivate all models for this machine/energy_source
+        from database import db, deactivate_baseline_models
+        await deactivate_baseline_models(machine_id, energy_source_id)
+        
+        # Activate the selected model
+        async with db.pool.acquire() as conn:
+            await conn.execute(
+                "UPDATE energy_baselines SET is_active = true WHERE id = $1",
+                model_id
+            )
+        
+        logger.info(f"✓ Model {model_id} activated for machine {machine_id}")
+        
+        return {
+            "success": True,
+            "message": f"Model version {model['model_version']} is now active",
+            "model_id": str(model_id),
+            "machine_id": str(machine_id)
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error activating model: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to activate model: {str(e)}")
+
+
+@router.delete("/baseline/model/{model_id}", tags=["Baseline"])
+async def delete_model(model_id: UUID = Path(..., description="Model UUID to delete")):
+    """
+    Delete a baseline model permanently.
+    
+    **WARNING:** This action cannot be undone!
+    
+    **Restrictions:**
+    - Cannot delete the active model (deactivate/activate another first)
+    - Deletes model metadata from database
+    - Deletes saved model file from disk
+    
+    **Returns:**
+    - Confirmation message
+    """
+    try:
+        from database import db
+        from pathlib import Path
+        
+        # Get model details
+        model = await baseline_service.get_model_details(model_id)
+        if not model:
+            raise HTTPException(status_code=404, detail="Model not found")
+        
+        # Check if active
+        if model.get('is_active'):
+            raise HTTPException(
+                status_code=400, 
+                detail="Cannot delete active model. Activate another model first."
+            )
+        
+        # Delete from database
+        async with db.pool.acquire() as conn:
+            deleted = await conn.fetchval(
+                "DELETE FROM energy_baselines WHERE id = $1 RETURNING id",
+                model_id
+            )
+        
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Model not found")
+        
+        # Delete model file from disk (if exists)
+        try:
+            model_path = Path(f"/app/models/saved/baseline/{model['machine_id']}_v{model['model_version']}.pkl")
+            if model_path.exists():
+                model_path.unlink()
+                logger.info(f"Deleted model file: {model_path}")
+        except Exception as e:
+            logger.warning(f"Could not delete model file: {e}")
+        
+        logger.info(f"✓ Model {model_id} deleted")
+        
+        return {
+            "success": True,
+            "message": f"Model version {model['model_version']} deleted successfully",
+            "model_id": str(model_id)
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting model: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to delete model: {str(e)}")
 
 
 # ============================================================================

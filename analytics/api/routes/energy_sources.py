@@ -6,7 +6,7 @@ Critical for OVOS dynamic feature discovery.
 """
 
 from fastapi import APIRouter, HTTPException, Query
-from typing import List, Optional
+from typing import List, Optional, Any
 from uuid import UUID
 import logging
 
@@ -175,6 +175,47 @@ async def list_features_for_energy_source(
                 regression_only=regression_only
             )
             
+            # Map feature_name to actual column name in aggregated data
+            # (e.g., "pressure_bar" -> "avg_pressure_bar")
+            def get_column_name(feature: Any) -> str:
+                """Map feature_name to actual aggregated column name."""
+                agg = feature.aggregation_function.upper()
+                
+                # Special cases matching get_machine_data_combined() query
+                if feature.feature_name == "production_count":
+                    return "total_production_count"
+                elif feature.feature_name == "avg_throughput":
+                    return "avg_throughput_units_per_hour"
+                elif feature.feature_name == "total_production":
+                    return "total_production_count"
+                elif feature.feature_name == "consumption_kwh":
+                    return "total_energy_kwh"
+                elif feature.feature_name == "operating_hours":
+                    return "operating_hours"  # Derived field
+                elif feature.feature_name == "good_units_count":
+                    return "total_production_good"
+                elif feature.feature_name == "defect_units_count":
+                    return "total_production_bad"
+                elif feature.feature_name == "avg_cycle_time_sec":
+                    # Not in aggregated data - would need to add to query
+                    return None  # Skip this feature for now
+                
+                # Standard prefix mapping
+                if agg == "AVG":
+                    return f"avg_{feature.source_column}"
+                elif agg in ("SUM", "TOTAL"):
+                    return f"total_{feature.source_column}"
+                elif agg == "MAX":
+                    return f"max_{feature.source_column}"
+                elif agg == "MIN":
+                    return f"min_{feature.source_column}"
+                elif agg == "CUSTOM":
+                    # Custom aggregations use feature_name as-is
+                    return feature.feature_name
+                else:
+                    # Default: use feature_name as-is
+                    return feature.feature_name
+            
             return {
                 "energy_source": es_row["name"],
                 "energy_source_id": str(energy_source_id),
@@ -183,12 +224,14 @@ async def list_features_for_energy_source(
                 "features": [
                     {
                         "feature_name": f.feature_name,
+                        "column_name": get_column_name(f),  # NEW: Actual column in aggregated data
                         "source_table": f.source_table,
                         "source_column": f.source_column,
                         "aggregation_function": f.aggregation_function,
                         "description": f.description
                     }
                     for f in features
+                    if get_column_name(f) is not None  # Filter out unavailable features
                 ]
             }
     except HTTPException:

@@ -368,61 +368,36 @@
                         
                         <!-- Driver Selection -->
                         <div class="driver-selection">
-                            <h6>Select Drivers (Min. 3)</h6>
-                            <small>Factors influencing energy</small>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
+                                <div>
+                                    <h6 style="margin: 0;">Select Drivers (Min. 3)</h6>
+                                    <small>Factors influencing energy</small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="smart-select-btn" style="display: none; font-size: 0.75rem; padding: 0.25rem 0.75rem;">
+                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 4px;">
+                                        <path d="M8.864.046C7.908-.193 7.02.53 6.956 1.466c-.072 1.051-.23 2.016-.428 2.59-.125.36-.479 1.013-1.04 1.639-.557.623-1.282 1.178-2.131 1.41C2.685 7.288 2 7.87 2 8.72v4.001c0 .845.682 1.464 1.448 1.545 1.07.114 1.564.415 2.068.723l.048.03c.272.165.578.348.97.484.397.136.861.217 1.466.217h3.5c.937 0 1.599-.477 1.934-1.064a1.86 1.86 0 0 0 .254-.912c0-.152-.023-.312-.077-.464.201-.263.38-.578.488-.901.11-.33.172-.762.004-1.149.069-.13.12-.269.159-.403.077-.27.113-.568.113-.857 0-.288-.036-.585-.113-.856a2.144 2.144 0 0 0-.138-.362 1.9 1.9 0 0 0 .234-1.734c-.206-.592-.682-1.1-1.2-1.272-.847-.282-1.803-.276-2.516-.211a9.84 9.84 0 0 0-.443.05 9.365 9.365 0 0 0-.062-4.509A1.38 1.38 0 0 0 9.125.111L8.864.046zM11.5 14.721H8c-.51 0-.863-.069-1.14-.164-.281-.097-.506-.228-.776-.393l-.04-.024c-.555-.339-1.198-.731-2.49-.868-.333-.036-.554-.29-.554-.55V8.72c0-.254.226-.543.62-.65 1.095-.3 1.977-.996 2.614-1.708.635-.71 1.064-1.475 1.238-1.978.243-.7.407-1.768.482-2.85.025-.362.36-.594.667-.518l.262.066c.16.04.258.143.288.255a8.34 8.34 0 0 1-.145 4.725.5.5 0 0 0 .595.644l.003-.001.014-.003.058-.014a8.908 8.908 0 0 1 1.036-.157c.663-.06 1.457-.054 2.11.164.175.058.45.3.57.65.107.308.087.67-.266 1.022l-.353.353.353.354c.043.043.105.141.154.315.048.167.075.37.075.581 0 .212-.027.414-.075.582-.05.174-.111.272-.154.315l-.353.353.353.354c.047.047.109.177.005.488a2.224 2.224 0 0 1-.505.805l-.353.353.353.354c.006.005.041.05.041.17a.866.866 0 0 1-.121.416c-.165.288-.503.56-1.066.56z"/>
+                                    </svg>
+                                    Smart Selection
+                                </button>
+                            </div>
                             
-                            <div class="driver-checkbox">
-                                <div class="form-check">
-                                    <input class="form-check-input driver-input" type="checkbox" value="total_production_count" id="driver-production" checked>
-                                    <label class="form-check-label" for="driver-production">
-                                        Production Count
-                                    </label>
+                            <!-- Smart Selection Feedback -->
+                            <div id="smart-select-feedback" style="display: none; margin-bottom: var(--space-3); padding: var(--space-2) var(--space-3); background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border: 1px solid #667eea50; border-radius: 6px;">
+                                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                    <svg width="16" height="16" fill="#667eea" viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                    </svg>
+                                    <div style="flex: 1;">
+                                        <strong style="color: #667eea; font-size: 0.85rem;" id="smart-select-count"></strong>
+                                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;" id="smart-select-details"></div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="driver-checkbox">
-                                <div class="form-check">
-                                    <input class="form-check-input driver-input" type="checkbox" value="avg_outdoor_temp_c" id="driver-outdoor-temp" checked>
-                                    <label class="form-check-label" for="driver-outdoor-temp">
-                                        Outdoor Temperature
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="driver-checkbox">
-                                <div class="form-check">
-                                    <input class="form-check-input driver-input" type="checkbox" value="avg_pressure_bar" id="driver-pressure" checked>
-                                    <label class="form-check-label" for="driver-pressure">
-                                        Pressure
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="driver-checkbox">
-                                <div class="form-check">
-                                    <input class="form-check-input driver-input" type="checkbox" value="avg_throughput_units_per_hour" id="driver-throughput">
-                                    <label class="form-check-label" for="driver-throughput">
-                                        Throughput
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="driver-checkbox">
-                                <div class="form-check">
-                                    <input class="form-check-input driver-input" type="checkbox" value="avg_machine_temp_c" id="driver-machine-temp">
-                                    <label class="form-check-label" for="driver-machine-temp">
-                                        Machine Temperature
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="driver-checkbox">
-                                <div class="form-check">
-                                    <input class="form-check-input driver-input" type="checkbox" value="avg_load_factor" id="driver-load-factor">
-                                    <label class="form-check-label" for="driver-load-factor">
-                                        Load Factor
-                                    </label>
-                                </div>
+                            <div id="drivers-container" style="max-height: 300px; overflow-y: auto; margin-top: var(--space-3);">
+                                <p class="text-muted" style="font-size: var(--text-xs); margin: var(--space-3) 0;">
+                                    Select a machine to see available drivers
+                                </p>
                             </div>
                             
                             <div class="alert alert-warning" id="driver-warning" style="display: none; margin-top: var(--space-3); margin-bottom: 0; padding: var(--space-2) var(--space-3); font-size: var(--text-xs);">
@@ -549,12 +524,246 @@
                 const option = document.createElement('option');
                 option.value = machine.id;
                 option.textContent = `${machine.name} (${machine.type})`;
+                // Store energy source for later use
+                option.dataset.energySource = 'electricity'; // Default, can be enhanced
                 select.appendChild(option);
             });
         } catch (error) {
             console.error('Error loading machines:', error);
             // Keep hardcoded options as fallback
         }
+    }
+    
+    // Load available features/drivers for selected machine
+    async function loadDriversForMachine(machineId, energySource = 'electricity', machineType = null) {
+        const container = document.getElementById('drivers-container');
+        const smartBtn = document.getElementById('smart-select-btn');
+        
+        // Store for smart selection
+        window.currentMachineId = machineId;
+        window.currentEnergySource = energySource;
+        window.currentMachineType = machineType;
+        
+        try {
+            // Show loading state
+            container.innerHTML = '<p class="text-muted" style="font-size: var(--text-xs); margin: var(--space-3) 0;"><span class="spinner-border spinner-border-sm me-2"></span>Loading available drivers...</p>';
+            
+            // Fetch features from API
+            const response = await axios.get(`${API_BASE}/features/${energySource}`, {
+                params: { regression_only: true }
+            });
+            
+            const features = response.data.features || [];
+            window.availableFeatures = features; // Store for smart selection
+            
+            // Create mapping: feature_name -> column_name
+            window.featureColumnMap = {};
+            features.forEach(f => {
+                window.featureColumnMap[f.feature_name] = f.column_name;
+            });
+            
+            if (features.length === 0) {
+                container.innerHTML = '<p class="text-warning" style="font-size: var(--text-xs); margin: var(--space-3) 0;">No features available for this energy source</p>';
+                smartBtn.style.display = 'none';
+                return;
+            }
+            
+            // Show smart selection button
+            smartBtn.style.display = 'inline-block';
+            
+            // Recommended features (pre-selected by default)
+            const recommendedFeatures = [
+                'total_production', 'production_count', 'good_units_count',
+                'outdoor_temp_c', 'pressure_bar', 'avg_throughput',
+                'machine_temp_c', 'operating_hours'
+            ];
+            
+            // Build driver checkboxes
+            let html = '';
+            features.forEach((feature, index) => {
+                const featureName = feature.feature_name;
+                const columnName = feature.column_name; // Actual DB column name
+                const isRecommended = recommendedFeatures.some(rf => featureName.includes(rf));
+                const checked = isRecommended && index < 5 ? 'checked' : ''; // Pre-select first 3-5 recommended
+                
+                // Format description
+                let description = feature.description || '';
+                if (description.length > 60) {
+                    description = description.substring(0, 57) + '...';
+                }
+                
+                html += `
+                    <div class="driver-checkbox" style="margin-bottom: var(--space-2);">
+                        <div class="form-check">
+                            <input class="form-check-input driver-input" type="checkbox" value="${columnName}" data-feature-name="${featureName}" id="driver-${featureName}" ${checked}>
+                            <label class="form-check-label" for="driver-${featureName}" title="${feature.description}">
+                                <strong>${formatFeatureName(featureName)}</strong>
+                                ${description ? `<br><small class="text-muted" style="font-size: 0.75rem;">${description}</small>` : ''}
+                            </label>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // Re-attach validation listeners
+            document.querySelectorAll('.driver-input').forEach(checkbox => {
+                checkbox.addEventListener('change', validateDrivers);
+            });
+            
+            // Initial validation
+            validateDrivers();
+            
+        } catch (error) {
+            console.error('Error loading drivers:', error);
+            container.innerHTML = `
+                <div class="alert alert-danger" style="font-size: var(--text-xs); margin: var(--space-3) 0;">
+                    Failed to load drivers. Please try again.
+                </div>
+            `;
+            smartBtn.style.display = 'none';
+        }
+    }
+    
+    // Smart Selection - automatically choose best drivers for machine type
+    // Based on ISO 50006 energy performance indicators and domain expertise
+    async function smartSelectDrivers() {
+        if (!window.availableFeatures || !window.currentMachineType) {
+            return;
+        }
+        
+        const machineType = window.currentMachineType.toLowerCase();
+        const features = window.availableFeatures;
+        
+        // Machine-type specific driver selection rules
+        // Optimized based on energy physics and ISO 50001 best practices
+        const smartRules = {
+            // Compressor: Pressure work (P·V), ambient conditions, load
+            compressor: {
+                primary: ['pressure_bar', 'outdoor_temp_c'],  // Physics: PV=nRT, air density
+                secondary: ['total_production', 'production_count', 'operating_hours'],
+                optional: ['machine_temp_c', 'outdoor_humidity_percent']
+            },
+            // HVAC: Temperature differential drives energy (Q=mc∆T)
+            hvac: {
+                primary: ['outdoor_temp_c', 'heating_degree_days', 'cooling_degree_days'],  // ISO 50006 metrics
+                secondary: ['indoor_temp_c', 'outdoor_humidity_percent', 'operating_hours'],
+                optional: ['machine_temp_c']
+            },
+            // Motor/Conveyor: Mechanical work (torque × speed), production load
+            motor: {
+                primary: ['total_production', 'production_count', 'avg_throughput'],
+                secondary: ['operating_hours', 'good_units_count'],
+                optional: ['machine_temp_c']
+            },
+            conveyor: {
+                primary: ['total_production', 'avg_throughput', 'operating_hours'],
+                secondary: ['production_count', 'good_units_count'],
+                optional: ['machine_temp_c']
+            },
+            // Pump: Pressure head work (∆P·Q), fluid properties
+            pump: {
+                primary: ['pressure_bar', 'outdoor_temp_c'],  // Pressure work, viscosity changes
+                secondary: ['operating_hours', 'total_production'],
+                optional: ['machine_temp_c']
+            },
+            // Injection Molding: Heating cycles, production efficiency
+            injection_molding: {
+                primary: ['avg_cycle_time_sec', 'total_production', 'machine_temp_c'],  // Cycle = heating+cooling
+                secondary: ['production_count', 'good_units_count', 'defect_units_count'],
+                optional: ['operating_hours', 'outdoor_temp_c']
+            },
+            // Boiler: Heat load (Q=mc∆T), ambient losses
+            boiler: {
+                primary: ['outdoor_temp_c', 'heating_degree_days'],  // ISO 50006 standard
+                secondary: ['operating_hours', 'pressure_bar'],  // Steam pressure setpoint
+                optional: ['machine_temp_c', 'total_production']
+            }
+        };
+        
+        // Get rules for this machine type (default to motor if unknown)
+        const rules = smartRules[machineType] || smartRules['motor'];
+        
+        // Uncheck all first
+        document.querySelectorAll('.driver-input').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Select features in priority order
+        let selectedCount = 0;
+        const selectedNames = [];
+        
+        // 1. Primary drivers (physics-based, highest correlation)
+        rules.primary.forEach(rec => {
+            features.forEach(feature => {
+                const featureName = feature.feature_name;
+                const checkbox = document.getElementById(`driver-${featureName}`);
+                if (checkbox && featureName.includes(rec) && !checkbox.checked) {
+                    checkbox.checked = true;
+                    selectedCount++;
+                    selectedNames.push(formatFeatureName(featureName));
+                }
+            });
+        });
+        
+        // 2. Secondary drivers (operational factors)
+        rules.secondary.forEach(rec => {
+            features.forEach(feature => {
+                const featureName = feature.feature_name;
+                const checkbox = document.getElementById(`driver-${featureName}`);
+                if (checkbox && featureName.includes(rec) && !checkbox.checked) {
+                    checkbox.checked = true;
+                    selectedCount++;
+                    selectedNames.push(formatFeatureName(featureName));
+                }
+            });
+        });
+        
+        // 3. Optional drivers (if we need more to reach minimum)
+        if (selectedCount < 5) {
+            rules.optional.forEach(rec => {
+                if (selectedCount >= 7) return; // Cap at 7 to avoid overfitting
+                features.forEach(feature => {
+                    const featureName = feature.feature_name;
+                    const checkbox = document.getElementById(`driver-${featureName}`);
+                    if (checkbox && featureName.includes(rec) && !checkbox.checked) {
+                        checkbox.checked = true;
+                        selectedCount++;
+                        selectedNames.push(formatFeatureName(featureName));
+                    }
+                });
+            });
+        }
+        
+        // Validate
+        validateDrivers();
+        
+        // Show inline feedback
+        const feedback = document.getElementById('smart-select-feedback');
+        const countElem = document.getElementById('smart-select-count');
+        const detailsElem = document.getElementById('smart-select-details');
+        
+        countElem.textContent = `${selectedCount} optimal drivers selected for ${window.currentMachineType}`;
+        detailsElem.textContent = `Based on ISO 50006 energy performance indicators: ${selectedNames.slice(0, 3).join(', ')}${selectedCount > 3 ? `, +${selectedCount - 3} more` : ''}`;
+        feedback.style.display = 'block';
+        
+        // Auto-hide after 8 seconds
+        setTimeout(() => {
+            feedback.style.display = 'none';
+        }, 8000);
+    }
+    
+    // Format feature name for display (convert snake_case to Title Case)
+    function formatFeatureName(featureName) {
+        return featureName
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, l => l.toUpperCase())
+            .replace(/Kwh/g, 'kWh')
+            .replace(/Kw/g, 'kW')
+            .replace(/Avg/g, 'Average')
+            .replace(/Temp/g, 'Temperature')
+            .replace(/Sec/g, 'Seconds');
     }
     
     // Initialize page
@@ -566,11 +775,7 @@
     startDate.setDate(startDate.getDate() - 30);
     document.getElementById('start-date').valueAsDate = startDate;
     
-    // Driver validation
-    document.querySelectorAll('.driver-input').forEach(checkbox => {
-        checkbox.addEventListener('change', validateDrivers);
-    });
-    
+    // Driver validation (will be attached dynamically when drivers load)
     function validateDrivers() {
         const checkedCount = document.querySelectorAll('.driver-input:checked').length;
         const warning = document.getElementById('driver-warning');
@@ -585,11 +790,32 @@
         }
     }
     
-    // Load existing models when machine is selected
+    // Smart selection button click handler
+    document.getElementById('smart-select-btn').addEventListener('click', smartSelectDrivers);
+    
+    // Load existing models and drivers when machine is selected
     document.getElementById('machine-select').addEventListener('change', async (e) => {
         const machineId = e.target.value;
-        if (!machineId) return;
+        if (!machineId) {
+            // Reset drivers container
+            document.getElementById('drivers-container').innerHTML = '<p class="text-muted" style="font-size: var(--text-xs); margin: var(--space-3) 0;">Select a machine to see available drivers</p>';
+            document.getElementById('smart-select-btn').style.display = 'none';
+            return;
+        }
         
+        // Get energy source and machine type from selected option
+        const selectedOption = e.target.options[e.target.selectedIndex];
+        const energySource = selectedOption.dataset.energySource || 'electricity';
+        
+        // Extract machine type from text (e.g., "Compressor-1 (compressor)")
+        const optionText = selectedOption.textContent;
+        const machineTypeMatch = optionText.match(/\(([^)]+)\)/);
+        const machineType = machineTypeMatch ? machineTypeMatch[1] : null;
+        
+        // Load drivers for this machine
+        await loadDriversForMachine(machineId, energySource, machineType);
+        
+        // Load existing models
         try {
             const response = await axios.get(`${API_BASE}/baseline/models`, {
                 params: { machine_id: machineId }
@@ -609,10 +835,26 @@
             return;
         }
         
-        let html = '<div class="table-responsive"><table class="industrial-table table-striped"><thead><tr><th>Model Name</th><th>Version</th><th>R² Score</th><th>RMSE</th><th>Training Samples</th><th>Date Created</th><th>Status</th></tr></thead><tbody>';
+        let html = '<div class="table-responsive"><table class="industrial-table table-striped"><thead><tr><th>Model Name</th><th>Version</th><th>R² Score</th><th>RMSE</th><th>Training Samples</th><th>Date Created</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
         models.forEach(model => {
             const active = model.is_active ? '<span class="badge badge-success badge-with-dot">Active</span>' : '<span class="badge badge-neutral">Archived</span>';
             const r2Class = model.r_squared >= 0.8 ? 'color: var(--color-success);' : 'color: var(--color-warning);';
+            
+            // Action buttons - only show for inactive models
+            let actionButtons = '';
+            if (!model.is_active) {
+                actionButtons = `
+                    <button class="btn btn-sm btn-primary" onclick="activateModel('${model.id}')" style="margin-right: 0.5rem;">
+                        Activate
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteModel('${model.id}', '${model.model_name}', ${model.model_version})">
+                        Delete
+                    </button>
+                `;
+            } else {
+                actionButtons = '<span style="color: var(--text-tertiary); font-size: var(--text-xs);">Currently Active</span>';
+            }
+            
             html += `
                 <tr>
                     <td style="font-weight: var(--font-semibold);">${model.model_name || 'Baseline Model'}</td>
@@ -622,12 +864,71 @@
                     <td style="color: var(--text-secondary);">${model.training_samples || 'N/A'}</td>
                     <td style="color: var(--text-secondary); font-size: var(--text-sm);">${formatDate(model.created_at)}</td>
                     <td>${active}</td>
+                    <td>${actionButtons}</td>
                 </tr>
             `;
         });
         html += '</tbody></table></div>';
         
         container.innerHTML = html;
+    }
+    
+    // Activate model function
+    async function activateModel(modelId) {
+        if (!confirm('Activate this model? The current active model will be archived.')) {
+            return;
+        }
+        
+        try {
+            const response = await axios.put(`${API_BASE}/baseline/model/${modelId}/activate`);
+            
+            if (response.data.success) {
+                // Show success message
+                alert('✓ Model activated successfully');
+                
+                // Reload models list
+                const machineId = document.getElementById('machine-select').value;
+                if (machineId) {
+                    const modelsResponse = await axios.get(`${API_BASE}/baseline/models`, {
+                        params: { machine_id: machineId }
+                    });
+                    displayExistingModels(modelsResponse.data.models || modelsResponse.data);
+                }
+            }
+        } catch (error) {
+            console.error('Activation error:', error);
+            const errorMsg = error.response?.data?.detail || 'Failed to activate model';
+            alert('❌ Activation Failed\n\n' + errorMsg);
+        }
+    }
+    
+    // Delete model function
+    async function deleteModel(modelId, modelName, version) {
+        if (!confirm(`⚠️ DELETE MODEL v${version}?\n\nThis action CANNOT be undone!\n\nModel: ${modelName}\nVersion: v${version}`)) {
+            return;
+        }
+        
+        try {
+            const response = await axios.delete(`${API_BASE}/baseline/model/${modelId}`);
+            
+            if (response.data.success) {
+                // Show success message
+                alert('✓ Model deleted successfully');
+                
+                // Reload models list
+                const machineId = document.getElementById('machine-select').value;
+                if (machineId) {
+                    const modelsResponse = await axios.get(`${API_BASE}/baseline/models`, {
+                        params: { machine_id: machineId }
+                    });
+                    displayExistingModels(modelsResponse.data.models || modelsResponse.data);
+                }
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            const errorMsg = error.response?.data?.detail || 'Failed to delete model';
+            alert('❌ Delete Failed\n\n' + errorMsg);
+        }
     }
     
     // Form submission
@@ -647,6 +948,13 @@
             return;
         }
         
+        console.log('Training request:', {
+            machine_id: machineId,
+            start_date: startDate,
+            end_date: endDate,
+            drivers: drivers
+        });
+        
     // Show progress (non-blocking inline spinner)
     document.getElementById('initial-message').style.display = 'none';
     document.getElementById('model-results').classList.remove('show');
@@ -658,12 +966,16 @@
     spinner.style.display = 'inline-block';
         
         try {
-            const response = await axios.post(`${API_BASE}/baseline/train`, {
+            const payload = {
                 machine_id: machineId,
                 start_date: startDate + 'T00:00:00Z',
                 end_date: endDate + 'T23:59:59Z',
                 drivers: drivers
-            });
+            };
+            
+            console.log('Sending payload:', payload);
+            
+            const response = await axios.post(`${API_BASE}/baseline/train`, payload);
             
             displayModelResults(response.data);
             
@@ -674,10 +986,26 @@
             displayExistingModels(modelsResponse.data.models || modelsResponse.data);
             
         } catch (error) {
-            // Friendly toast + fallback alert
-            showToast && typeof showToast === 'function'
-                ? showToast('Training failed: ' + (error.response?.data?.message || error.message), 'danger', 7000)
-                : alert('Training failed: ' + (error.response?.data?.message || error.message));
+            console.error('Training error:', error);
+            console.error('Error response:', error.response?.data);
+            
+            // Get detailed error message
+            let errorMsg = 'Training failed';
+            if (error.response?.data?.detail) {
+                // FastAPI validation error format
+                if (Array.isArray(error.response.data.detail)) {
+                    errorMsg = error.response.data.detail.map(e => `${e.loc?.join('.')}: ${e.msg}`).join('\n');
+                } else {
+                    errorMsg = error.response.data.detail;
+                }
+            } else if (error.response?.data?.message) {
+                errorMsg = error.response.data.message;
+            } else if (error.message) {
+                errorMsg = error.message;
+            }
+            
+            // Show error message
+            alert('❌ Training Failed\n\n' + errorMsg);
             document.getElementById('initial-message').style.display = 'block';
         } finally {
             document.getElementById('training-progress').style.display = 'none';
