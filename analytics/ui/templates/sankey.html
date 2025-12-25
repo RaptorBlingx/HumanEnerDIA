@@ -5,14 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Energy Flow - Sankey Diagram | EnMS</title>
     
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Industrial Design System -->
+    <link rel="stylesheet" href="/css/enms-industrial.css">
     
     <!-- Sidebar Component -->
     <link rel="stylesheet" href="/css/sidebar.css?v=1765871462">
     
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <!-- D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -22,15 +28,15 @@
     
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-primary);
+            background-color: var(--bg-primary);
             min-height: 100vh;
         }
         
         .main-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
             margin: 2rem auto;
             padding: 2rem;
             max-width: 1400px;
@@ -40,34 +46,37 @@
             text-align: center;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid var(--color-primary);
         }
         
         .header h1 {
-            color: #2d3748;
-            font-weight: 700;
+            color: var(--text-primary);
+            font-weight: var(--font-bold);
             margin-bottom: 0.5rem;
+            font-family: var(--font-headings);
         }
         
         .header p {
-            color: #718096;
+            color: var(--text-secondary);
             font-size: 1.1rem;
         }
         
         .controls-panel {
-            background: #f7fafc;
-            border-radius: 12px;
+            background: var(--color-gray-100);
+            border-radius: var(--radius-lg);
             padding: 1.5rem;
             margin-bottom: 2rem;
+            border: 1px solid var(--border-light);
         }
         
         .metric-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
             color: white;
-            border-radius: 12px;
+            border-radius: var(--radius-lg);
             padding: 1rem;
             text-align: center;
             margin-bottom: 1rem;
+            box-shadow: var(--shadow-md);
         }
         
         .metric-card h3 {
@@ -82,23 +91,25 @@
         }
         
         #sankey-chart {
-            background: #fafafa;
-            border-radius: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
             padding: 2rem;
             min-height: 600px;
             position: relative;
+            border: 1px solid var(--border-light);
         }
         
         .node rect {
             cursor: pointer;
-            stroke: #000;
+            stroke: var(--text-primary);
             stroke-width: 1px;
         }
         
         .node text {
             pointer-events: none;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: var(--font-semibold);
+            font-family: var(--font-primary);
         }
         
         .link {
@@ -131,14 +142,15 @@
         .spinner-border {
             width: 4rem;
             height: 4rem;
-            color: #667eea;
+            color: var(--color-primary);
         }
         
         .legend {
             margin-top: 2rem;
             padding: 1rem;
-            background: #f7fafc;
-            border-radius: 8px;
+            background: var(--color-gray-100);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
         }
         
         .legend-item {
@@ -155,48 +167,11 @@
             margin-right: 8px;
             vertical-align: middle;
         }
-        /* Navigation Bar */
-        .viz-nav {
-            background: linear-gradient(90deg, #1a365d 0%, #2d3748 100%);
-            padding: 0.75rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .viz-nav-brand {
-            color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .viz-nav-brand:hover { color: #a0aec0; }
-        .viz-nav-links {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .viz-nav-link {
-            color: #e2e8f0;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        .viz-nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
-        .viz-nav-link.active { background: #667eea; color: white; }
-        .viz-nav-divider { color: #4a5568; margin: 0 0.25rem; }
     </style>
 </head>
 <body>
     <!-- Hamburger Menu Header -->
-    <header class="industrial-header" style="padding: 1rem 2rem; background: #1a202c; border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <header class="industrial-header" style="padding: 1rem 2rem;">
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%;">
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <button onclick="toggleSidebar()" class="hamburger-btn">
@@ -206,12 +181,12 @@
                         <line x1="3" y1="18" x2="21" y2="18"></line>
                     </svg>
                 </button>
-                <div class="industrial-logo" style="display: flex; align-items: center; gap: 0.5rem; color: white;">
+                <a href="/" class="industrial-logo" style="display: flex; align-items: center; gap: 0.5rem; color: white; text-decoration: none;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
                     </svg>
                     <span>HUMANERGY Analytics</span>
-                </div>
+                </a>
             </div>
             <div style="display: flex; align-items: center; gap: 20px;">
                 <button id="ovos-enable-voice-nav" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">

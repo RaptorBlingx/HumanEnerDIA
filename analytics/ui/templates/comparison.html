@@ -5,29 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Machine Comparison | EnMS</title>
     
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Industrial Design System -->
+    <link rel="stylesheet" href="/css/enms-industrial.css">
     
     <!-- Sidebar Component -->
     <link rel="stylesheet" href="/css/sidebar.css?v=1765871462">
     
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-primary);
+            background-color: var(--bg-primary);
             min-height: 100vh;
         }
         
         .main-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
             margin: 2rem auto;
             padding: 2rem;
             max-width: 1600px;
@@ -37,34 +43,37 @@
             text-align: center;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid var(--color-primary);
         }
         
         .header h1 {
-            color: #2d3748;
-            font-weight: 700;
+            color: var(--text-primary);
+            font-weight: var(--font-bold);
             margin-bottom: 0.5rem;
+            font-family: var(--font-headings);
         }
         
         .header p {
-            color: #718096;
+            color: var(--text-secondary);
             font-size: 1.1rem;
         }
         
         .controls-panel {
-            background: #f7fafc;
-            border-radius: 12px;
+            background: var(--color-gray-100);
+            border-radius: var(--radius-lg);
             padding: 1.5rem;
             margin-bottom: 2rem;
+            border: 1px solid var(--border-light);
         }
         
         .winner-banner {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);
             color: white;
-            border-radius: 12px;
+            border-radius: var(--radius-lg);
             padding: 1.5rem;
             margin-bottom: 2rem;
             text-align: center;
+            box-shadow: var(--shadow-md);
         }
         
         .winner-banner h3 {
@@ -73,39 +82,41 @@
         }
         
         .insights-panel {
-            background: #fff5e6;
-            border-left: 4px solid #ff9800;
-            border-radius: 8px;
+            background: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid var(--color-warning);
+            border-radius: var(--radius-lg);
             padding: 1.5rem;
             margin-bottom: 2rem;
         }
         
         .insights-panel h5 {
-            color: #e65100;
+            color: var(--color-warning-dark);
             margin-bottom: 1rem;
+            font-weight: var(--font-bold);
         }
         
         .insight-item {
             background: white;
-            border-radius: 8px;
+            border-radius: var(--radius-lg);
             padding: 0.75rem;
             margin-bottom: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-sm);
         }
         
         .chart-container {
-            background: #fafafa;
-            border-radius: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
             padding: 2rem;
             margin-bottom: 2rem;
             height: 400px;
+            border: 1px solid var(--border-light);
         }
         
         .comparison-table {
             background: white;
-            border-radius: 12px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-md);
         }
         
         .comparison-table table {
@@ -113,9 +124,9 @@
         }
         
         .comparison-table th {
-            background: #667eea;
+            background: var(--color-primary);
             color: white;
-            font-weight: 600;
+            font-weight: var(--font-semibold);
             padding: 1rem;
         }
         
@@ -159,7 +170,7 @@
         .spinner-border {
             width: 4rem;
             height: 4rem;
-            color: #667eea;
+            color: var(--color-primary);
         }
         
         .machine-checkbox-container {
@@ -310,7 +321,7 @@
 </head>
 <body>
     <!-- Hamburger Menu Header -->
-    <header class="industrial-header" style="padding: 1rem 2rem; background: #1a202c; border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <header class="industrial-header" style="padding: 1rem 2rem;">
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%;">
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <button onclick="toggleSidebar()" class="hamburger-btn">
@@ -320,12 +331,12 @@
                         <line x1="3" y1="18" x2="21" y2="18"></line>
                     </svg>
                 </button>
-                <div class="industrial-logo" style="display: flex; align-items: center; gap: 0.5rem; color: white;">
+                <a href="/" class="industrial-logo" style="display: flex; align-items: center; gap: 0.5rem; color: white; text-decoration: none;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
                     </svg>
                     <span>HUMANERGY Analytics</span>
-                </div>
+                </a>
             </div>
             <div style="display: flex; align-items: center; gap: 20px;">
                 <button id="ovos-enable-voice-nav" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
