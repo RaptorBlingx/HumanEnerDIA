@@ -47,7 +47,11 @@ class BoilerSimulator(BaseMachineSimulator):
         )
         
         # Boiler-specific parameters
-        self.thermal_capacity_kw = rated_power_kw * 50  # 50x electrical is typical
+        # Thermal capacity adjusted for realistic factory energy balance
+        # Boiler electrical (45 kW) represents auxiliary systems (pumps, fans, controls)
+        # Setting to 1.5x makes total thermal ~67.5 kW, creating balanced energy mix
+        # With 3 energy streams (elec + gas + steam), boiler will be ~25-35% of total energy
+        self.thermal_capacity_kw = rated_power_kw * 1.5  # 1.5x electrical for balanced factory energy
         self.boiler_efficiency = 0.85  # 85% efficiency
         self.steam_pressure_bar = 10.0  # 10 bar steam pressure
         self.outdoor_temp_base_c = 15.0  # Baseline outdoor temperature

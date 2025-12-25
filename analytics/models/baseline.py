@@ -84,6 +84,14 @@ class BaselineModel:
         logger.info(f"[MODEL-PREP] Column names: {list(df.columns)}")
         logger.info(f"[MODEL-PREP] First row sample: {df.iloc[0].to_dict() if len(df) > 0 else 'No data'}")
         
+        # Convert all numeric columns to float (handle Decimal from PostgreSQL)
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                try:
+                    df[col] = pd.to_numeric(df[col], errors='ignore')
+                except:
+                    pass
+        
         # Auto-select features if not provided
         if feature_columns is None:
             feature_columns = [
@@ -95,17 +103,37 @@ class BaselineModel:
                 'avg_load_factor'
             ]
         
-        # Filter to columns that exist in the data AND have non-null values
+        # Filter to columns that exist in the data AND have non-null values AND have variance
         available_features = []
         for col in feature_columns:
             if col in df.columns:
                 # Check if column has at least some non-null values (>10% coverage)
                 non_null_ratio = df[col].notna().sum() / len(df)
-                if non_null_ratio > 0.1:
-                    available_features.append(col)
-                    logger.info(f"[MODEL-PREP] Feature '{col}': {non_null_ratio*100:.1f}% coverage - INCLUDED")
-                else:
+                if non_null_ratio < 0.1:
                     logger.warning(f"[MODEL-PREP] Feature '{col}': {non_null_ratio*100:.1f}% coverage - EXCLUDED (insufficient data)")
+                    continue
+                
+                # Check variance - exclude constant/near-constant columns
+                # First convert to numeric to handle Decimal types
+                col_numeric = pd.to_numeric(df[col], errors='coerce')
+                col_variance = col_numeric.var()
+                col_std = col_numeric.std()
+                col_mean = col_numeric.mean()
+                
+                # Skip if variance is near zero (constant column)
+                if pd.isna(col_variance) or col_variance < 1e-10:
+                    logger.warning(f"[MODEL-PREP] Feature '{col}': variance={col_variance} - EXCLUDED (near-zero variance, likely all zeros)")
+                    continue
+                
+                # Skip if coefficient of variation is too small (less than 0.01% variation)
+                if abs(col_mean) > 1e-10:
+                    cv = abs(col_std / col_mean)
+                    if cv < 0.0001:
+                        logger.warning(f"[MODEL-PREP] Feature '{col}': CV={cv:.6f}, mean={col_mean:.2f}, std={col_std:.2f} - EXCLUDED (insufficient variation)")
+                        continue
+                
+                available_features.append(col)
+                logger.info(f"[MODEL-PREP] Feature '{col}': {non_null_ratio*100:.1f}% coverage, variance={col_variance:.4f}, std={col_std:.4f} - INCLUDED")
         
         logger.info(f"Available columns in data: {list(df.columns)}")
         logger.info(f"Requested features: {feature_columns}")
@@ -113,6 +141,32 @@ class BaselineModel:
         
         if len(available_features) == 0:
             raise ValueError(f"No valid features found in data. Available columns: {list(df.columns)}, Requested: {feature_columns}")
+        
+        # Check for multicollinearity - remove highly correlated features
+        if len(available_features) > 1:
+            # Create temporary dataframe with just the features
+            feature_df = df[available_features].apply(pd.to_numeric, errors='coerce').dropna()
+            
+            # Calculate correlation matrix
+            corr_matrix = feature_df.corr().abs()
+            
+            # Find pairs with correlation > 0.95 (highly correlated)
+            upper_triangle = corr_matrix.where(
+                np.triu(np.ones(corr_matrix.shape), k=1).astype(bool)
+            )
+            
+            # Features to drop
+            to_drop = [column for column in upper_triangle.columns 
+                      if any(upper_triangle[column] > 0.95)]
+            
+            if to_drop:
+                logger.warning(f"[MODEL-PREP] Dropping {len(to_drop)} highly correlated features (>0.95): {to_drop}")
+                available_features = [f for f in available_features if f not in to_drop]
+                
+                if len(available_features) == 0:
+                    raise ValueError("All features are highly correlated - cannot train model")
+        
+        logger.info(f"[MODEL-PREP] Final features after correlation check: {available_features}")
         
         # Remove rows with missing values (only for selected features + target)
         df_clean = df[[target_column] + available_features].dropna()
