@@ -63,8 +63,9 @@ class VoiceQueryResponse(BaseModel):
     response: Optional[str] = None
     audio_base64: Optional[str] = None  # Base64 encoded WAV audio from OVOS TTS
     audio_format: Optional[str] = None  # Audio format (wav, mp3, etc.) - None if no audio
-    pdf_base64: Optional[str] = None  # Base64 encoded PDF for report downloads
-    pdf_filename: Optional[str] = None  # Suggested filename for PDF download
+    pdf_base64: Optional[str] = None  # LEGACY: Base64 encoded PDF for report downloads (V1)
+    pdf_filename: Optional[str] = None  # LEGACY: Suggested filename for PDF download (V1)
+    pdf_download: Optional[dict] = None  # V2: PDF download metadata {report_id, download_url, filename, file_size_kb, ready}
     error: Optional[str] = None
     session_id: str
     latency_ms: int
@@ -148,8 +149,9 @@ async def voice_query(request: VoiceQueryRequest):
                 response=data.get("response"),
                 audio_base64=data.get("audio_base64"),
                 audio_format=data.get("audio_format", "wav"),
-                pdf_base64=data.get("pdf_base64"),
-                pdf_filename=data.get("pdf_filename"),
+                pdf_base64=data.get("pdf_base64"),  # V1 legacy
+                pdf_filename=data.get("pdf_filename"),  # V1 legacy
+                pdf_download=data.get("pdf_download"),  # V2: Pass through PDF metadata object
                 error=data.get("error"),
                 session_id=data.get("session_id", request.session_id or "auto"),
                 latency_ms=latency_ms,
