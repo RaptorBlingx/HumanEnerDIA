@@ -60,3 +60,8 @@ websockets==12.0
 # Testing
 pytest==7.4.3
 pytest-asyncio==0.21.1
+
+# PDF Report Generation (reports_v2)
+playwright>=1.40.0
+kaleido>=0.2.1
+plotly>=5.18.0

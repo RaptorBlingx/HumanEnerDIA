@@ -2,8 +2,23 @@
 
 **Project**: EnMS PDF Report System Overhaul  
 **Goal**: Transform current 3/10 reports → 9.5/10 SOTA world-class reports  
-**Status**: ✅ Planning Complete | ⏳ Implementation Pending  
+**Status**: ✅ Planning Complete | 🚀 Implementation IN PROGRESS  
 **Timeline**: 5-6 weeks implementation
+
+---
+
+## ⚠️ CRITICAL IMPLEMENTATION NOTES
+
+### Old vs. New System
+- **OLD System** (`analytics/reports/`): **KEEP AS CHECKPOINT** - DO NOT MODIFY
+- **NEW System** (`analytics/reports_v2/`): **UNDER CONSTRUCTION** - 9.5/10 target
+- **Strategy**: Parallel development, switchover only when new system is validated
+- **Removal**: Old system will be removed ONLY when new system achieves true 9.5/10 SOTA quality
+
+### Progress Tracking
+- All completed steps marked as ✅ DONE in documentation
+- TODO list maintained in [TODO.md](./TODO.md)
+- Implementation started: December 25, 2025
 
 ---
 
