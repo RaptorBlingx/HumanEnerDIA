@@ -3,489 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports - EnMS</title>
-    
-    <!-- Professional Industrial Design System -->
-    <link rel="stylesheet" href="/css/enms-industrial.css">
-    
-    <!-- Sidebar Component -->
-    <link rel="stylesheet" href="/css/sidebar.css?v=1765871462">
-    
-    <!-- Google Fonts - Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <title>EnMS Report Generator - Test Interface</title>
     <style>
-        .report-card {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a365d 0%, #00A8E8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
             background: white;
             border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 1px solid #e5e7eb;
-            margin-bottom: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
         
-        .form-group {
-            margin-bottom: 24px;
+        .header {
+            background: #1a365d;
+            color: white;
+            padding: 30px;
+            text-align: center;
         }
         
-        .form-label {
-            display: block;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
             font-size: 14px;
         }
         
-        .form-input, .form-select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s;
+        .content {
+            padding: 40px;
         }
         
-        .form-input:focus, .form-select:focus {
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a365d;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
             outline: none;
             border-color: #00A8E8;
-            box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.1);
         }
         
-        .btn-generate {
-            background: linear-gradient(135deg, #00A8E8 0%, #0080B8 100%);
-            color: white;
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 24px;
             border: none;
-            padding: 14px 32px;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(0, 168, 232, 0.3);
         }
         
-        .btn-generate:hover {
+        .btn-primary {
+            background: #00A8E8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0096d1;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 168, 232, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 168, 232, 0.4);
         }
         
-        .btn-generate:active {
-            transform: translateY(0);
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
         }
         
-        .btn-generate:disabled {
-            background: #9ca3af;
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+        
+        .btn-tertiary {
+            background: #718096;
+            color: white;
+        }
+        
+        .btn-tertiary:hover {
+            background: #4a5568;
+        }
+        
+        button:disabled {
+            background: #cbd5e0;
             cursor: not-allowed;
-            box-shadow: none;
+            transform: none;
         }
         
-        .loading-spinner {
+        .status {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #f0fdf4;
+            border: 2px solid #48bb78;
+            color: #22543d;
+        }
+        
+        .status.error {
+            background: #fef2f2;
+            border: 2px solid #e53e3e;
+            color: #742a2a;
+        }
+        
+        .status.loading {
+            background: #eff6ff;
+            border: 2px solid #00A8E8;
+            color: #1e40af;
+        }
+        
+        .status-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .status-message {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .download-link {
             display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #1a365d;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .download-link:hover {
+            background: #2d3748;
+            transform: translateY(-2px);
+        }
+        
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #00A8E8;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+        
+        .info-box strong {
+            color: #1e40af;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 168, 232, 0.3);
             border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
+            border-top-color: #00A8E8;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
-        .alert {
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            font-size: 14px;
-            display: none;
-        }
-        
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-        
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-        
-        .report-preview {
-            background: #f9fafb;
-            border: 2px dashed #d1d5db;
-            border-radius: 8px;
-            padding: 24px;
-            text-align: center;
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-        
-        .report-info {
-            background: #f0f9ff;
-            border-left: 4px solid #00A8E8;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            border-radius: 4px;
-        }
-        
-        .report-info h3 {
-            margin: 0 0 8px 0;
-            color: #0c4a6e;
-            font-size: 16px;
-        }
-        
-        .report-info p {
-            margin: 0;
-            color: #075985;
-            font-size: 14px;
-            line-height: 1.6;
-        }
     </style>
 </head>
 <body>
-    <!-- Professional Navigation Header -->
-    <header class="industrial-header">
-        <div class="container" style="padding-left: 0; padding-right: 0;">
-            <nav class="industrial-nav" style="justify-content: space-between; padding: 0; padding-right: 1rem;">
-                <div class="industrial-logo" style="display: flex; align-items: center; gap: 1rem; padding-left: 5px;">
-                    <button onclick="toggleSidebar()" class="hamburger-btn" style="margin: 0; margin-right: 0.5rem;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <line x1="3" y1="12" x2="21" y2="12"></line>
-                            <line x1="3" y1="18" x2="21" y2="18"></line>
-                        </svg>
-                    </button>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                    </svg>
-                    <span>HUMANERGY</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <button id="ovos-enable-voice-nav" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        </svg>
-                        <span>Enable Voice</span>
-                    </button>
-                    <div style="color: #fff; font-weight: 500;">
-                        <span id="user-name"></span>
-                    </div>
-                </div>
-            </nav>
+    <div class="container">
+        <div class="header">
+            <h1>📊 EnMS Report Generator</h1>
+            <p>Generate professional energy management reports with real-time data</p>
         </div>
-    </header>
-
-    <script>
-        // Display user name in header
-        const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-        if (userData.full_name) {
-            document.getElementById('user-name').textContent = userData.full_name;
-        }
-    </script>
-
-    <!-- Page Header -->
-    <section style="background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%); 
-                    color: white; 
-                    padding: 48px 0;">
-        <div class="container" style="max-width: 1400px; margin: 0 auto;">
-            <h1 style="font-size: 42px; font-weight: 700; margin-bottom: 12px; color: #FFFFFF;">
-                📊 Energy Performance Reports
-            </h1>
-            <p style="font-size: 18px; color: rgba(255,255,255,0.9); margin: 0;">
-                Generate ISO 50001 compliant energy reports for performance tracking
-            </p>
-        </div>
-    </section>
-
-    <!-- Main Content -->
-    <div class="container" style="padding-top: 48px; padding-bottom: 80px; max-width: 1200px;">
         
-        <!-- Alert Messages -->
-        <div id="alertSuccess" class="alert alert-success"></div>
-        <div id="alertError" class="alert alert-error"></div>
-        
-        <!-- Report Generator Card -->
-        <div class="report-card">
-            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">
-                <div style="width: 56px; height: 56px; border-radius: 12px; background: linear-gradient(135deg, #00A8E8 0%, #0080B8 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 168, 232, 0.3);">
-                    <svg width="28" height="28" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 style="margin: 0 0 4px 0; font-size: 24px; color: #1f2937;">Generate Report</h2>
-                    <p style="margin: 0; color: #6b7280; font-size: 14px;">Select parameters and generate your energy performance report</p>
-                </div>
-            </div>
-            
-            <div class="report-info">
-                <h3>Monthly Energy Performance Report (EnPI)</h3>
-                <p>
-                    Comprehensive monthly analysis including:
-                    • Executive Summary with total consumption and anomalies
-                    • Energy Performance Indicators (SEC, Load Factor, Peak Demand)
-                    • Machine-wise consumption breakdown with charts
-                    • Daily consumption trends
-                    • Anomaly summary and auto-generated recommendations
-                </p>
+        <div class="content">
+            <div class="info-box">
+                <strong>🎯 Test Interface:</strong> This page connects to the new V2 Report API to generate comprehensive PDF reports with live factory data.
             </div>
             
             <form id="reportForm">
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="reportType">Report Type</label>
-                        <select id="reportType" class="form-select" required>
-                            <option value="monthly_enpi">Monthly Energy Performance Report</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="factory">Factory (Optional)</label>
-                        <select id="factory" class="form-select">
-                            <option value="">All Factories</option>
-                            <option value="1">Factory 1</option>
-                            <option value="2">Factory 2</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="factory">Factory</label>
+                    <select id="factory" required>
+                        <option value="11111111-1111-1111-1111-111111111111">Demo Manufacturing Plant</option>
+                        <option value="22222222-2222-2222-2222-222222222222">European Production Facility</option>
+                    </select>
                 </div>
                 
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="year">Year</label>
-                        <select id="year" class="form-select" required>
-                            <option value="2025">2025</option>
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="month">Month</label>
-                        <select id="month" class="form-select" required>
-                            <option value="1">January</option>
-                            <option value="2">February</option>
-                            <option value="3">March</option>
-                            <option value="4">April</option>
-                            <option value="5">May</option>
-                            <option value="6">June</option>
-                            <option value="7">July</option>
-                            <option value="8">August</option>
-                            <option value="9">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12" selected>December</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="year">Year</label>
+                    <input type="number" id="year" value="2025" min="2020" max="2030" required>
                 </div>
                 
-                <div style="display: flex; gap: 16px; margin-top: 32px;">
-                    <button type="submit" id="btnGenerate" class="btn-generate">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
-                            <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                        </svg>
-                        Generate & Download PDF
+                <div class="form-group">
+                    <label for="month">Month</label>
+                    <select id="month" required>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12" selected>December</option>
+                    </select>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn-primary" id="generateBtn">
+                        🚀 Generate Report
                     </button>
-                    
-                    <button type="button" id="btnPreview" class="btn-generate" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
-                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
-                        Preview Data
+                    <button type="button" class="btn-tertiary" id="statusBtn">
+                        ℹ️ API Status
                     </button>
                 </div>
             </form>
+            
+            <div id="statusBox" class="status"></div>
         </div>
-        
-        <!-- Preview Section -->
-        <div id="previewSection" style="display: none;">
-            <div class="report-card">
-                <h3 style="margin: 0 0 20px 0; font-size: 20px; color: #1f2937;">
-                    📋 Report Data Preview
-                </h3>
-                <div id="previewContent" class="report-preview">
-                    Click "Preview Data" to see report contents before generating PDF
-                </div>
-            </div>
-        </div>
-        
     </div>
-
+    
     <script>
-        const reportForm = document.getElementById('reportForm');
-        const btnGenerate = document.getElementById('btnGenerate');
-        const btnPreview = document.getElementById('btnPreview');
-        const previewSection = document.getElementById('previewSection');
-        const previewContent = document.getElementById('previewContent');
-        const alertSuccess = document.getElementById('alertSuccess');
-        const alertError = document.getElementById('alertError');
+        const API_BASE = window.location.origin;
+        const statusBox = document.getElementById('statusBox');
+        const generateBtn = document.getElementById('generateBtn');
+        const statusBtn = document.getElementById('statusBtn');
         
-        // Set current date as default
-        const now = new Date();
-        document.getElementById('year').value = now.getFullYear();
-        document.getElementById('month').value = now.getMonth() + 1;
-        
-        function showAlert(type, message) {
-            const alert = type === 'success' ? alertSuccess : alertError;
-            alert.textContent = message;
-            alert.style.display = 'block';
-            setTimeout(() => { alert.style.display = 'none'; }, 5000);
-        }
-        
-        function hideAlerts() {
-            alertSuccess.style.display = 'none';
-            alertError.style.display = 'none';
-        }
-        
-        function setLoading(button, loading) {
-            if (loading) {
-                button.disabled = true;
-                const spinner = document.createElement('span');
-                spinner.className = 'loading-spinner';
-                button.insertBefore(spinner, button.firstChild);
-            } else {
-                button.disabled = false;
-                const spinner = button.querySelector('.loading-spinner');
-                if (spinner) spinner.remove();
+        function showStatus(type, title, message, downloadUrl = null) {
+            statusBox.className = `status ${type}`;
+            statusBox.style.display = 'block';
+            
+            let html = `
+                <div class="status-title">${type === 'loading' ? '<span class="spinner"></span>' : ''}${title}</div>
+                <div class="status-message">${message}</div>
+            `;
+            
+            if (downloadUrl) {
+                html += `<a href="${downloadUrl}" class="download-link" download>📥 Download Report PDF</a>`;
             }
+            
+            statusBox.innerHTML = html;
         }
         
-        // Preview report data
-        btnPreview.addEventListener('click', async () => {
-            hideAlerts();
-            setLoading(btnPreview, true);
-            
-            const params = new URLSearchParams({
-                report_type: document.getElementById('reportType').value,
-                year: document.getElementById('year').value,
-                month: document.getElementById('month').value
-            });
-            
-            const factoryId = document.getElementById('factory').value;
-            if (factoryId) params.append('factory_id', factoryId);
-            
-            try {
-                const response = await fetch(`/api/analytics/api/v1/reports/preview?${params}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    previewSection.style.display = 'block';
-                    previewContent.innerHTML = `
-                        <div style="text-align: left;">
-                            <h4 style="color: #1f2937; margin-top: 0;">📊 ${data.data.period}</h4>
-                            <p><strong>Factory:</strong> ${data.data.factory_name}</p>
-                            
-                            <h5 style="color: #0c4a6e; margin-top: 20px;">Executive Summary</h5>
-                            <ul style="text-align: left; color: #374151;">
-                                <li>Total Energy: ${data.data.summary.total_kwh.toFixed(2)} kWh</li>
-                                <li>vs Previous Month: ${data.data.summary.prev_month_change >= 0 ? '+' : ''}${data.data.summary.prev_month_change.toFixed(1)}%</li>
-                                <li>Anomalies: ${Object.values(data.data.summary.anomaly_counts).reduce((a,b) => a+b, 0)} total 
-                                    (${data.data.summary.anomaly_counts.critical} critical, ${data.data.summary.anomaly_counts.warning} warning)</li>
-                            </ul>
-                            
-                            <h5 style="color: #0c4a6e; margin-top: 20px;">Energy Performance Indicators</h5>
-                            <ul style="text-align: left; color: #374151;">
-                                ${data.data.enpis.map(enpi => `
-                                    <li>${enpi.name}: ${enpi.current} (Target: ${enpi.target}) - ${enpi.status}</li>
-                                `).join('')}
-                            </ul>
-                            
-                            <h5 style="color: #0c4a6e; margin-top: 20px;">Top Energy Consumers</h5>
-                            <ul style="text-align: left; color: #374151;">
-                                ${data.data.machines.slice(0, 5).map(m => `
-                                    <li>${m.name}: ${m.kwh.toFixed(0)} kWh (${m.percent.toFixed(1)}%)</li>
-                                `).join('')}
-                            </ul>
-                            
-                            <p style="margin-top: 20px; color: #059669; font-weight: 600;">✓ Data ready for PDF generation</p>
-                        </div>
-                    `;
-                    showAlert('success', 'Preview loaded successfully!');
-                    previewContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                } else {
-                    throw new Error(data.detail || 'Failed to load preview');
-                }
-            } catch (error) {
-                showAlert('error', `Preview failed: ${error.message}`);
-                previewContent.innerHTML = `<p style="color: #991b1b;">❌ ${error.message}</p>`;
-            } finally {
-                setLoading(btnPreview, false);
-            }
-        });
-        
-        // Generate PDF report
-        reportForm.addEventListener('submit', async (e) => {
+        // Generate Report with Real Data
+        document.getElementById('reportForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            hideAlerts();
-            setLoading(btnGenerate, true);
-            
-            const params = new URLSearchParams({
-                report_type: document.getElementById('reportType').value,
-                year: document.getElementById('year').value,
-                month: document.getElementById('month').value
-            });
             
             const factoryId = document.getElementById('factory').value;
-            if (factoryId) params.append('factory_id', factoryId);
+            const year = parseInt(document.getElementById('year').value);
+            const month = parseInt(document.getElementById('month').value);
+            
+            generateBtn.disabled = true;
+            showStatus('loading', '⏳ Generating Report...', 'Please wait while we fetch data and build your PDF report. This may take 30-60 seconds.');
             
             try {
-                const response = await fetch(`/api/analytics/api/v1/reports/generate?${params}`, {
-                    method: 'POST'
+                const response = await fetch(`${API_BASE}/api/analytics/api/v1/reports/v2/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        factory_id: factoryId,
+                        year: year,
+                        month: month
+                    })
                 });
                 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Report generation failed');
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    const downloadUrl = `${API_BASE}/api/analytics${data.download_url}`;
+                    showStatus('success', 
+                        '✅ Report Generated Successfully!', 
+                        `Your report has been generated (${data.file_size_kb} KB). Click below to download.`,
+                        downloadUrl
+                    );
+                } else {
+                    showStatus('error', 
+                        '❌ Generation Failed', 
+                        data.detail || data.message || 'An error occurred while generating the report.'
+                    );
                 }
-                
-                // Get filename from response header or construct it
-                const contentDisposition = response.headers.get('Content-Disposition');
-                let filename = 'EnPI_Report.pdf';
-                if (contentDisposition) {
-                    const match = contentDisposition.match(/filename="?([^"]+)"?/);
-                    if (match) filename = match[1];
-                }
-                
-                // Download PDF
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                
-                showAlert('success', `✓ Report generated successfully! Downloaded as ${filename}`);
             } catch (error) {
-                showAlert('error', `❌ Report generation failed: ${error.message}`);
+                showStatus('error', 
+                    '❌ Connection Error', 
+                    `Failed to connect to API: ${error.message}`
+                );
             } finally {
-                setLoading(btnGenerate, false);
+                generateBtn.disabled = false;
             }
         });
+        
+        // Check API Status
+        statusBtn.addEventListener('click', async () => {
+            statusBtn.disabled = true;
+            showStatus('loading', '⏳ Checking API...', 'Verifying report generation service status...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/analytics/api/v1/reports/v2/status`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    const features = data.features.map(f => `• ${f}`).join('<br>');
+                    showStatus('success', 
+                        '✅ API Operational', 
+                        `<strong>${data.service}</strong> v${data.version}<br><br><strong>Features:</strong><br>${features}`
+                    );
+                } else {
+                    showStatus('error', '❌ API Unavailable', 'The report generation service is not responding.');
+                }
+            } catch (error) {
+                showStatus('error', '❌ Connection Error', `Cannot reach API: ${error.message}`);
+            } finally {
+                statusBtn.disabled = false;
+            }
+        });
+        
+        // Auto-check API status on load
+        window.addEventListener('load', () => {
+            setTimeout(() => statusBtn.click(), 500);
+        });
     </script>
-    
-    <!-- EnMS Chatbot Widget -->
-    <script src="/js/chatbot-widget.js"></script>
-    
-    <!-- OVOS Voice Assistant Widget -->
-    <script src="/js/ovos-voice-widget.js?v=20251225"></script>
-    <!-- Sidebar Script -->
-    <script src="/js/sidebar.js?v=1765871462"></script>
 </body>
 </html>

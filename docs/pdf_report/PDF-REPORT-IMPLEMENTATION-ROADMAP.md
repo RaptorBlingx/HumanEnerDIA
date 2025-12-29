@@ -1,7 +1,23 @@
 # PDF Report Implementation Roadmap
 **From 3/10 → 9.5/10**  
 **Estimated Timeline**: 5-6 weeks  
-**Status**: Planning Phase ✅
+**Status**: 🚀 IMPLEMENTATION IN PROGRESS
+
+---
+
+## ⚠️ CRITICAL NOTES
+
+**OLD SYSTEM PRESERVATION:**
+- `analytics/reports/` → **KEEP INTACT** (checkpoint, do not modify)
+- `analytics/reports_v2/` → **NEW IMPLEMENTATION** (parallel development)
+- Switchover ONLY when new system validated as true 9.5/10 SOTA
+- Old system removal requires explicit approval
+
+**PROGRESS TRACKING:**
+- ✅ DONE - Marked tasks are completed and validated
+- 🚀 IN PROGRESS - Currently working on
+- ⏳ PENDING - Not started yet
+- All progress tracked in [TODO.md](./TODO.md)
 
 ---
 
