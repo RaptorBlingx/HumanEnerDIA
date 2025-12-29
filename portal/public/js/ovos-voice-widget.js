@@ -716,9 +716,21 @@
                 }
                 
                 // Trigger PDF download if present (for report generation queries)
-                console.log('📄 PDF check:', { pdf_base64: !!data.pdf_base64, pdf_filename: data.pdf_filename });
-                if (data.pdf_base64 && data.pdf_filename) {
-                    console.log('📥 Triggering PDF download:', data.pdf_filename);
+                // V2: REST bridge returns pdf_download object with URL instead of base64
+                console.log('🔍 Checking for PDF download:', {
+                    has_pdf_download: !!data.pdf_download,
+                    is_ready: data.pdf_download?.ready,
+                    full_data: data.pdf_download
+                });
+                
+                if (data.pdf_download && data.pdf_download.ready) {
+                    console.log('📄 PDF download available:', data.pdf_download.filename);
+                    console.log('📄 Calling downloadPDFFromURL...');
+                    downloadPDFFromURL(data.pdf_download.download_url, data.pdf_download.filename);
+                    addMessage(`📄 Downloading: ${data.pdf_download.filename} (${data.pdf_download.file_size_kb.toFixed(1)} KB)`, false, false);
+                } else if (data.pdf_base64 && data.pdf_filename) {
+                    // Legacy: Fallback to base64 download (backward compatibility)
+                    console.log('📄 Triggering PDF download (base64):', data.pdf_filename);
                     downloadPDF(data.pdf_base64, data.pdf_filename);
                 }
             } else if (data.error) {
@@ -831,6 +843,93 @@
             console.log(`✅ PDF downloaded: ${filename}`);
         } catch (err) {
             console.error('Failed to download PDF:', err);
+            addMessage(`PDF download failed: ${err.message}`, false, true);
+        }
+    }
+
+    /**
+     * Download PDF from URL (V2 report system)
+     * Fetches PDF from EnMS API and triggers browser download
+     * @param {string} downloadUrl - Full URL to PDF download endpoint
+     * @param {string} filename - Name for downloaded file
+     */
+    async function downloadPDFFromURL(downloadUrl, filename) {
+        try {
+            console.log(`📄 Original PDF URL: ${downloadUrl}`);
+            
+            // CRITICAL FIX: Rewrite direct analytics URL to go through nginx proxy
+            // This avoids CORS issues when portal is on :8080 but API is on :8001
+            // Transform: http://10.33.10.104:8001/api/v1/reports/... 
+            //       To: /api/analytics/api/v1/reports/...
+            let proxiedUrl = downloadUrl;
+            if (downloadUrl.includes(':8001')) {
+                // Extract path after hostname:port
+                const urlObj = new URL(downloadUrl);
+                proxiedUrl = '/api/analytics' + urlObj.pathname;
+                console.log(`📄 Rewritten to nginx proxy: ${proxiedUrl}`);
+            }
+            
+            const response = await fetch(proxiedUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const blob = await response.blob();
+            console.log(`✅ PDF fetched: ${(blob.size / 1024).toFixed(1)} KB`);
+            
+            // Create download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log(`✅ PDF downloaded successfully: ${filename}`);
+        } catch (err) {
+            console.error('❌ Failed to download PDF from URL:', err);
+            addMessage(`PDF download failed: ${err.message}`, false, true);
+        }
+    }
+
+    /**
+     * Download PDF from URL (V2 report system)
+     * Fetches PDF from EnMS API and triggers browser download
+     * @param {string} downloadUrl - Full URL to PDF download endpoint
+     * @param {string} filename - Name for downloaded file
+     */
+    async function downloadPDFFromURL(downloadUrl, filename) {
+        try {
+            console.log(`📄 Fetching PDF from: ${downloadUrl}`);
+            
+            const response = await fetch(downloadUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const blob = await response.blob();
+            
+            // Create download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log(`✅ PDF downloaded successfully: ${filename}`);
+        } catch (err) {
+            console.error('Failed to download PDF from URL:', err);
             addMessage(`PDF download failed: ${err.message}`, false, true);
         }
     }

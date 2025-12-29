@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVOS PDF Download Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        .test-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .info {
+            color: #17a2b8;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-panel">
+        <h1>🎙️ OVOS PDF Download Test</h1>
+        <p class="subtitle">Test end-to-end voice-triggered PDF report generation</p>
+        
+        <div>
+            <button id="testDecember" class="test-btn">📄 Generate December Report</button>
+            <button id="testNovember" class="test-btn">📄 Generate November Report</button>
+            <button id="testCustom" class="test-btn">✏️ Custom Query</button>
+            <button id="clearResults" class="test-btn" style="background: #6c757d;">🗑️ Clear</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        let testNumber = 0;
+
+        function log(message, type = 'info') {
+            testNumber++;
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545',
+                info: '#17a2b8'
+            };
+            const color = colors[type] || '#333';
+            resultsDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        async function testQuery(queryText) {
+            const buttons = document.querySelectorAll('.test-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            log(`\n═══ Test #${testNumber}: "${queryText}" ═══`, 'info');
+            log('📤 Sending query to OVOS REST Bridge...');
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch('/api/ovos/voice/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: queryText,
+                        session_id: 'test_' + Date.now()
+                    })
+                });
+
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                log(`⏱️ Response received in ${elapsed}s`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(`✅ Success: ${data.success}`, 'success');
+                log(`💬 Response: "${data.response}"`);
+
+                if (data.pdf_download) {
+                    log('📄 PDF Download Data:', 'success');
+                    log(`   - Filename: ${data.pdf_download.filename}`);
+                    log(`   - Size: ${data.pdf_download.file_size_kb} KB`);
+                    log(`   - Report ID: ${data.pdf_download.report_id}`);
+                    log(`   - URL: ${data.pdf_download.download_url}`);
+                    
+                    if (data.pdf_download.ready) {
+                        log('🚀 Triggering automatic download...', 'success');
+                        await downloadPDF(data.pdf_download.download_url, data.pdf_download.filename);
+                    }
+                } else {
+                    log('⚠️ No PDF download data in response', 'error');
+                }
+
+            } catch (err) {
+                log(`❌ Error: ${err.message}`, 'error');
+                console.error('Test error:', err);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        async function downloadPDF(url, filename) {
+            try {
+                log(`📥 Original URL: ${url}`);
+                
+                // CRITICAL FIX: Rewrite URL to go through nginx proxy (avoid CORS)
+                let proxiedUrl = url;
+                if (url.includes(':8001')) {
+                    const urlObj = new URL(url);
+                    proxiedUrl = '/api/analytics' + urlObj.pathname;
+                    log(`📥 Rewritten to: ${proxiedUrl}`, 'info');
+                }
+                
+                log(`📥 Fetching PDF from: ${proxiedUrl}`);
+                const response = await fetch(proxiedUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                log(`✅ PDF fetched: ${(blob.size / 1024).toFixed(1)} KB`);
+
+                // Create download link
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+                log(`✅ PDF download triggered: ${filename}`, 'success');
+                log('🎉 CHECK YOUR DOWNLOADS FOLDER!', 'success');
+
+            } catch (err) {
+                log(`❌ PDF download failed: ${err.message}`, 'error');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('testDecember').addEventListener('click', () => {
+            testQuery('generate December report');
+        });
+
+        document.getElementById('testNovember').addEventListener('click', () => {
+            testQuery('create November report');
+        });
+
+        document.getElementById('testCustom').addEventListener('click', () => {
+            const query = prompt('Enter custom query:', 'generate report for October 2024');
+            if (query) testQuery(query);
+        });
+
+        document.getElementById('clearResults').addEventListener('click', () => {
+            resultsDiv.innerHTML = '';
+            testNumber = 0;
+        });
+
+        // Initial message
+        log('🎯 OVOS PDF Download Test Page Ready');
+        log('Click a button above to test PDF generation and download');
+        log('Expected: ~7 seconds for PDF generation, then automatic download');
+    </script>
+</body>
+</html>

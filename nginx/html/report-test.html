@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnMS Report Generator - Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a365d 0%, #00A8E8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #1a365d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a365d;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00A8E8;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #00A8E8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0096d1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 168, 232, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+        
+        .btn-tertiary {
+            background: #718096;
+            color: white;
+        }
+        
+        .btn-tertiary:hover {
+            background: #4a5568;
+        }
+        
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #f0fdf4;
+            border: 2px solid #48bb78;
+            color: #22543d;
+        }
+        
+        .status.error {
+            background: #fef2f2;
+            border: 2px solid #e53e3e;
+            color: #742a2a;
+        }
+        
+        .status.loading {
+            background: #eff6ff;
+            border: 2px solid #00A8E8;
+            color: #1e40af;
+        }
+        
+        .status-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .status-message {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .download-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #1a365d;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .download-link:hover {
+            background: #2d3748;
+            transform: translateY(-2px);
+        }
+        
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #00A8E8;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+        
+        .info-box strong {
+            color: #1e40af;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 168, 232, 0.3);
+            border-radius: 50%;
+            border-top-color: #00A8E8;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 EnMS Report Generator</h1>
+            <p>Generate professional energy management reports with real-time data</p>
+        </div>
+        
+        <div class="content">
+            <div class="info-box">
+                <strong>🎯 Test Interface:</strong> This page connects to the new V2 Report API to generate comprehensive PDF reports with live factory data.
+            </div>
+            
+            <form id="reportForm">
+                <div class="form-group">
+                    <label for="factory">Factory</label>
+                    <select id="factory" required>
+                        <option value="11111111-1111-1111-1111-111111111111">Demo Manufacturing Plant</option>
+                        <option value="22222222-2222-2222-2222-222222222222">European Production Facility</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="year">Year</label>
+                    <input type="number" id="year" value="2025" min="2020" max="2030" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="month">Month</label>
+                    <select id="month" required>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12" selected>December</option>
+                    </select>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn-primary" id="generateBtn">
+                        🚀 Generate Report
+                    </button>
+                    <button type="button" class="btn-tertiary" id="statusBtn">
+                        ℹ️ API Status
+                    </button>
+                </div>
+            </form>
+            
+            <div id="statusBox" class="status"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = window.location.origin;
+        const statusBox = document.getElementById('statusBox');
+        const generateBtn = document.getElementById('generateBtn');
+        const statusBtn = document.getElementById('statusBtn');
+        
+        function showStatus(type, title, message, downloadUrl = null) {
+            statusBox.className = `status ${type}`;
+            statusBox.style.display = 'block';
+            
+            let html = `
+                <div class="status-title">${type === 'loading' ? '<span class="spinner"></span>' : ''}${title}</div>
+                <div class="status-message">${message}</div>
+            `;
+            
+            if (downloadUrl) {
+                html += `<a href="${downloadUrl}" class="download-link" download>📥 Download Report PDF</a>`;
+            }
+            
+            statusBox.innerHTML = html;
+        }
+        
+        // Generate Report with Real Data
+        document.getElementById('reportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const factoryId = document.getElementById('factory').value;
+            const year = parseInt(document.getElementById('year').value);
+            const month = parseInt(document.getElementById('month').value);
+            
+            generateBtn.disabled = true;
+            showStatus('loading', '⏳ Generating Report...', 'Please wait while we fetch data and build your PDF report. This may take 30-60 seconds.');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/analytics/api/v1/reports/v2/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        factory_id: factoryId,
+                        year: year,
+                        month: month
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    const downloadUrl = `${API_BASE}/api/analytics${data.download_url}`;
+                    showStatus('success', 
+                        '✅ Report Generated Successfully!', 
+                        `Your report has been generated (${data.file_size_kb} KB). Click below to download.`,
+                        downloadUrl
+                    );
+                } else {
+                    showStatus('error', 
+                        '❌ Generation Failed', 
+                        data.detail || data.message || 'An error occurred while generating the report.'
+                    );
+                }
+            } catch (error) {
+                showStatus('error', 
+                    '❌ Connection Error', 
+                    `Failed to connect to API: ${error.message}`
+                );
+            } finally {
+                generateBtn.disabled = false;
+            }
+        });
+        
+        // Check API Status
+        statusBtn.addEventListener('click', async () => {
+            statusBtn.disabled = true;
+            showStatus('loading', '⏳ Checking API...', 'Verifying report generation service status...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/analytics/api/v1/reports/v2/status`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    const features = data.features.map(f => `• ${f}`).join('<br>');
+                    showStatus('success', 
+                        '✅ API Operational', 
+                        `<strong>${data.service}</strong> v${data.version}<br><br><strong>Features:</strong><br>${features}`
+                    );
+                } else {
+                    showStatus('error', '❌ API Unavailable', 'The report generation service is not responding.');
+                }
+            } catch (error) {
+                showStatus('error', '❌ Connection Error', `Cannot reach API: ${error.message}`);
+            } finally {
+                statusBtn.disabled = false;
+            }
+        });
+        
+        // Auto-check API status on load
+        window.addEventListener('load', () => {
+            setTimeout(() => statusBtn.click(), 500);
+        });
+    </script>
+</body>
+</html>
