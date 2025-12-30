@@ -1,0 +1,87 @@
+# EnMS Chatbot Test Cases
+# Comprehensive test cases for regression testing
+{
+  "iso_50001": [
+    ["What is the scope of EnMS?", "ask_scope"],
+    ["What is PDCA?", "ask_pdca"],
+    ["What is management review?", "ask_management_review"],
+    ["What is energy baseline?", "ask_energy_baseline"],
+    ["What is EnPI?", "ask_enpi"],
+    ["What are energy objectives?", "ask_objectives_targets"],
+    ["What is an energy review?", "ask_energy_planning"],
+    ["What is internal audit?", "ask_internal_audit"],
+    ["What is energy policy?", "ask_energy_policy"],
+    ["What is top management responsibility?", "ask_management_responsibility"]
+  ],
+  "portal": [
+    ["What is the baseline page?", "ask_portal_baseline"],
+    ["What is the anomaly page?", "ask_portal_anomaly"],
+    ["What is the main dashboard?", "ask_portal_dashboard"],
+    ["What is the KPI page?", "ask_portal_kpi"],
+    ["What is the forecast page?", "ask_portal_forecast"],
+    ["What is the reports page?", "ask_portal_reports"],
+    ["How do I train baseline model?", "ask_portal_baseline"],
+    ["What is R² score?", "ask_portal_baseline"],
+    ["How to detect anomalies?", "ask_portal_anomaly"],
+    ["What is MTTR?", "ask_portal_anomaly"]
+  ],
+  "grafana": [
+    ["Factory Overview dashboard", "ask_grafana_factory"],
+    ["Cost Analytics dashboard", "ask_grafana_cost"],
+    ["ISO 50001 Compliance dashboard", "ask_grafana_iso50001"],
+    ["Real-time Monitoring dashboard", "ask_grafana_realtime"],
+    ["Machine Health dashboard", "ask_grafana_machine_health"],
+    ["ML Performance dashboard", "ask_grafana_ml"],
+    ["Environmental Monitoring dashboard", "ask_grafana_environmental"],
+    ["Anomaly Detection dashboard", "ask_grafana_anomaly"],
+    ["Executive Summary dashboard", "ask_grafana_executive"],
+    ["Operational Efficiency dashboard", "ask_grafana_operational"]
+  ],
+  "ovos": [
+    ["How to ask energy by voice?", "ask_ovos_energy"],
+    ["List voice commands", "ask_ovos_capabilities"],
+    ["What OVOS can do?", "ask_ovos_capabilities"],
+    ["How to check anomalies by voice?", "ask_ovos_anomaly"],
+    ["How to get cost reports by voice?", "ask_ovos_cost"],
+    ["How to forecast energy by voice?", "ask_ovos_forecast"],
+    ["How to check KPIs by voice?", "ask_ovos_kpi"],
+    ["How to get status updates by voice?", "ask_ovos_status"],
+    ["How to generate reports by voice?", "ask_ovos_reports"]
+  ],
+  "concepts": [
+    ["What is TimescaleDB?", "ask_timescaledb"],
+    ["What is Docker?", "ask_docker"],
+    ["What is MQTT?", "ask_mqtt"],
+    ["What is Node-RED?", "ask_nodered"],
+    ["What is Redis?", "ask_redis"],
+    ["What is baseline model?", "ask_concept_baseline"],
+    ["What is anomaly detection ML?", "ask_concept_anomaly_ml"],
+    ["What is ARIMA?", "ask_concept_arima"],
+    ["What is Prophet?", "ask_concept_prophet"],
+    ["What is CUSUM?", "ask_concept_cusum"],
+    ["What is OEE?", "ask_concept_oee"],
+    ["What is load factor?", "ask_concept_loadfactor"],
+    ["What is peak demand?", "ask_concept_peakdemand"],
+    ["What is SEC?", "ask_concept_sec"],
+    ["What is SEU?", "ask_concept_seu"],
+    ["What is EnPI calculation?", "ask_concept_enpi"]
+  ],
+  "system": [
+    ["What is the simulator service?", "ask_simulator"],
+    ["What is analytics API?", "ask_analytics_api"],
+    ["What is Humanergy platform?", "ask_humanergy_platform"]
+  ],
+  "visualization": [
+    ["What is Sankey diagram?", "ask_viz_sankey"],
+    ["What is heatmap?", "ask_viz_heatmap"],
+    ["What is comparison chart?", "ask_viz_comparison"]
+  ],
+  "edge_cases": [
+    ["baseline", "ask_energy_baseline"],
+    ["anomaly", "ask_portal_anomaly"],
+    ["dashboard", "ask_portal_dashboard"],
+    ["OEE", "ask_concept_oee"],
+    ["What is baseline and how to train it?", "ask_portal_baseline"],
+    ["HVAC", "ask_general_info"]
+  ]
+}

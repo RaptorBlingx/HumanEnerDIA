@@ -10,6 +10,150 @@ intents:
 - requirement
 - thank
 responses:
+  utter_ask_humanergy_platform:
+  - text: Humanergy is an intelligent energy management platform combining real-time monitoring, ML analytics, and ISO 50001 compliance. It features dashboards for baseline prediction, anomaly detection, forecasting, KPIs, plus Grafana visualizations and OVOS voice assistant.
+  - text: Humanergy is a comprehensive Energy Management System (EnMS) with Analytics dashboards, 11 Grafana SOTA dashboards, voice assistant integration, and automated reporting. Navigate using the sidebar menu to access all features.
+  utter_ask_portal_dashboard:
+  - text: The main dashboard is your command center showing real-time energy metrics, alerts, machine status, and quick navigation to all Humanergy features via the sidebar menu.
+  - text: Dashboard shows total consumption, active machines, recent anomalies, and KPI summaries. Use the left sidebar to navigate to Analytics, Visualizations, and Grafana.
+  utter_ask_portal_baseline:
+  - text: The Baseline page trains ML models to predict expected energy consumption based on drivers (temperature, pressure, load, production). View R², RMSE, MAE metrics and coefficient impact charts.
+  - text: Baseline prediction compares actual vs expected consumption. Select a machine, choose drivers, train the model, then view the prediction chart and performance metrics.
+  utter_ask_portal_anomaly:
+  - text: The Anomaly Detection page identifies unusual consumption patterns using statistical analysis. View alerts by severity (Critical, Warning, Info), filter by machine and time period.
+  - text: Anomalies are detected when consumption deviates significantly from expected patterns. Check severity levels, investigate root causes, and mark resolved once fixed.
+  utter_ask_portal_kpi:
+  - text: The KPI Dashboard displays key metrics including Energy Efficiency, Load Factor, Peak Demand, Cost Efficiency, and SEC (Specific Energy Consumption) with trend charts.
+  - text: Track KPIs like load factor percentage, peak demand ratio, and efficiency ratings. Use time filters (24h, 7d, 30d) to analyze performance trends.
+  utter_ask_portal_forecast:
+  - text: The Forecast page predicts future demand using ARIMA (1-4h) and Prophet (24h-7d) models. Features include Optimal Load Scheduling to find best times to run equipment.
+  - text: Train ARIMA for short-term or Prophet for long-term forecasts. Use Optimal Load Scheduling to minimize energy costs by finding optimal operation times.
+  utter_ask_portal_reports:
+  - text: Generate PDF reports for consumption summaries, KPI performance, anomaly analysis, and efficiency metrics. Export data as CSV for further analysis.
+  - text: Reports include consumption totals, peak demand, efficiency metrics, baseline comparison, and anomaly summaries. Download as PDF or export data.
+  utter_ask_viz_sankey:
+  - text: The Sankey diagram visualizes energy flow through your facility. Flow width represents energy quantity (kWh). Identify major consumers and distribution patterns.
+  - text: Read Sankey left-to-right - from sources through machines to outputs. Thicker flows indicate more energy. Helps identify losses and optimization opportunities.
+  utter_ask_viz_heatmap:
+  - text: The heatmap displays consumption or anomalies across hours (X-axis) and days (Y-axis). Darker colors indicate higher values. Spot patterns and outliers.
+  - text: Use heatmap to identify peak consumption hours, weekend vs weekday patterns, shift schedules, and recurring anomalies.
+  utter_ask_viz_comparison:
+  - text: The Comparison page displays side-by-side metrics for multiple machines including consumption, peak demand, load factor, and efficiency ratings.
+  - text: Compare machines to identify best/worst performers, efficiency gaps, and candidates for maintenance or upgrades.
+  utter_ask_grafana_general:
+  - text: Humanergy includes 11 SOTA (State Of The Art) Grafana dashboards covering Factory Overview, ISO 50001 EnPI, Anomaly Detection, Cost Analytics, and more. Access via sidebar menu.
+  - text: SOTA dashboards provide premium visualizations with ML insights. Use the machine selector to filter views. Dashboards refresh every 30-60 seconds (Real-Time is faster).
+  utter_ask_grafana_factory:
+  - text: SOTA Factory Overview is the Command Center showing real-time status - Active Machines, Energy Today, Cost, Anomalies, Live Power chart, and Machine Status & Health.
+  - text: Factory Overview provides operational awareness with live power consumption (6h), energy by machine breakdown, and machine health indicators in one view.
+  utter_ask_grafana_iso50001:
+  - text: SOTA ISO 50001 EnPI tracks compliance with EnPI Score, Energy Savings, CUSUM Control Chart, Baseline vs Actual, Weather Normalization, and SEU Performance panels.
+  - text: The ISO 50001 dashboard helps monitor energy performance indicators and compliance status with visualization of baseline deviations and degree-day normalization.
+  utter_ask_grafana_anomaly:
+  - text: SOTA Anomaly Detection shows Active/Critical Anomalies, MTTR, Severity Distribution, Timeline, Machine ranking by anomaly count, Heatmap, and Unresolved list.
+  - text: Use the Anomaly dashboard to monitor alert severity, mean time to resolution, and identify which machines and hours have the most issues.
+  utter_ask_grafana_cost:
+  - text: SOTA Cost Analytics tracks Current Month Cost, Variance, Average Rate, Potential Savings, 12-month Trend, Time-of-Use breakdown, and Savings Opportunities.
+  - text: Cost dashboard helps identify expensive energy periods, top cost contributors, and optimization opportunities for reducing electricity bills.
+  utter_ask_grafana_executive:
+  - text: SOTA Executive Summary provides management-level KPIs including Top Operational Concerns, 12-Month Energy Trend, and Energy Intensity (kWh per unit produced).
+  - text: Executive Summary is designed for managers with high-level metrics and long-term trends without technical complexity.
+  utter_ask_grafana_machine_health:
+  - text: SOTA Machine Health provides deep-dive analysis with Health Score, Energy, Power, Anomalies, ML Model Performance, Baseline Variance, and Power Consumption charts.
+  - text: Machine Health dashboard enables detailed analysis of individual machines including their ML model accuracy and deviation from expected baseline consumption.
+  utter_ask_grafana_ml:
+  - text: SOTA ML Performance tracks Active Models, Average R²/RMSE, score trends over time, model performance by machine, and recent training history (30d).
+  - text: Use ML Performance dashboard to monitor model accuracy, identify models needing retraining, and track overall prediction quality across the facility.
+  utter_ask_grafana_operational:
+  - text: SOTA Operational Efficiency shows OEE (Overall Equipment Effectiveness), Availability Rate, Performance Rate, Production vs Energy correlation, and Machine Status.
+  - text: Operational Efficiency tracks production metrics and correlates them with energy usage to identify optimal operating points and efficiency opportunities.
+  utter_ask_grafana_predictive:
+  - text: SOTA Predictive Analytics shows RMSE/MAPE/R² metrics, Forecast vs Actual comparisons, Model Performance comparisons, and accuracy trends over time.
+  - text: Predictive Analytics dashboard validates forecast accuracy by comparing predictions against actual consumption and tracking error metrics.
+  utter_ask_grafana_realtime:
+  - text: SOTA Real-Time Production shows Factory Status, Active Machines, Current Power, and Live Power chart (last 15 minutes) with fastest refresh rate.
+  - text: Real-Time Production provides instant operational awareness with sub-minute updates for monitoring current factory state and power consumption.
+  utter_ask_grafana_environmental:
+  - text: SOTA Environmental Impact tracks Monthly Carbon Footprint, CO2 Emissions Trend, Emission Intensity (kg CO2/unit), CO2 by Machine, and Reduction Progress.
+  - text: Environmental dashboard helps monitor and reduce carbon footprint by tracking emissions, intensity metrics, and progress toward sustainability goals.
+  utter_ask_ovos_capabilities:
+  - text: OVOS voice assistant can query energy data, check machine status, show KPIs, generate forecasts, detect anomalies, analyze costs, and generate PDF reports using natural voice commands.
+  - text: You can ask OVOS about energy consumption, machine status, forecasts, anomalies, costs, and reports. Try 'What's the energy consumption of Compressor-1?' or 'Any active alerts?'.
+  utter_ask_ovos_energy:
+  - text: Ask OVOS about energy by saying 'What's the energy consumption of [machine]?' or 'How much energy did [machine] use [time period]?'. OVOS understands machine names and time phrases.
+  - text: For energy queries, try 'Show hourly energy consumption for HVAC-Main', 'How much power is Compressor-1 using?', or 'Compare energy between machines'.
+  utter_ask_ovos_status:
+  - text: Check machine status by voice with 'Is [machine] running?', 'Which machines are active?', 'Any machines offline?', or 'Give me a factory overview'.
+  - text: OVOS can tell you machine health status. Try 'Is Boiler-1 running?', 'System diagnostics', or 'How many machines are active?'.
+  utter_ask_ovos_kpi:
+  - text: Get KPIs by saying 'Show me the KPIs for Compressor-1', 'What's the load factor?', 'Calculate SEC', or 'What's the peak demand?'.
+  - text: OVOS provides load factor, SEC, peak demand, efficiency, and carbon metrics. Try 'KPIs for Boiler-1' or 'What's our carbon footprint?'.
+  utter_ask_ovos_forecast:
+  - text: Ask for forecasts with 'Forecast energy for tomorrow', 'What's the expected energy for Compressor-1?', or 'Show me the medium-term forecast'.
+  - text: OVOS supports short-term (ARIMA) and medium-term (Prophet) forecasts. Try 'Predict consumption for HVAC-Main' or 'Train baseline for Compressor-1'.
+  utter_ask_ovos_anomaly:
+  - text: Check anomalies by saying 'Are there any anomalies?', 'Any active alerts?', 'What's wrong?', or 'Find issues in Compressor-1'.
+  - text: OVOS detects and reports anomalies with severity levels. Try 'Any critical issues?', 'List active anomalies', or 'Check for unusual patterns'.
+  utter_ask_ovos_cost:
+  - text: Query costs by saying 'How much have we spent on energy?', 'Energy cost today', 'Which machine costs the most?', or 'Cost breakdown'.
+  - text: OVOS provides cost analysis including per-machine costs. Try 'Energy cost this week', 'Spending on electricity', or 'Budget usage'.
+  utter_ask_ovos_reports:
+  - text: Generate reports by saying 'Create a monthly report', 'Generate ISO 50001 report', 'I need a PDF report', or 'Download the report'.
+  - text: OVOS can generate monthly, ISO 50001 compliance, and performance reports. Say 'Generate report' and OVOS provides a download link.
+  utter_ask_concept_baseline:
+  - text: Energy baseline is an ML model predicting expected consumption based on drivers (temperature, load, production). Used for anomaly detection and EnPI calculation.
+  - text: Baselines enable comparing actual vs expected consumption. Train with historical data, monitor R² accuracy, retrain when performance drops.
+  utter_ask_concept_enpi:
+  - text: EnPI (Energy Performance Indicator) = Actual/Baseline × 100. Values <100 indicate improvement. Required by ISO 50001 for tracking energy performance.
+  - text: EnPI quantifies efficiency improvement vs baseline. Track trends, target 5-10% reduction, use CUSUM charts for cumulative deviation analysis.
+  utter_ask_concept_sec:
+  - text: SEC (Specific Energy Consumption) = kWh / units produced. Normalizes consumption for production volume. Lower SEC = more efficient production.
+  - text: SEC enables fair efficiency comparison across different production volumes. Reduce by minimizing idle time and improving process parameters.
+  utter_ask_concept_loadfactor:
+  - text: Load Factor = Average Power / Peak Power × 100. High load factor (70-90%) indicates efficient equipment utilization and reduces demand charges.
+  - text: Improve load factor by leveling production, staggering startups, and reducing peak demand spikes.
+  utter_ask_concept_peakdemand:
+  - text: Peak demand is maximum power (kW) during a billing period. Utilities charge separately for peaks - a single spike affects the entire month's bill.
+  - text: Reduce peak demand through load shifting, staggering equipment startups, and demand response programs.
+  utter_ask_concept_seu:
+  - text: SEU (Significant Energy Use) is equipment with high consumption or improvement potential. ISO 50001 requires identifying and managing SEUs.
+  - text: Typically 20% of equipment accounts for 80% of consumption. Focus improvement efforts on SEUs for maximum impact.
+  utter_ask_concept_arima:
+  - text: ARIMA is a time-series forecasting method for short-term predictions (1-4 hours). Uses past values and patterns to predict future consumption.
+  - text: ARIMA works well for stable, regular patterns. Limited for seasonal data or long-term forecasts - use Prophet for those.
+  utter_ask_concept_prophet:
+  - text: Prophet is Facebook's forecasting model for medium-term predictions (24h-7d). Handles seasonality, holidays, and missing data automatically.
+  - text: Prophet excels at capturing daily/weekly patterns. More robust than ARIMA for business data with seasonal cycles.
+  utter_ask_concept_anomaly_ml:
+  - text: Humanergy uses Z-score (statistical outliers), Isolation Forest (ML), and baseline deviation to detect anomalies. Severity based on magnitude and impact.
+  - text: Anomalies can indicate equipment issues, process deviations, or sensor problems. Investigate root cause when detected.
+  utter_ask_concept_oee:
+  - text: OEE = Availability × Performance × Quality. World-class is 85%+. Low OEE correlates with poor energy efficiency due to idle time and rework.
+  - text: Track each OEE component separately to identify improvement opportunities. Improving OEE typically improves SEC.
+  utter_ask_concept_cusum:
+  - text: CUSUM chart tracks cumulative deviation from baseline. Detects gradual efficiency degradation or sustained improvement that period-by-period analysis misses.
+  - text: Upward CUSUM trend = cumulative waste. Downward trend = cumulative savings. Flat line = on target.
+  utter_ask_nodered:
+  - text: Node-RED is the ETL pipeline - receives MQTT sensor data, transforms/validates it, and batch-inserts to TimescaleDB. Access at port 1880.
+  - text: Node-RED flows connect MQTT-in nodes → transform functions → PostgreSQL inserts. It's the data bridge between factory sensors and database.
+  utter_ask_mqtt:
+  - text: MQTT is the lightweight pub/sub messaging protocol transporting real-time sensor data. Broker at 172.18.0.1:1883. Topics follow factory/{id}/{machine}/{type} pattern.
+  - text: MQTT receives data from factory equipment. Node-RED subscribes to topics to process and store sensor readings.
+  utter_ask_timescaledb:
+  - text: TimescaleDB is PostgreSQL optimized for time-series. Uses hypertables (auto-partitioned) and continuous aggregates (_1min, _1hour, _1day) for fast queries.
+  - text: Query continuous aggregates for aggregated data, not raw hypertables. Access via: docker exec -it enms-postgres psql -U $POSTGRES_USER -d enms.
+  utter_ask_analytics_api:
+  - text: Analytics API (FastAPI, port 8001) provides ML/KPI endpoints - baseline training, anomaly detection, forecasting, KPIs, reports. Swagger docs at /docs.
+  - text: Analytics handles all ML operations. Key endpoints: /baseline/*, /anomaly/*, /kpi/*, /forecast/*, /reports/*.
+  utter_ask_simulator:
+  - text: Simulator (port 8003) generates realistic factory sensor data - energy, production, environmental. Simulates 5 machine types with variable intervals.
+  - text: Check status: curl localhost:8003/simulator/status. Control via POST /simulator/start, /simulator/stop.
+  utter_ask_docker:
+  - text: Services via docker-compose: postgres (5432), analytics (8001), simulator (8003), nodered (1880), grafana (3000), nginx (8080 gateway), redis.
+  - text: Start all: docker-compose up -d. Restart one: docker-compose restart [service]. Logs: docker-compose logs -f [service].
+  utter_ask_redis:
+  - text: Redis provides caching (300s TTL for expensive queries) and pub/sub for real-time WebSocket events like anomaly.detected, baseline.trained.
+  - text: Disable pub/sub with REDIS_PUBSUB_ENABLED=false in .env if WebSocket not needed.
   utter_greet:
   - text: Hello! I'm here to help you with questions about the Energy Management System (EnMS) based on ISO 50001:2011. How can I assist you today?
   - text: Hi! I can answer questions about Energy Management Systems. What would you like to know?

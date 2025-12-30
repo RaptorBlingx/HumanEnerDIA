@@ -6,8 +6,24 @@ import random
 import re
 import json
 import os
+import logging
+from datetime import datetime
 from difflib import SequenceMatcher
 from collections import Counter
+
+# Set up query logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# File handler for query logs
+log_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs')
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, 'query_log.jsonl')
+
+file_handler = logging.FileHandler(log_file)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(logging.Formatter('%(message)s'))
+logger.addHandler(file_handler)
 
 # Q&A verisini yükle
 QA_DATA = {}
@@ -42,11 +58,484 @@ class ActionRetrieveAnswer(Action):
         user_message_lower = user_message.lower()
         intent = latest_message.get("intent", {}).get("name", "")
         
+        # Log query start
+        query_log = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "query": user_message,
+            "intent": intent,
+            "sender_id": tracker.sender_id
+        }
+        
+        # Common misspellings correction (Phase 8.6)
+        misspellings = {
+            "eneregy": "energy", "enery": "energy", "energey": "energy",
+            "anaomaly": "anomaly", "anomoly": "anomaly", "anamoly": "anomaly",
+            "eficiency": "efficiency", "efficency": "efficiency",
+            "basline": "baseline", "baseeline": "baseline",
+            "forcast": "forecast", "forcaste": "forecast",
+            "dashbord": "dashboard", "dashbaord": "dashboard",
+            "monitering": "monitoring", "moniterring": "monitoring",
+            "equipement": "equipment", "equiptment": "equipment",
+            "performace": "performance", "preformance": "performance",
+            "consuption": "consumption", "consumtion": "consumption",
+            "maintainance": "maintenance", "maintenence": "maintenance",
+        }
+        
+        # Correct common misspellings
+        for misspell, correct in misspellings.items():
+            if misspell in user_message_lower:
+                user_message_lower = user_message_lower.replace(misspell, correct)
+        
+        # Abbreviation expansion map (Phase 8.3)
+        abbreviation_map = {
+            "\\boee\\b": "overall equipment effectiveness",
+            "\\bhvac\\b": "heating ventilation air conditioning",
+            "\\bkpi\\b": "key performance indicator",
+            "\\bseu\\b": "significant energy use",
+            "\\bsec\\b": "specific energy consumption",
+            "\\benpi\\b": "energy performance indicator",
+            "\\bkpis\\b": "key performance indicators",
+            "\\biot\\b": "internet of things",
+            "\\bapi\\b": "application programming interface",
+            "\\benpis\\b": "energy performance indicators",
+        }
+        
+        # Expand abbreviations in user message (regex with word boundaries)
+        for abbr, expansion in abbreviation_map.items():
+            user_message_lower = re.sub(abbr, expansion, user_message_lower, flags=re.IGNORECASE)
+        
         # Anahtar kelime mapping - hangi kelimeler hangi alt konuya ait
         keyword_to_topic = {
-            # DEFINITION topics
+            # HUMANERGY PLATFORM topics (NEW - longer keywords for specificity)
+            "humanergy platform": "ask_humanergy_platform",
+            "humanergy": "ask_humanergy_platform",
+            "what is humanergy": "ask_humanergy_platform",
+            "humanergy features": "ask_humanergy_platform",
+            "navigate humanergy": "ask_humanergy_platform",
+            
+            # PORTAL DASHBOARD topics (Phase 2)
+            "main dashboard": "ask_portal_dashboard",
+            "portal dashboard": "ask_portal_dashboard",
+            "portal home": "ask_portal_dashboard",
+            "sidebar menu": "ask_portal_dashboard",
+            "navigate portal": "ask_portal_dashboard",
+            "what widgets": "ask_portal_dashboard",
+            "main sections": "ask_portal_dashboard",
+            "real-time data": "ask_portal_dashboard",
+            "analytics vs grafana": "ask_portal_dashboard",
+            
+            # PORTAL BASELINE topics (Phase 2 - longer keywords to avoid ISO collision)
+            "baseline page": "ask_portal_baseline",
+            "baseline analysis": "ask_portal_baseline",
+            "baseline prediction": "ask_portal_baseline",
+            "baseline model": "ask_portal_baseline",
+            "train baseline": "ask_portal_baseline",
+            "r² score": "ask_portal_baseline",
+            "r2 score": "ask_portal_baseline",
+            "rmse baseline": "ask_portal_baseline",
+            "mae baseline": "ask_portal_baseline",
+            "coefficient bars": "ask_portal_baseline",
+            "driver selection": "ask_portal_baseline",
+            "baseline chart": "ask_portal_baseline",
+            "baseline metrics": "ask_portal_baseline",
+            
+            # PORTAL ANOMALY topics (Phase 2)
+            "anomaly page": "ask_portal_anomaly",
+            "anomaly detection": "ask_portal_anomaly",
+            "anomalies": "ask_portal_anomaly",
+            "energy anomaly": "ask_portal_anomaly",
+            "anomaly severity": "ask_portal_anomaly",
+            "critical anomaly": "ask_portal_anomaly",
+            "warning anomaly": "ask_portal_anomaly",
+            "anomaly threshold": "ask_portal_anomaly",
+            "filter anomalies": "ask_portal_anomaly",
+            "detect anomalies": "ask_portal_anomaly",
+            
+            # PORTAL KPI topics (Phase 2)
+            "kpi page": "ask_portal_kpi",
+            "kpi dashboard": "ask_portal_kpi",
+            "key performance indicator": "ask_portal_kpi",
+            "efficiency metrics": "ask_portal_kpi",
+            "load factor kpi": "ask_portal_kpi",
+            "peak demand ratio": "ask_portal_kpi",
+            "cost efficiency": "ask_portal_kpi",
+            "sec kpi": "ask_portal_kpi",
+            "specific energy consumption": "ask_portal_kpi",
+            "improve kpis": "ask_portal_kpi",
+            "kpis": "ask_portal_kpi",
+            "track kpi": "ask_portal_kpi",
+            
+            # PORTAL FORECAST topics (Phase 2)
+            "forecast page": "ask_portal_forecast",
+            "energy forecasting": "ask_portal_forecast",
+            "arima model": "ask_portal_forecast",
+            "prophet model": "ask_portal_forecast",
+            "arima vs prophet": "ask_portal_forecast",
+            "difference between arima and prophet": "ask_portal_forecast",
+            "arima and prophet": "ask_portal_forecast",
+            "compare arima prophet": "ask_portal_forecast",
+            "train forecast": "ask_portal_forecast",
+            "forecast horizon": "ask_portal_forecast",
+            "optimal load scheduling": "ask_portal_forecast",
+            "load scheduling": "ask_portal_forecast",
+            "best time to run": "ask_portal_forecast",
+            "trained model status": "ask_portal_forecast",
+            "retrain forecast": "ask_portal_forecast",
+            
+            # PORTAL REPORTS topics (Phase 2)
+            "report page": "ask_portal_reports",
+            "generate report": "ask_portal_reports",
+            "pdf report": "ask_portal_reports",
+            "energy report": "ask_portal_reports",
+            "download report": "ask_portal_reports",
+            "report types": "ask_portal_reports",
+            
+            # VISUALIZATION - SANKEY topics (Phase 2)
+            "sankey diagram": "ask_viz_sankey",
+            "sankey": "ask_viz_sankey",
+            "energy flow": "ask_viz_sankey",
+            "flow diagram": "ask_viz_sankey",
+            "sankey nodes": "ask_viz_sankey",
+            
+            # VISUALIZATION - HEATMAP topics (Phase 2)
+            "heatmap": "ask_viz_heatmap",
+            "heat map": "ask_viz_heatmap",
+            "anomaly heatmap": "ask_viz_heatmap",
+            "consumption heatmap": "ask_viz_heatmap",
+            
+            # VISUALIZATION - COMPARISON topics (Phase 2)
+            "comparison page": "ask_viz_comparison",
+            "compare machines": "ask_viz_comparison",
+            "machine comparison": "ask_viz_comparison",
+            "compare energy": "ask_viz_comparison",
+            
+            # GRAFANA DASHBOARDS - General (Phase 3)
+            "grafana": "ask_grafana_general",
+            "grafana dashboards": "ask_grafana_general",
+            "sota dashboards": "ask_grafana_general",
+            "what is sota": "ask_grafana_general",
+            "how many dashboards": "ask_grafana_general",
+            "access grafana": "ask_grafana_general",
+            "dashboard refresh": "ask_grafana_general",
+            
+            # SCHEDULER JOBS - Automated Tasks
+            "scheduler": "ask_scheduler",
+            "scheduled jobs": "ask_scheduler",
+            "automated jobs": "ask_scheduler",
+            "background jobs": "ask_scheduler",
+            "cron jobs": "ask_scheduler",
+            "apscheduler": "ask_scheduler",
+            "baseline retrain": "ask_scheduler",
+            "anomaly detection job": "ask_scheduler",
+            "kpi calculation": "ask_scheduler",
+            "training cleanup": "ask_scheduler",
+            "job status": "ask_scheduler",
+            "trigger job": "ask_scheduler",
+            
+            # GRAFANA - Factory Overview (Phase 3)
+            "factory overview": "ask_grafana_factory",
+            "factory dashboard": "ask_grafana_factory",
+            "command center": "ask_grafana_factory",
+            "factory status": "ask_grafana_factory",
+            "all machines dashboard": "ask_grafana_factory",
+            "live power consumption": "ask_grafana_factory",
+            
+            # GRAFANA - ISO 50001 EnPI (Phase 3)
+            "sota iso 50001": "ask_grafana_iso50001",
+            "iso 50001 dashboard": "ask_grafana_iso50001",
+            "enpi dashboard": "ask_grafana_iso50001",
+            "cusum control": "ask_grafana_iso50001",
+            "weather normalization": "ask_grafana_iso50001",
+            "seu performance": "ask_grafana_iso50001",
+            "baseline vs actual": "ask_grafana_iso50001",
+            
+            # GRAFANA - Anomaly Detection (Phase 3)
+            "grafana anomaly": "ask_grafana_anomaly",
+            "anomaly dashboard": "ask_grafana_anomaly",
+            "anomaly heatmap grafana": "ask_grafana_anomaly",
+            "mean time to resolution": "ask_grafana_anomaly",
+            "mttr anomaly": "ask_grafana_anomaly",
+            "unresolved anomalies": "ask_grafana_anomaly",
+            "anomaly timeline": "ask_grafana_anomaly",
+            
+            # GRAFANA - Cost Analytics (Phase 3)
+            "cost analytics": "ask_grafana_cost",
+            "cost dashboard": "ask_grafana_cost",
+            "energy costs grafana": "ask_grafana_cost",
+            "time of use cost": "ask_grafana_cost",
+            "cost savings opportunities": "ask_grafana_cost",
+            "monthly cost trend": "ask_grafana_cost",
+            "top cost contributors": "ask_grafana_cost",
+            
+            # GRAFANA - Executive Summary (Phase 3)
+            "executive summary": "ask_grafana_executive",
+            "executive dashboard": "ask_grafana_executive",
+            "management dashboard": "ask_grafana_executive",
+            "energy intensity trend": "ask_grafana_executive",
+            "operational concerns": "ask_grafana_executive",
+            
+            # GRAFANA - Machine Health (Phase 3)
+            "machine health dashboard": "ask_grafana_machine_health",
+            "machine health grafana": "ask_grafana_machine_health",
+            "health score": "ask_grafana_machine_health",
+            "baseline variance": "ask_grafana_machine_health",
+            "machine deep dive": "ask_grafana_machine_health",
+            
+            # GRAFANA - ML Performance (Phase 3)
+            "ml performance dashboard": "ask_grafana_ml",
+            "model performance grafana": "ask_grafana_ml",
+            "ml metrics dashboard": "ask_grafana_ml",
+            "r² score trend": "ask_grafana_ml",
+            "rmse trend": "ask_grafana_ml",
+            "training history": "ask_grafana_ml",
+            "active models": "ask_grafana_ml",
+            
+            # GRAFANA - Operational Efficiency (Phase 3)
+            "operational efficiency dashboard": "ask_grafana_operational",
+            "oee dashboard": "ask_grafana_operational",
+            "availability rate": "ask_grafana_operational",
+            "performance rate": "ask_grafana_operational",
+            "production efficiency": "ask_grafana_operational",
+            
+            # GRAFANA - Predictive Analytics (Phase 3)
+            "predictive analytics dashboard": "ask_grafana_predictive",
+            "forecast dashboard": "ask_grafana_predictive",
+            "mape forecast": "ask_grafana_predictive",
+            "forecast vs actual": "ask_grafana_predictive",
+            "forecast accuracy": "ask_grafana_predictive",
+            
+            # GRAFANA - Real-Time Production (Phase 3)
+            "realtime production": "ask_grafana_realtime",
+            "real-time dashboard": "ask_grafana_realtime",
+            "live power grafana": "ask_grafana_realtime",
+            "realtime monitoring": "ask_grafana_realtime",
+            
+            # GRAFANA - Environmental Impact (Phase 3)
+            "environmental impact": "ask_grafana_environmental",
+            "carbon footprint": "ask_grafana_environmental",
+            "co2 emissions": "ask_grafana_environmental",
+            "emission intensity": "ask_grafana_environmental",
+            "carbon dashboard": "ask_grafana_environmental",
+            "emission reduction": "ask_grafana_environmental",
+            
+            # OVOS Voice Assistant - Capabilities (Phase 4)
+            "ovos capabilities": "ask_ovos_capabilities",
+            "voice assistant": "ask_ovos_capabilities",
+            "what can ovos do": "ask_ovos_capabilities",
+            "what can i ask": "ask_ovos_capabilities",
+            "voice commands": "ask_ovos_capabilities",
+            "what is ovos": "ask_ovos_capabilities",
+            "ovos features": "ask_ovos_capabilities",
+            "available voice commands": "ask_ovos_capabilities",
+            
+            # OVOS Voice Assistant - Energy Queries (Phase 4)
+            "energy by voice": "ask_ovos_energy",
+            "ask about energy": "ask_ovos_energy",
+            "voice energy query": "ask_ovos_energy",
+            "energy consumption voice": "ask_ovos_energy",
+            "ask ovos energy": "ask_ovos_energy",
+            "how do i ask about energy": "ask_ovos_energy",
+            
+            # OVOS Voice Assistant - Status Queries (Phase 4)
+            "status by voice": "ask_ovos_status",
+            "machine status voice": "ask_ovos_status",
+            "check status voice": "ask_ovos_status",
+            "ask machine status": "ask_ovos_status",
+            "voice status check": "ask_ovos_status",
+            "system health voice": "ask_ovos_status",
+            
+            # OVOS Voice Assistant - KPI Queries (Phase 4)
+            "kpi by voice": "ask_ovos_kpi",
+            "ask kpis voice": "ask_ovos_kpi",
+            "performance voice": "ask_ovos_kpi",
+            "voice kpi query": "ask_ovos_kpi",
+            "load factor voice": "ask_ovos_kpi",
+            "sec voice": "ask_ovos_kpi",
+            
+            # OVOS Voice Assistant - Forecast Queries (Phase 4)
+            "forecast by voice": "ask_ovos_forecast",
+            "voice forecast": "ask_ovos_forecast",
+            "ask forecast voice": "ask_ovos_forecast",
+            "prediction voice": "ask_ovos_forecast",
+            "baseline voice": "ask_ovos_forecast",
+            
+            # OVOS Voice Assistant - Anomaly Queries (Phase 4)
+            "anomaly by voice": "ask_ovos_anomaly",
+            "voice anomaly": "ask_ovos_anomaly",
+            "ask about anomalies": "ask_ovos_anomaly",
+            "alerts voice": "ask_ovos_anomaly",
+            
+            # OVOS Voice Assistant - Cost Queries (Phase 4)
+            "cost by voice": "ask_ovos_cost",
+            "voice cost query": "ask_ovos_cost",
+            "ask about costs": "ask_ovos_cost",
+            "energy cost voice": "ask_ovos_cost",
+            
+            # OVOS Voice Assistant - Reports (Phase 4)
+            "report by voice": "ask_ovos_reports",
+            "generate report voice": "ask_ovos_reports",
+            "generate reports by voice": "ask_ovos_reports",
+            "pdf voice": "ask_ovos_reports",
+            "voice report": "ask_ovos_reports",
+            "voice reports": "ask_ovos_reports",
+            
+            # TECHNICAL CONCEPTS - Baseline (Phase 5)
+            "what is energy baseline": "ask_concept_baseline",
+            "what is baseline": "ask_concept_baseline",
+            "baseline concept": "ask_concept_baseline",
+            "how is baseline calculated": "ask_concept_baseline",
+            "baseline vs forecast": "ask_concept_baseline",
+            "baseline drivers": "ask_concept_baseline",
+            "baseline deviation": "ask_concept_baseline",
+            "baseline accuracy": "ask_concept_baseline",
+            "retrain baseline": "ask_concept_baseline",
+            "normalized baseline": "ask_concept_baseline",
+            
+            # TECHNICAL CONCEPTS - EnPI (Phase 5)
+            "what is enpi": "ask_concept_enpi",
+            "enpi concept": "ask_concept_enpi",
+            "how is enpi calculated": "ask_concept_enpi",
+            "enpi vs kpi": "ask_concept_enpi",
+            "good enpi value": "ask_concept_enpi",
+            "enpi trend": "ask_concept_enpi",
+            "enpi iso 50001": "ask_concept_enpi",
+            "cusum enpi": "ask_concept_enpi",
+            
+            # TECHNICAL CONCEPTS - SEC (Phase 5)
+            "what is sec": "ask_concept_sec",
+            "sec concept": "ask_concept_sec",
+            "specific energy consumption": "ask_concept_sec",
+            "how is sec calculated": "ask_concept_sec",
+            "good sec value": "ask_concept_sec",
+            "reduce sec": "ask_concept_sec",
+            "kwh per unit": "ask_concept_sec",
+            
+            # TECHNICAL CONCEPTS - Load Factor (Phase 5)
+            "what is load factor": "ask_concept_loadfactor",
+            "load factor concept": "ask_concept_loadfactor",
+            "how is load factor calculated": "ask_concept_loadfactor",
+            "good load factor": "ask_concept_loadfactor",
+            "improve load factor": "ask_concept_loadfactor",
+            
+            # TECHNICAL CONCEPTS - Peak Demand (Phase 5)
+            "what is peak demand": "ask_concept_peakdemand",
+            "peak demand concept": "ask_concept_peakdemand",
+            "reduce peak demand": "ask_concept_peakdemand",
+            "demand response": "ask_concept_peakdemand",
+            "peak shaving": "ask_concept_peakdemand",
+            
+            # TECHNICAL CONCEPTS - SEU (Phase 5)
+            "what is seu": "ask_concept_seu",
+            "seu concept": "ask_concept_seu",
+            "significant energy uses": "ask_concept_seu",
+            "how are seus identified": "ask_concept_seu",
+            "manage seus": "ask_concept_seu",
+            
+            # TECHNICAL CONCEPTS - ARIMA (Phase 5)
+            "what is arima": "ask_concept_arima",
+            "arima concept": "ask_concept_arima",
+            "how does arima work": "ask_concept_arima",
+            "arima forecast": "ask_concept_arima",
+            "arima accuracy": "ask_concept_arima",
+            "arima limitations": "ask_concept_arima",
+            
+            # TECHNICAL CONCEPTS - Prophet (Phase 5)
+            "what is prophet": "ask_concept_prophet",
+            "prophet concept": "ask_concept_prophet",
+            "how does prophet work": "ask_concept_prophet",
+            "prophet forecast": "ask_concept_prophet",
+            "prophet vs arima": "ask_concept_prophet",
+            
+            # TECHNICAL CONCEPTS - Anomaly Detection (Phase 5)
+            "how does anomaly detection work": "ask_concept_anomaly_ml",
+            "anomaly detection algorithm": "ask_concept_anomaly_ml",
+            "z-score anomaly": "ask_concept_anomaly_ml",
+            "isolation forest": "ask_concept_anomaly_ml",
+            "anomaly severity": "ask_concept_anomaly_ml",
+            "what causes anomalies": "ask_concept_anomaly_ml",
+            
+            # TECHNICAL CONCEPTS - OEE (Phase 5)
+            "what is oee": "ask_concept_oee",
+            "oee concept": "ask_concept_oee",
+            "overall equipment effectiveness": "ask_concept_oee",
+            "how is oee calculated": "ask_concept_oee",
+            "good oee": "ask_concept_oee",
+            
+            # TECHNICAL CONCEPTS - CUSUM (Phase 5)
+            "what is cusum": "ask_concept_cusum",
+            "cusum chart": "ask_concept_cusum",
+            "cusum concept": "ask_concept_cusum",
+            "how does cusum work": "ask_concept_cusum",
+            "read cusum chart": "ask_concept_cusum",
+            
+            # SYSTEM COMPONENTS - Node-RED (Phase 6)
+            "what is node-red": "ask_nodered",
+            "node-red": "ask_nodered",
+            "nodered": "ask_nodered",
+            "node red": "ask_nodered",
+            "etl pipeline": "ask_nodered",
+            "data pipeline": "ask_nodered",
+            "node-red flows": "ask_nodered",
+            "access node-red": "ask_nodered",
+            
+            # SYSTEM COMPONENTS - MQTT (Phase 6)
+            "what is mqtt": "ask_mqtt",
+            "mqtt broker": "ask_mqtt",
+            "mqtt topics": "ask_mqtt",
+            "publish subscribe": "ask_mqtt",
+            "mqtt messages": "ask_mqtt",
+            "monitor mqtt": "ask_mqtt",
+            
+            # SYSTEM COMPONENTS - TimescaleDB (Phase 6)
+            "what is timescaledb": "ask_timescaledb",
+            "timescaledb": "ask_timescaledb",
+            "hypertables": "ask_timescaledb",
+            "continuous aggregates": "ask_timescaledb",
+            "time-series database": "ask_timescaledb",
+            "query timescaledb": "ask_timescaledb",
+            "access database": "ask_timescaledb",
+            
+            # SYSTEM COMPONENTS - Analytics API (Phase 6)
+            "what is analytics api": "ask_analytics_api",
+            "analytics api": "ask_analytics_api",
+            "analytics service": "ask_analytics_api",
+            "fastapi backend": "ask_analytics_api",
+            "api endpoints": "ask_analytics_api",
+            "swagger docs": "ask_analytics_api",
+            "analytics architecture": "ask_analytics_api",
+            
+            # SYSTEM COMPONENTS - Simulator (Phase 6)
+            "what is simulator": "ask_simulator",
+            "simulator": "ask_simulator",
+            "simulated data": "ask_simulator",
+            "factory simulator": "ask_simulator",
+            "simulator status": "ask_simulator",
+            "machine simulation": "ask_simulator",
+            "test data generator": "ask_simulator",
+            
+            # SYSTEM COMPONENTS - Docker (Phase 6)
+            "docker": "ask_docker",
+            "docker services": "ask_docker",
+            "docker-compose": "ask_docker",
+            "start services": "ask_docker",
+            "restart service": "ask_docker",
+            "check service health": "ask_docker",
+            "what ports": "ask_docker",
+            "nginx routing": "ask_docker",
+            
+            # SYSTEM COMPONENTS - Redis (Phase 6)
+            "what is redis": "ask_redis",
+            "redis caching": "ask_redis",
+            "redis pub/sub": "ask_redis",
+            "websocket events": "ask_redis",
+            "real-time events": "ask_redis",
+            
+            # DEFINITION topics (expanded Phase 8)
             "baseline": "ask_energy_baseline",
             "energy baseline": "ask_energy_baseline",
+            "baseline reference": "ask_energy_baseline",
+            "baseline period": "ask_energy_baseline",
+            "baseline adjustment": "ask_energy_baseline",
             "enpi": "ask_enpi",
             "enpis": "ask_enpi",
             "energy performance indicator": "ask_enpi",
@@ -55,6 +544,9 @@ class ActionRetrieveAnswer(Action):
             "energy review": "ask_energy_review",
             "scope": "ask_scope",
             "boundary": "ask_scope",
+            "scope definition": "ask_scope",
+            "scope exclusions": "ask_scope",
+            "system boundary": "ask_scope",
             "terms": "ask_terms_definitions",
             "definitions": "ask_definitions",
             "define": "ask_definitions",
@@ -62,10 +554,15 @@ class ActionRetrieveAnswer(Action):
             "exactly is meant by": "ask_terms_definitions",
             "what exactly is meant": "ask_terms_definitions",
             
-            # PURPOSE topics
+            # PURPOSE topics (expanded Phase 8.6)
             "pdca": "ask_pdca",
             "plan do check act": "ask_pdca",
+            "pdca cycle": "ask_pdca",
+            "continuous improvement": "ask_pdca",
             "benchmarking": "ask_benchmarking",
+            "benchmark": "ask_benchmarking",
+            "compare performance": "ask_benchmarking",
+            "industry standards": "ask_benchmarking",
             "iso": "ask_iso_standards",
             "iso 50001": "ask_iso_standards",
             "international standard": "ask_iso_standards",
@@ -74,21 +571,43 @@ class ActionRetrieveAnswer(Action):
             "for what purposes": "ask_iso_standards",
             "standard": "ask_iso_standards",
             "general": "ask_general_info",
+            "general information": "ask_general_info",
+            "overview": "ask_general_info",
+            "about humanergy": "ask_general_info",
             
-            # PROCESS topics
+            # PROCESS topics (expanded coverage for Phase 8)
             "planning": "ask_energy_planning",
             "energy planning": "ask_energy_planning",
+            "planning process": "ask_energy_planning",
+            "energy review": "ask_energy_planning",
+            "energy objectives": "ask_energy_planning",
             "implementation": "ask_implementation",
+            "implement": "ask_implementation",
+            "implementation plan": "ask_implementation",
+            "deployment": "ask_implementation",
             "checking": "ask_checking",
+            "check": "ask_checking",
+            "checking process": "ask_checking",
+            "verification": "ask_checking",
             "monitoring": "ask_monitoring_measurement",
             "measurement": "ask_monitoring_measurement",
             "audit": "ask_internal_audit",
             "internal audit": "ask_internal_audit",
+            "audit program": "ask_internal_audit",
+            "audit criteria": "ask_internal_audit",
+            "audit findings": "ask_internal_audit",
             "management review": "ask_management_review",
+            "review meeting": "ask_management_review",
+            "review process": "ask_management_review",
+            "review inputs": "ask_management_review",
+            "review outputs": "ask_management_review",
             "corrective": "ask_corrective_preventive_action",
             "preventive": "ask_corrective_preventive_action",
             "action plan": "ask_action_plans",
             "action plans": "ask_action_plans",
+            "action plan development": "ask_action_plans",
+            "plan execution": "ask_action_plans",
+            "plan monitoring": "ask_action_plans",
             "objectives": "ask_objectives_targets",
             "targets": "ask_objectives_targets",
             "operational control": "ask_operational_control",
@@ -99,15 +618,32 @@ class ActionRetrieveAnswer(Action):
             "training": "ask_competence_training",
             "documentation": "ask_documentation",
             "records": "ask_records",
+            "process": "process",
+            "procedure": "process",
+            "how to": "process",
+            "steps": "process",
+            "establish process": "process",
+            "implement process": "process",
             
-            # REQUIREMENT topics
+            # REQUIREMENT topics (expanded coverage for Phase 8)
             "policy": "ask_energy_policy",
             "energy policy": "ask_energy_policy",
+            "policy statement": "ask_energy_policy",
+            "policy commitments": "ask_energy_policy",
+            "policy framework": "ask_energy_policy",
             "legal": "ask_legal_requirements",
             "legal requirements": "ask_legal_requirements",
             "compliance": "ask_compliance",
             "management responsibility": "ask_management_responsibility",
             "top management": "ask_management_responsibility",
+            "management commitment": "ask_management_responsibility",
+            "leadership": "ask_management_responsibility",
+            "requirement": "requirement",
+            "must": "requirement",
+            "shall": "requirement",
+            "mandatory": "requirement",
+            "required": "requirement",
+            "obligated": "requirement",
         }
         
         # If intent is not in new structure, use default utter action
@@ -187,10 +723,30 @@ class ActionRetrieveAnswer(Action):
         scope_keywords = ['scope', 'boundary', 'boundaries']
         user_has_scope = any(keyword in user_message_lower for keyword in scope_keywords)
         
-        # Process intent için önce QA_DATA["process"]'e bak
+        # PRIORITY 1: Topic-specific categories (e.g., ask_humanergy_platform) take precedence
+        # This ensures keyword-matched topics are checked BEFORE generic process/definition lookups
+        if topic and topic not in ["ask_scope"] and topic in QA_DATA and QA_DATA[topic]:
+            best_answer = self._find_best_answer(user_message_lower, QA_DATA[topic])
+            if best_answer:
+                # Log successful match
+                query_log["matched_category"] = topic
+                query_log["answer_preview"] = best_answer[:100]
+                query_log["status"] = "success"
+                logger.info(json.dumps(query_log))
+                
+                dispatcher.utter_message(text=best_answer)
+                return []
+        
+        # PRIORITY 2: Process intent için QA_DATA["process"]'e bak
         if intent == "process" and "process" in QA_DATA and QA_DATA["process"]:
             best_answer = self._find_best_answer(user_message_lower, QA_DATA["process"])
             if best_answer:
+                # Log successful match
+                query_log["matched_category"] = "process"
+                query_log["answer_preview"] = best_answer[:100]
+                query_log["status"] = "success"
+                logger.info(json.dumps(query_log))
+                
                 dispatcher.utter_message(text=best_answer)
                 return []
         
@@ -198,25 +754,93 @@ class ActionRetrieveAnswer(Action):
         if user_has_scope and "process" in QA_DATA and QA_DATA["process"]:
             best_answer = self._find_best_answer(user_message_lower, QA_DATA["process"])
             if best_answer:
+                # Log successful match
+                query_log["matched_category"] = "process (scope)"
+                query_log["answer_preview"] = best_answer[:100]
+                query_log["status"] = "success"
+                logger.info(json.dumps(query_log))
+                
                 dispatcher.utter_message(text=best_answer)
                 return []
         
-        # Topic'e göre Q&A verisinde ara (process intent değilse veya process'te bulunamadıysa)
-        # ÖNEMLİ: Scope soruları process intent'inde olduğu için, ask_scope topic'ine bakma
-        # sadece process intent'i değilse ve scope keyword'ü yoksa bak
-        if topic and topic in QA_DATA and QA_DATA[topic]:
-            # Scope soruları process intent'inde, o yüzden ask_scope topic'ine bakma
-            if topic == "ask_scope" and (intent == "process" or user_has_scope):
-                # Zaten process intent'inde aradık, bulamadık, o yüzden domain response'a geç
-                pass
-            else:
-                best_answer = self._find_best_answer(user_message_lower, QA_DATA[topic])
-                if best_answer:
-                    dispatcher.utter_message(text=best_answer)
-                    return []
+        # PRIORITY 3: Scope topic'ine bak (process intent'inden sonra)
+        if topic == "ask_scope" and topic in QA_DATA and QA_DATA[topic]:
+            best_answer = self._find_best_answer(user_message_lower, QA_DATA[topic])
+            if best_answer:
+                # Log successful match
+                query_log["matched_category"] = topic
+                query_log["answer_preview"] = best_answer[:100]
+                query_log["status"] = "success"
+                logger.info(json.dumps(query_log))
+                
+                dispatcher.utter_message(text=best_answer)
+                return []
         
         # Q&A verisinde bulunamazsa, domain'deki response'ları kullan
         topic_to_response = {
+            # HUMANERGY PLATFORM (NEW)
+            "ask_humanergy_platform": "utter_ask_humanergy_platform",
+            
+            # PORTAL PAGES (Phase 2)
+            "ask_portal_dashboard": "utter_ask_portal_dashboard",
+            "ask_portal_baseline": "utter_ask_portal_baseline",
+            "ask_portal_anomaly": "utter_ask_portal_anomaly",
+            "ask_portal_kpi": "utter_ask_portal_kpi",
+            "ask_portal_forecast": "utter_ask_portal_forecast",
+            "ask_portal_reports": "utter_ask_portal_reports",
+            
+            # VISUALIZATIONS (Phase 2)
+            "ask_viz_sankey": "utter_ask_viz_sankey",
+            "ask_viz_heatmap": "utter_ask_viz_heatmap",
+            "ask_viz_comparison": "utter_ask_viz_comparison",
+            
+            # GRAFANA DASHBOARDS (Phase 3)
+            "ask_grafana_general": "utter_ask_grafana_general",
+            "ask_grafana_factory": "utter_ask_grafana_factory",
+            "ask_grafana_iso50001": "utter_ask_grafana_iso50001",
+            "ask_grafana_anomaly": "utter_ask_grafana_anomaly",
+            "ask_grafana_cost": "utter_ask_grafana_cost",
+            "ask_grafana_executive": "utter_ask_grafana_executive",
+            "ask_grafana_machine_health": "utter_ask_grafana_machine_health",
+            "ask_grafana_ml": "utter_ask_grafana_ml",
+            "ask_grafana_operational": "utter_ask_grafana_operational",
+            "ask_grafana_predictive": "utter_ask_grafana_predictive",
+            "ask_grafana_realtime": "utter_ask_grafana_realtime",
+            "ask_grafana_environmental": "utter_ask_grafana_environmental",
+            
+            # OVOS VOICE ASSISTANT (Phase 4)
+            "ask_ovos_capabilities": "utter_ask_ovos_capabilities",
+            "ask_ovos_energy": "utter_ask_ovos_energy",
+            "ask_ovos_status": "utter_ask_ovos_status",
+            "ask_ovos_kpi": "utter_ask_ovos_kpi",
+            "ask_ovos_forecast": "utter_ask_ovos_forecast",
+            "ask_ovos_anomaly": "utter_ask_ovos_anomaly",
+            "ask_ovos_cost": "utter_ask_ovos_cost",
+            "ask_ovos_reports": "utter_ask_ovos_reports",
+            
+            # TECHNICAL CONCEPTS (Phase 5)
+            "ask_concept_baseline": "utter_ask_concept_baseline",
+            "ask_concept_enpi": "utter_ask_concept_enpi",
+            "ask_concept_sec": "utter_ask_concept_sec",
+            "ask_concept_loadfactor": "utter_ask_concept_loadfactor",
+            "ask_concept_peakdemand": "utter_ask_concept_peakdemand",
+            "ask_concept_seu": "utter_ask_concept_seu",
+            "ask_concept_arima": "utter_ask_concept_arima",
+            "ask_concept_prophet": "utter_ask_concept_prophet",
+            "ask_concept_anomaly_ml": "utter_ask_concept_anomaly_ml",
+            "ask_concept_oee": "utter_ask_concept_oee",
+            "ask_concept_cusum": "utter_ask_concept_cusum",
+            
+            # SYSTEM COMPONENTS (Phase 6)
+            "ask_nodered": "utter_ask_nodered",
+            "ask_mqtt": "utter_ask_mqtt",
+            "ask_timescaledb": "utter_ask_timescaledb",
+            "ask_analytics_api": "utter_ask_analytics_api",
+            "ask_simulator": "utter_ask_simulator",
+            "ask_docker": "utter_ask_docker",
+            "ask_redis": "utter_ask_redis",
+            
+            # Existing ISO 50001 topics
             "ask_energy_baseline": "utter_ask_energy_baseline",
             "ask_enpi": "utter_ask_enpi",
             "ask_significant_energy_use": "utter_ask_significant_energy_use",
@@ -255,11 +879,24 @@ class ActionRetrieveAnswer(Action):
         
         if not responses:
             # Fallback: use the standard utter action
+            # Log fallback
+            query_log["matched_category"] = "fallback"
+            query_log["response_key"] = response_key
+            query_log["status"] = "fallback"
+            logger.info(json.dumps(query_log))
+            
             dispatcher.utter_message(response=response_key)
             return []
         
         # Select the most appropriate response based on keywords in user message
         selected_response = self._select_best_response(user_message_lower, responses, topic or intent)
+        
+        # Log domain response
+        query_log["matched_category"] = topic or intent
+        query_log["response_key"] = response_key
+        query_log["answer_preview"] = selected_response[:100]
+        query_log["status"] = "domain_response"
+        logger.info(json.dumps(query_log))
         
         # Send the selected response
         dispatcher.utter_message(text=selected_response)
