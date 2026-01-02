@@ -1,0 +1,59 @@
+========================================
+APPLICATION RECEIVED
+HumanEnerDIA WASABI Project
+========================================
+
+Dear {{contact_name}},
+
+Thank you for your interest in participating as a pilot factory in the HumanEnerDIA project. We are pleased to confirm that your application has been successfully received.
+
+========================================
+YOUR APPLICATION REFERENCE NUMBER
+{{application_ref}}
+========================================
+Please save this reference number for your records.
+
+----------------------------------------
+APPLICATION SUMMARY
+----------------------------------------
+Company Name:     {{company_name}}
+Contact Person:   {{contact_name}}
+Email:            {{contact_email}}
+Submitted:        {{submission_date}}
+
+========================================
+WHAT HAPPENS NEXT?
+========================================
+
+* Our team will review your application within 5-7 business days
+* We will evaluate your factory's suitability for the HumanEnerDIA project
+* Shortlisted candidates will be contacted via email for the next steps
+* Selected pilot factories will be invited for an initial assessment meeting
+* Final selection will be announced by early February 2026
+
+========================================
+QUESTIONS OR NEED ASSISTANCE?
+========================================
+
+If you have any questions about your application or the HumanEnerDIA project, please contact us:
+
+Email: bilgi@aartimuhendislik.com
+Subject: Pilot Factory Application - {{application_ref}}
+
+Please include your reference number in the subject line for faster response.
+
+========================================
+
+We appreciate your interest in joining the HumanEnerDIA initiative. Your commitment to advancing energy management in manufacturing is commendable.
+
+Best regards,
+HumanEnerDIA Project Team
+WASABI - AI-Powered Energy Management
+
+========================================
+
+This is an automated confirmation email.
+For inquiries, contact: bilgi@aartimuhendislik.com
+
+HumanEnerDIA WASABI Project
+Advancing Energy Management in European Manufacturing

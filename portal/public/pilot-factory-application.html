@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Pilot Factory Application - HumanEnerDIA WASABI Project</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    
+    <!-- Google Fonts - Inter (Professional) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Sidebar CSS -->
+    <link rel="stylesheet" href="/css/sidebar.css?v=1765871462">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Navigation */
+        header {
+            background: rgba(10, 36, 99, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem 1rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-bottom: 2px solid rgba(0, 168, 232, 0.3);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin: 0;
+            margin-right: 0.5rem;
+        }
+
+        .hamburger-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        .hamburger-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Main Container */
+        .main-wrapper {
+            flex: 1;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0A2463 0%, #00A8E8 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .deadline-notice {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .deadline-notice svg {
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .intro-text {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #555;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .required-notice {
+            background: #E3F2FD;
+            border-left: 4px solid #00A8E8;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: #0A2463;
+            font-weight: 500;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 22px;
+            color: #0A2463;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        .section-number {
+            background: linear-gradient(135deg, #00A8E8 0%, #0A2463 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0, 168, 232, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .required {
+            color: #e74c3c;
+            margin-left: 3px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="url"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .radio-option:hover,
+        .checkbox-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .radio-option input[type="radio"],
+        .checkbox-option input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .radio-option label,
+        .checkbox-option label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 400;
+            flex: 1;
+        }
+
+        .conditional-field {
+            display: none;
+            margin-top: 15px;
+            padding-left: 20px;
+            border-left: 3px solid #667eea;
+        }
+
+        .conditional-field.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .field-valid {
+            border-color: #4caf50 !important;
+        }
+
+        .field-invalid {
+            border-color: #e74c3c !important;
+            background: #fff3f3 !important;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            background: #fff3f3;
+            border-radius: 6px;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section.has-errors {
+            border-left: 4px solid #e74c3c;
+            background: #fffbfb;
+            padding-left: 36px;
+            position: relative;
+        }
+
+        .section-error-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .error-summary {
+            position: sticky;
+            top: 80px;
+            background: #fff3f3;
+            border: 2px solid #e74c3c;
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            z-index: 100;
+            box-shadow: 0 4px 16px rgba(231, 76, 60, 0.2);
+        }
+
+        .error-summary h3 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-summary ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+        }
+
+        .error-summary li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ffd4d4;
+        }
+
+        .error-summary li:last-child {
+            border-bottom: none;
+        }
+
+        .error-summary a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-summary a:hover {
+            text-decoration: underline;
+        }
+
+        .error-summary button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .error-summary button:hover {
+            background: #c0392b;
+        }
+
+        .honeypot {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .submit-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #00A8E8 0%, #0A2463 100%);
+            color: white;
+            border: none;
+            padding: 16px 60px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(0, 168, 232, 0.4);
+        }
+
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 168, 232, 0.5);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message-box {
+            display: none;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+
+        .message-box.show {
+            display: block;
+        }
+
+        .message-box.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .message-box.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(10, 36, 99, 0.95);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        footer p {
+            color: white;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper {
+                padding: 0 1rem;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .section-title {
+                font-size: 18px;
+            }
+
+            .submit-button {
+                padding: 14px 40px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-wrapper {
+                padding: 0 0.5rem;
+            }
+
+            .form-container {
+                padding: 15px;
+            }
+
+            .radio-group,
+            .checkbox-group {
+                gap: 8px;
+            }
+
+            .radio-option,
+            .checkbox-option {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo-section">
+                <button onclick="toggleSidebar()" class="hamburger-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="/" class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    HUMANERGY
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Submitting your application...</p>
+        </div>
+    </div>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+    <div class="container">
+        <div class="header">
+            <h1>🏭 Pilot Factory Application</h1>
+            <p>HumanEnerDIA WASABI Project - Factory Energy Management System</p>
+        </div>
+
+        <div class="deadline-notice">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+            </svg>
+            Application Deadline: January 23, 2026
+        </div>
+
+        <div class="form-container">
+            <div class="intro-text">
+                <p>Thank you for your interest in participating as a pilot factory in the HumanEnerDIA project. Please complete all sections of this application form. Our team will review your submission and contact you within 5-7 business days.</p>
+            </div>
+
+            <div class="required-notice">
+                <strong>📌 Note:</strong> All fields marked with <span class="required">*</span> are required. Please ensure all information is accurate and complete.
+            </div>
+
+            <!-- Message Box -->
+            <div class="message-box" id="messageBox"></div>
+
+            <!-- Error Summary (Hidden by default, shown when validation fails) -->
+            <div id="error-summary-container"></div>
+
+            <!-- Accessibility: Screen reader announcements -->
+            <div id="error-announcement" role="alert" aria-live="assertive" style="position: absolute; left: -9999px;"></div>
+
+            <form id="pilot-factory-form" novalidate>
+                <!-- Honeypot Field (Anti-spam) -->
+                <input type="text" name="company_url_check" class="honeypot" tabindex="-1" autocomplete="new-password" aria-hidden="true">
+
+                <!-- Section 1: Company Information -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-number">1</span>
+                        Company Information
+                    </h2>
+
+                    <div class="form-group">
+                        <label for="company_name">Company Name <span class="required">*</span></label>
+                        <input type="text" id="company_name" name="company_name" required maxlength="255" 
+                               placeholder="Enter your company name">
+                        <div class="error-message" id="error_company_name">Please enter your company name</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city_address">City & Full Address <span class="required">*</span></label>
+                        <textarea id="city_address" name="city_address" required maxlength="500"
+                                  placeholder="Enter complete address including city, street, postal code"></textarea>
+                        <div class="error-message" id="error_city_address">Please enter your complete address</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact_name">Contact Person Name <span class="required">*</span></label>
+                        <input type="text" id="contact_name" name="contact_name" required maxlength="255"
+                               placeholder="Full name of primary contact">
+                        <div class="error-message" id="error_contact_name">Please enter contact person name</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact_position">Contact Person Position <span class="required">*</span></label>
+                        <input type="text" id="contact_position" name="contact_position" required maxlength="255"
+                               placeholder="e.g., Factory Manager, Energy Manager, CEO">
+                        <div class="error-message" id="error_contact_position">Please enter contact position</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact_email">Contact Email <span class="required">*</span></label>
+                        <input type="email" id="contact_email" name="contact_email" required maxlength="255"
+                               placeholder="email@company.com">
+                        <div class="error-message" id="error_contact_email">Please enter a valid email address</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact_phone">Contact Phone <span class="required">*</span></label>
+                        <input type="tel" id="contact_phone" name="contact_phone" required maxlength="50"
+                               placeholder="+90 XXX XXX XX XX">
+                        <div class="error-message" id="error_contact_phone">Please enter a valid phone number (min 7 characters)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company_website">Company Website</label>
+                        <input type="url" id="company_website" name="company_website" maxlength="255"
+                               placeholder="https://www.company.com (optional)">
+                        
+                    </div>
+                </div>
+
+                <!-- Section 2: Factory Profile -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-number">2</span>
+                        Factory Profile
+                    </h2>
+
+                    <div class="form-group">
+                        <label>Manufacturing Sector <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="sector_automotive" name="manufacturing_sector" value="Automotive" required>
+                                <label for="sector_automotive">Automotive</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="sector_electronics" name="manufacturing_sector" value="Electronics" required>
+                                <label for="sector_electronics">Electronics</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="sector_textile" name="manufacturing_sector" value="Textile" required>
+                                <label for="sector_textile">Textile</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="sector_food" name="manufacturing_sector" value="Food & Beverage" required>
+                                <label for="sector_food">Food & Beverage</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="sector_chemicals" name="manufacturing_sector" value="Chemicals" required>
+                                <label for="sector_chemicals">Chemicals</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="sector_metal" name="manufacturing_sector" value="Metal Processing" required>
+                                <label for="sector_metal">Metal Processing</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="sector_other" name="manufacturing_sector" value="Other" required>
+                                <label for="sector_other">Other (please specify)</label>
+                            </div>
+                        </div>
+                        <div class="conditional-field" id="sector_other_field">
+                            <input type="text" id="manufacturing_sector_other" name="manufacturing_sector_other" maxlength="255"
+                                   placeholder="Please specify your sector">
+                        </div>
+                        <div class="error-message" id="error_manufacturing_sector">Please select a manufacturing sector</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Number of Employees <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="emp_50" name="num_employees" value="Less than 50" required>
+                                <label for="emp_50">Less than 50</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="emp_250" name="num_employees" value="50-250" required>
+                                <label for="emp_250">50-250</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="emp_1000" name="num_employees" value="250-1000" required>
+                                <label for="emp_1000">250-1000</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="emp_more" name="num_employees" value="More than 1000" required>
+                                <label for="emp_more">More than 1000</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="error_num_employees">Please select number of employees</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Facility Area <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="area_5000" name="facility_area" value="Less than 5,000 m²" required>
+                                <label for="area_5000">Less than 5,000 m²</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="area_20000" name="facility_area" value="5,000-20,000 m²" required>
+                                <label for="area_20000">5,000-20,000 m²</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="area_more" name="facility_area" value="More than 20,000 m²" required>
+                                <label for="area_more">More than 20,000 m²</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="error_facility_area">Please select facility area</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Annual Electricity Consumption <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="elec_500" name="annual_electricity" value="Less than 500 MWh" required>
+                                <label for="elec_500">Less than 500 MWh</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="elec_2000" name="annual_electricity" value="500-2,000 MWh" required>
+                                <label for="elec_2000">500-2,000 MWh</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="elec_more" name="annual_electricity" value="More than 2,000 MWh" required>
+                                <label for="elec_more">More than 2,000 MWh</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="error_annual_electricity">Please select annual electricity consumption</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Number of Production Operations/Processes <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="ops_5" name="num_production_operations" value="Less than 5" required>
+                                <label for="ops_5">Less than 5</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="ops_15" name="num_production_operations" value="5-15" required>
+                                <label for="ops_15">5-15</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="ops_more" name="num_production_operations" value="More than 15" required>
+                                <label for="ops_more">More than 15</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="error_num_production_operations">Please select number of production operations</div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Digital & Energy Readiness -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-number">3</span>
+                        Digital & Energy Readiness
+                    </h2>
+
+                    <div class="form-group">
+                        <label>Do you monitor any utility data digitally? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="monitoring_yes" name="digital_monitoring" value="yes" required>
+                                <label for="monitoring_yes">Yes</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="monitoring_no" name="digital_monitoring" value="no" required>
+                                <label for="monitoring_no">No</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="error_digital_monitoring">Please select an option</div>
+                    </div>
+
+                    <div class="conditional-field" id="monitoring_details">
+                        <div class="form-group">
+                            <label for="num_digital_meters">Number of digital meters installed <span class="required">*</span></label>
+                            <select id="num_digital_meters" name="num_digital_meters" data-conditional="true">
+                                <option value="">Select number</option>
+                                <option value="1-3">1-3</option>
+                                <option value="4-10">4-10</option>
+                                <option value="10-20">10-20</option>
+                                <option value=">20">&gt;20</option>
+                            </select>
+                            <div class="error-message" id="error_num_digital_meters">Please select number of meters</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Do you have SCADA, machine data, or digital dashboards? <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="scada_yes" name="has_scada" value="yes" data-conditional="true">
+                                    <label for="scada_yes">Yes</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="scada_no" name="has_scada" value="no" data-conditional="true">
+                                    <label for="scada_no">No</label>
+                                </div>
+                            </div>
+                            <div class="error-message" id="error_has_scada">Please select an option</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Do you have OR plan to have a responsible person for energy monitoring/maintenance/automation? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="energy_yes" name="has_energy_responsible" value="Yes, already have" required>
+                                <label for="energy_yes">Yes, already have</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="energy_part" name="has_energy_responsible" value="Planning to assign" required>
+                                <label for="energy_part">Planning to assign</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="energy_no" name="has_energy_responsible" value="No" required>
+                                <label for="energy_no">No</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="error_has_energy_responsible">Please select an option</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Digital maturity level: <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="maturity_low" name="digital_maturity" value="Low" required>
+                                <label for="maturity_low">Low</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="maturity_medium" name="digital_maturity" value="Medium" required>
+                                <label for="maturity_medium">Medium</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="maturity_high" name="digital_maturity" value="High" required>
+                                <label for="maturity_high">High</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="error_digital_maturity">Please select digital maturity level</div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Participation Commitment -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-number">4</span>
+                        Participation Commitment
+                    </h2>
+
+                    <div class="form-group">
+                        <label>Are you willing to participate in this project free of charge? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="participate_yes" name="willing_to_participate" value="yes" required>
+                                <label for="participate_yes">✅ Yes, we commit to participate</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="participate_no" name="willing_to_participate" value="no" required>
+                                <label for="participate_no">❌ No</label>
+                            </div>
+                        </div>
+                        <div class="help-text">Note: Free participation is a requirement for this pilot project</div>
+                        <div class="error-message" id="error_willing_to_participate">You must agree to participate free of charge</div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Availability -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-number">5</span>
+                        Availability & Scheduling
+                    </h2>
+
+                    <div class="form-group">
+                        <label>Preferred week for initial meeting/assessment (optional)</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="meeting_week1" name="preferred_meeting_week" value="Week of February 3-7, 2026">
+                                <label for="meeting_week1">Week of February 3-7, 2026</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="meeting_week2" name="preferred_meeting_week" value="Week of February 10-14, 2026">
+                                <label for="meeting_week2">Week of February 10-14, 2026</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="meeting_week3" name="preferred_meeting_week" value="Week of February 17-21, 2026">
+                                <label for="meeting_week3">Week of February 17-21, 2026</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="meeting_flexible" name="preferred_meeting_week" value="Flexible">
+                                <label for="meeting_flexible">Flexible - any week works</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preferred week for system installation (optional)</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="install_week1" name="preferred_installation_week" value="Week of March 3-7, 2026">
+                                <label for="install_week1">Week of March 3-7, 2026</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="install_week2" name="preferred_installation_week" value="Week of March 10-14, 2026">
+                                <label for="install_week2">Week of March 10-14, 2026</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="install_week3" name="preferred_installation_week" value="Week of March 17-21, 2026">
+                                <label for="install_week3">Week of March 17-21, 2026</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="install_flexible" name="preferred_installation_week" value="Flexible">
+                                <label for="install_flexible">Flexible - any week works</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 6: Final Confirmation -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-number">6</span>
+                        Final Confirmation
+                    </h2>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="confirms_collaboration" name="confirms_collaboration" required>
+                                <label for="confirms_collaboration">
+                                    <strong>I confirm</strong> that the information provided is accurate and that our company is committed to collaborating throughout the project duration, including data sharing, system installation, and participation in meetings. <span class="required">*</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="error_confirms_collaboration">You must confirm collaboration to submit</div>
+                    </div>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="submit-section">
+                    <button type="submit" class="submit-button" id="submitButton">
+                        Submit Application
+                    </button>
+                    <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                        By submitting, you agree to be contacted regarding your application
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; max-width: 900px; margin-left: auto; margin-right: auto;">
+            <div style="flex: 1; text-align: left;">
+                <img src="/images/aplus-logo.png" alt="APlus Engineering" style="height: 120px; width: auto; filter: brightness(0) invert(1); opacity: 0.9;">
+            </div>
+            <div style="flex: 1; text-align: right;">
+                <img src="/images/wasabi-logo.png" alt="WASABI Project" style="height: 50px; width: auto; filter: brightness(0) invert(1); opacity: 0.9;">
+            </div>
+        </div>
+        <p>&copy; 2025 HUMANERGY - Powered by APlus Engineering &bull; Funded by WASABI Project. All rights reserved.</p>
+    </footer>
+
+    <script src="/js/sidebar.js?v=20260102115822"></script>
+    <script src="/js/pilot-factory-form.js?v=20260102184500"></script>
+</body>
+</html>

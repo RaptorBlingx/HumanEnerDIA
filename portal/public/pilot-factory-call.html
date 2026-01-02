@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call for Pilot Factory - HumanEnerDIA WASABI Project</title>
+    
+    <!-- Google Fonts - Inter (Professional) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Sidebar CSS -->
+    <link rel="stylesheet" href="/css/sidebar.css?v=1765871462">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: rgba(10, 36, 99, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem 1rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-bottom: 2px solid rgba(0, 168, 232, 0.3);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin: 0;
+            margin-right: 0.5rem;
+        }
+
+        .hamburger-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        .hamburger-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .content-box {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: #0A2463;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .deadline-banner {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+        }
+
+        .deadline-banner svg {
+            flex-shrink: 0;
+        }
+
+        h2 {
+            color: #1E3A8A;
+            margin: 2rem 0 1rem 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: #0A2463;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        ul {
+            margin: 1rem 0 1rem 2rem;
+        }
+
+        li {
+            margin-bottom: 0.8rem;
+            line-height: 1.7;
+            color: #333;
+        }
+
+        .highlight-box {
+            background: #F0F7FF;
+            border-left: 4px solid #00A8E8;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .cta-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 168, 232, 0.2);
+            color: #0A2463;
+            padding: 3rem;
+            border-radius: 16px;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(0, 168, 232, 0.15);
+        }
+
+        .cta-section h2 {
+            color: #0A2463;
+            margin-top: 0;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: #1E3A8A;
+            opacity: 0.9;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .apply-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #00A8E8 0%, #0A2463 100%);
+            color: white;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            text-decoration: none;
+            margin-top: 1.5rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 168, 232, 0.4);
+            border: none;
+        }
+
+        .apply-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 168, 232, 0.6);
+            background: linear-gradient(135deg, #0A2463 0%, #00A8E8 100%);
+        }
+
+        .contact-info {
+            background: #F8F9FA;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .contact-info strong {
+            color: #0A2463;
+        }
+
+        .contact-info a {
+            color: #00A8E8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            background: rgba(10, 36, 99, 0.95);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        footer p {
+            color: white;
+            opacity: 0.9;
+        }
+
+        .footer-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-logos img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .content-box {
+                padding: 2rem 1.5rem;
+            }
+
+            .cta-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .footer-logos {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo-section">
+                <button onclick="toggleSidebar()" class="hamburger-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="/" class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    HUMANERGY
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="content-box">
+            <h1>🏭 Call for Applications – Become the Selected Pilot Factory for the HumanEnerDIA Field Trials</h1>
+            
+            <p class="subtitle">WASABI Project – European Programme for Digital Intelligent Assistance in Manufacturing</p>
+            
+            <div class="deadline-banner">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Deadline for Applications: 23 January 2026</span>
+            </div>
+
+            <p><strong>Dear Manufacturing Industry Leader,</strong></p>
+
+            <p>We are pleased to announce a unique opportunity for one forward-looking manufacturing facility in Romania to become the official pilot site of the <strong>HumanEnerDIA experiment</strong>, developed under the European WASABI programme.</p>
+
+            <p>This exclusive pilot will provide the selected facility with full, free-of-charge access to an AI-assisted, human-centric digital energy management system—a technological capability that is typically costly and available only to advanced industrial players.</p>
+
+            <h2>What is HumanEnerDIA?</h2>
+            
+            <p>HumanEnerDIA integrates our <strong>ISO50001-compliant Intel50001 Intelligent Energy Management System</strong> with WASABI's Digital Intelligent Assistant (DIA) to create an innovative, human-centric solution powered by AI, voice interaction, and real-time data analysis.</p>
+
+            <p>The system helps factory teams:</p>
+            <ul>
+                <li>Monitor and predict energy performance</li>
+                <li>Interact with energy data through voice and text</li>
+                <li>Receive intelligent advice and warnings</li>
+                <li>Improve resource efficiency and operational awareness</li>
+            </ul>
+
+            <div class="highlight-box">
+                <strong>Project Partners:</strong> This experiment is carried out by A Arti Mühendislik (A Plus Engineering, Turkey) together with Green eDIH (Romania).
+            </div>
+
+            <h2>Why Apply to Become the Pilot Host?</h2>
+            
+            <ul>
+                <li>✅ <strong>Full deployment</strong> of the AI-powered HumanEnerDIA system (free of charge)</li>
+                <li>✅ <strong>Onsite installation,</strong> configuration, and commissioning</li>
+                <li>✅ <strong>Technical visits</strong> by A Plus Engineering & Green eDIH</li>
+                <li>✅ <strong>Energy performance insights,</strong> AI-supported analysis, and KPI reporting</li>
+                <li>✅ <strong>Voice- and text-based</strong> digital assistant functionalities</li>
+                <li>✅ <strong>Visibility</strong> through project dissemination across Europe</li>
+            </ul>
+
+            <div class="highlight-box">
+                <strong>No financial contribution is required</strong>—participation is fully supported by the WASABI project.
+            </div>
+
+            <h2>What We Expect from the Selected Factory</h2>
+            
+            <ul>
+                <li>Willingness to host system installation</li>
+                <li>Availability for technical visits and data collection</li>
+                <li>Participation in feedback and evaluation</li>
+                <li>Collaboration during field trials</li>
+            </ul>
+
+            <h2>How to Apply</h2>
+            
+            <p>We invite interested manufacturing facilities to express their interest and apply to become the official Romanian pilot site. Shortlisted candidates will be contacted for a brief meeting and technical suitability check. Final selection will be made jointly by A Plus Engineering and Green eDIH.</p>
+
+            <div class="contact-info">
+                <p><strong>For Questions or More Information:</strong></p>
+                <p>Email: <a href="mailto:bilgi@aartimuhendislik.com">bilgi@aartimuhendislik.com</a></p>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <h2>Ready to Transform Your Energy Management?</h2>
+            <p>Submit your application now and become part of this innovative European project!</p>
+            <a href="/pilot-factory-application.html" class="apply-button">Apply Now →</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; max-width: 900px; margin-left: auto; margin-right: auto;">
+            <div style="flex: 1; text-align: left;">
+                <img src="/images/aplus-logo.png" alt="APlus Engineering" style="height: 120px; width: auto; filter: brightness(0) invert(1); opacity: 0.9;">
+            </div>
+            <div style="flex: 1; text-align: right;">
+                <img src="/images/wasabi-logo.png" alt="WASABI Project" style="height: 50px; width: auto; filter: brightness(0) invert(1); opacity: 0.9;">
+            </div>
+        </div>
+        <p>&copy; 2025 HUMANERGY - Powered by APlus Engineering &bull; Funded by WASABI Project. All rights reserved.</p>
+    </footer>
+
+    <!-- Sidebar Component -->
+    <script src="/js/sidebar.js?v=20260102115822"></script>
+</body>
+</html>

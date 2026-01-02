@@ -1,0 +1,80 @@
+========================================
+NEW PILOT FACTORY APPLICATION
+HumanEnerDIA WASABI Project
+========================================
+
+⚠️ ACTION REQUIRED - Review this application promptly
+Application deadline: January 23, 2026
+
+========================================
+APPLICATION REFERENCE: {{application_ref}}
+========================================
+
+QUICK SUMMARY
+----------------------------------------
+Company:          {{company_name}}
+Contact:          {{contact_name}} ({{contact_position}})
+Email:            {{contact_email}}
+Phone:            {{contact_phone}}
+Sector:           {{manufacturing_sector}}
+Location:         {{city_address}}
+Submitted:        {{submission_date}}
+
+========================================
+FACTORY PROFILE
+========================================
+
+Employees:                {{num_employees}}
+Facility Area:            {{facility_area}}
+Annual Electricity:       {{annual_electricity}}
+Production Operations:    {{num_production_operations}}
+
+========================================
+DIGITAL & ENERGY READINESS
+========================================
+
+Digital Monitoring:       {{#digital_monitoring}}✅ YES{{/digital_monitoring}}{{^digital_monitoring}}❌ NO{{/digital_monitoring}}
+{{#digital_monitoring}}
+Digital Meters:           {{num_digital_meters}}
+SCADA System:             {{#has_scada}}✅ YES{{/has_scada}}{{^has_scada}}❌ NO{{/has_scada}}
+{{/digital_monitoring}}
+Energy Responsible:       {{has_energy_responsible}}
+Digital Maturity:         {{digital_maturity}}
+
+========================================
+PARTICIPATION & AVAILABILITY
+========================================
+
+Willing to Participate:   {{#willing_to_participate}}✅ YES{{/willing_to_participate}}{{^willing_to_participate}}❌ NO{{/willing_to_participate}}
+Confirms Collaboration:   {{#confirms_collaboration}}✅ YES{{/confirms_collaboration}}
+
+{{#preferred_meeting_week}}
+Preferred Meeting Week:   {{preferred_meeting_week}}
+{{/preferred_meeting_week}}
+{{#preferred_installation_week}}
+Preferred Installation:   {{preferred_installation_week}}
+{{/preferred_installation_week}}
+
+========================================
+SUBMISSION DETAILS
+========================================
+
+IP Address:   {{ip_address}}
+User Agent:   {{user_agent}}
+
+========================================
+QUICK ACTIONS
+========================================
+
+View in Admin Dashboard:
+{{dashboard_link}}
+
+Contact Applicant:
+mailto:{{contact_email}}?subject=HumanEnerDIA%20Pilot%20Factory%20-%20{{application_ref}}
+
+========================================
+
+This is an automated admin notification.
+Review deadline: January 23, 2026
+
+HumanEnerDIA WASABI Project - Admin Team
