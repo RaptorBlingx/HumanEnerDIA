@@ -372,6 +372,40 @@
             </div>
         </div>
 
+        <!-- Pilot Factory Applications Card -->
+        <div class="table-container" style="margin-top: 2rem;">
+            <div class="table-header">
+                <h2>🏭 Pilot Factory Applications</h2>
+                <div class="table-controls">
+                    <a href="/admin/pilot-applications.html" class="btn btn-primary">
+                        View Applications →
+                    </a>
+                </div>
+            </div>
+            <div style="padding: 2rem; text-align: center; background: white;">
+                <div class="stats-grid" style="max-width: 800px; margin: 0 auto;">
+                    <div class="stat-card" style="box-shadow: none; border: 1px solid #e0e0e0;">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-value" id="pilot-stat-total">-</div>
+                        <div class="stat-label">Total Applications</div>
+                    </div>
+                    <div class="stat-card" style="box-shadow: none; border: 1px solid #e0e0e0;">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-value" id="pilot-stat-pending">-</div>
+                        <div class="stat-label">Pending Review</div>
+                    </div>
+                    <div class="stat-card" style="box-shadow: none; border: 1px solid #e0e0e0;">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-value" id="pilot-stat-deadline">-</div>
+                        <div class="stat-label">Days to Deadline</div>
+                    </div>
+                </div>
+                <p style="color: #666; margin-top: 1rem; font-size: 0.9rem;">
+                    Manage applications for HumanEnerDIA pilot factory selection
+                </p>
+            </div>
+        </div>
+
         <!-- Users Table -->
         <div class="table-container">
             <div class="table-header">
@@ -612,7 +646,50 @@
         function loadData() {
             loadStats();
             loadUsers(currentPage);
+            loadPilotStats();
         }
+
+        async function loadPilotStats() {
+            const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/auth/admin/pilot-applications/stats', {
+                    headers: {'Authorization': `Bearer ${token}`}
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const stats = data.stats || {};
+                    document.getElementById('pilot-stat-total').textContent = stats.total || 0;
+                    document.getElementById('pilot-stat-pending').textContent = stats.pending || 0;
+                    
+                    // Calculate deadline
+                    const deadline = new Date('2026-01-23');
+                    const today = new Date();
+                    const diffTime = deadline - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    const deadlineEl = document.getElementById('pilot-stat-deadline');
+                    if (diffDays > 0) {
+                        deadlineEl.textContent = diffDays;
+                        if (diffDays <= 7) {
+                            deadlineEl.style.color = '#dc3545';
+                        }
+                    } else {
+                        deadlineEl.textContent = 'Passed';
+                        deadlineEl.style.color = '#dc3545';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load pilot stats:', error);
+            }
+        }
+
+        // Load pilot stats on page load
+        window.addEventListener('load', () => {
+            loadPilotStats();
+        });
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {

@@ -771,3 +771,480 @@ def reset_password(token: str, new_password: str) -> Dict:
     except Exception as e:
         logger.error(f"Password reset error: {e}")
         return {'success': False, 'error': 'Failed to reset password'}
+
+# ============================================================================
+# Pilot Factory Application Functions
+# ============================================================================
+
+def generate_application_reference() -> str:
+    """
+    Generate unique application reference number
+    Format: PF2026-XXXX (PF = Pilot Factory, Year, Sequential number)
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get the latest application number for 2026
+        cursor.execute("""
+            SELECT application_ref 
+            FROM pilot_factory_applications 
+            WHERE application_ref LIKE 'PF2026-%'
+            ORDER BY id DESC 
+            LIMIT 1
+        """)
+        
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if result and result[0]:
+            # Extract number and increment
+            last_number = int(result[0].split('-')[1])
+            new_number = last_number + 1
+        else:
+            # First application
+            new_number = 1
+        
+        # Format with leading zeros (4 digits)
+        return f"PF2026-{new_number:04d}"
+        
+    except Exception as e:
+        logger.error(f"Error generating application reference: {e}")
+        # Fallback to timestamp-based reference
+        from time import time
+        return f"PF2026-{int(time()) % 10000:04d}"
+
+
+def submit_pilot_factory_application(data: dict, ip_address: str, user_agent: str) -> dict:
+    """
+    Submit a pilot factory application
+    
+    Args:
+        data: Dictionary containing all form fields
+        ip_address: IP address of the submitter
+        user_agent: Browser user agent string
+    
+    Returns:
+        Dictionary with success status and application details or error message
+    """
+    try:
+        # Required fields validation
+        # Note: digital_monitoring and willing_to_participate are booleans, 
+        # so we need to check if they exist in data, not if they're truthy
+        required_text_fields = [
+            'company_name', 'city_address', 'contact_name', 'contact_position',
+            'contact_email', 'contact_phone', 'manufacturing_sector',
+            'num_employees', 'facility_area', 'annual_electricity',
+            'num_production_operations', 'has_energy_responsible',
+            'digital_maturity'
+        ]
+        
+        required_boolean_fields = [
+            'digital_monitoring', 'willing_to_participate', 'confirms_collaboration'
+        ]
+        
+        # Check text fields (must have truthy value)
+        missing_fields = [field for field in required_text_fields if not data.get(field)]
+        
+        # Check boolean fields (must exist in data, even if False)
+        missing_fields += [field for field in required_boolean_fields if field not in data]
+        
+        if missing_fields:
+            return {
+                'success': False,
+                'error': f'Missing required fields: {", ".join(missing_fields)}'
+            }
+        
+        # Validate email format
+        try:
+            email = data['contact_email'].lower().strip()
+            validate_email(email)
+        except EmailNotValidError as e:
+            return {
+                'success': False,
+                'error': f'Invalid email format: {str(e)}'
+            }
+        
+        # Validate phone format (basic check)
+        phone = data['contact_phone'].strip()
+        if len(phone) < 7:
+            return {
+                'success': False,
+                'error': 'Phone number is too short'
+            }
+        
+        # Check for duplicate email
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT id FROM pilot_factory_applications 
+            WHERE contact_email = %s
+        """, (email,))
+        
+        if cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return {
+                'success': False,
+                'error': 'An application with this email already exists. Please contact us if you need to update your application.',
+                'code': 'DUPLICATE_EMAIL'
+            }
+        
+        # Generate application reference
+        application_ref = generate_application_reference()
+        
+        # Sanitize and truncate text inputs
+        def sanitize(text, max_length=None):
+            if text is None:
+                return None
+            text = str(text).strip()
+            if max_length and len(text) > max_length:
+                text = text[:max_length]
+            return text
+        
+        # Validate participation requirements
+        if not data.get('willing_to_participate'):
+            cursor.close()
+            conn.close()
+            return {
+                'success': False,
+                'error': 'You must be willing to participate free of charge to apply'
+            }
+        
+        if not data.get('confirms_collaboration'):
+            cursor.close()
+            conn.close()
+            return {
+                'success': False,
+                'error': 'You must confirm willingness to collaborate'
+            }
+        
+        # Insert application
+        cursor.execute("""
+            INSERT INTO pilot_factory_applications (
+                application_ref, company_name, city_address, company_website,
+                contact_name, contact_position, contact_email, contact_phone,
+                manufacturing_sector, manufacturing_sector_other,
+                num_employees, facility_area, annual_electricity,
+                num_production_operations, digital_monitoring, num_digital_meters,
+                has_scada, has_energy_responsible, digital_maturity,
+                willing_to_participate, preferred_meeting_week,
+                preferred_installation_week, confirms_collaboration,
+                ip_address, user_agent, status
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            ) RETURNING id, submitted_at
+        """, (
+            application_ref,
+            sanitize(data['company_name'], 255),
+            sanitize(data['city_address']),
+            sanitize(data.get('company_website'), 255),
+            sanitize(data['contact_name'], 255),
+            sanitize(data['contact_position'], 255),
+            email,
+            sanitize(phone, 50),
+            sanitize(data['manufacturing_sector'], 100),
+            sanitize(data.get('manufacturing_sector_other'), 255),
+            sanitize(data['num_employees'], 50),
+            sanitize(data['facility_area'], 50),
+            sanitize(data['annual_electricity'], 50),
+            sanitize(data['num_production_operations'], 50),
+            bool(data.get('digital_monitoring')),
+            sanitize(data.get('num_digital_meters'), 50),
+            data.get('has_scada'),
+            sanitize(data['has_energy_responsible'], 50),
+            sanitize(data['digital_maturity'], 50),
+            bool(data['willing_to_participate']),
+            sanitize(data.get('preferred_meeting_week'), 50),
+            sanitize(data.get('preferred_installation_week'), 50),
+            bool(data['confirms_collaboration']),
+            sanitize(ip_address, 50),
+            sanitize(user_agent, 1000),
+            'pending'
+        ))
+        
+        result = cursor.fetchone()
+        application_id = result[0]
+        submitted_at = result[1]
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        logger.info(f"Pilot factory application submitted: {application_ref} from {data['company_name']}")
+        
+        return {
+            'success': True,
+            'application_id': application_id,
+            'application_ref': application_ref,
+            'submitted_at': submitted_at.isoformat(),
+            'company_name': data['company_name'],
+            'contact_email': email
+        }
+        
+    except Exception as e:
+        logger.error(f"Error submitting pilot factory application: {e}")
+        return {
+            'success': False,
+            'error': 'An error occurred while processing your application. Please try again later.'
+        }
+
+
+# ============================================================================
+# Pilot Factory Application - Email Functions
+# ============================================================================
+
+def send_pilot_factory_confirmation_email(application_data: dict) -> bool:
+    """
+    Send confirmation email to applicant.
+    
+    Args:
+        application_data: Dictionary with application details including:
+            - application_ref
+            - contact_name
+            - contact_email
+            - company_name
+            - submission_date (ISO format)
+    
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    if not EMAIL_ENABLED:
+        logger.warning("Email not enabled - skipping pilot factory confirmation email")
+        return False
+    
+    try:
+        # Load email templates
+        template_dir = os.path.join(os.path.dirname(__file__), 'email_templates')
+        
+        # Load HTML template
+        html_path = os.path.join(template_dir, 'pilot_factory_confirmation.html')
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        
+        # Load plain text template
+        txt_path = os.path.join(template_dir, 'pilot_factory_confirmation.txt')
+        with open(txt_path, 'r', encoding='utf-8') as f:
+            text_content = f.read()
+        
+        # Replace placeholders
+        replacements = {
+            '{{application_ref}}': application_data.get('application_ref', 'N/A'),
+            '{{contact_name}}': application_data.get('contact_name', ''),
+            '{{company_name}}': application_data.get('company_name', ''),
+            '{{contact_email}}': application_data.get('contact_email', ''),
+            '{{submission_date}}': application_data.get('submission_date', '')
+        }
+        
+        for placeholder, value in replacements.items():
+            html_content = html_content.replace(placeholder, str(value))
+            text_content = text_content.replace(placeholder, str(value))
+        
+        # Create email message
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"Application Received - Pilot Factory Selection (Ref: {application_data.get('application_ref', '')})"
+        msg['From'] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
+        msg['To'] = application_data.get('contact_email', '')
+        msg['Reply-To'] = 'bilgi@aartimuhendislik.com'
+        
+        # Attach both plain text and HTML versions
+        part1 = MIMEText(text_content, 'plain', 'utf-8')
+        part2 = MIMEText(html_content, 'html', 'utf-8')
+        msg.attach(part1)
+        msg.attach(part2)
+        
+        # Send email
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+        
+        logger.info(f"Pilot factory confirmation email sent to {application_data.get('contact_email')} (Ref: {application_data.get('application_ref')})")
+        return True
+        
+    except FileNotFoundError as e:
+        logger.error(f"Email template not found: {e}")
+        return False
+    except smtplib.SMTPException as e:
+        logger.error(f"SMTP error sending pilot factory confirmation: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"Error sending pilot factory confirmation email: {e}")
+        return False
+
+
+def send_pilot_factory_admin_notification(application_data: dict) -> bool:
+    """
+    Send notification email to admin team about new application.
+    
+    Args:
+        application_data: Dictionary with complete application details
+    
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    if not EMAIL_ENABLED:
+        logger.warning("Email not enabled - skipping pilot factory admin notification")
+        return False
+    
+    try:
+        # Admin email addresses
+        admin_emails = [
+            'swe.mohamad.jarad@gmail.com',
+            'umut.ogur@aartimuhendislik.com'
+        ]
+        
+        # Load email templates
+        template_dir = os.path.join(os.path.dirname(__file__), 'email_templates')
+        
+        # Load HTML template
+        html_path = os.path.join(template_dir, 'pilot_factory_admin_notification.html')
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        
+        # Load plain text template
+        txt_path = os.path.join(template_dir, 'pilot_factory_admin_notification.txt')
+        with open(txt_path, 'r', encoding='utf-8') as f:
+            text_content = f.read()
+        
+        # Determine digital maturity color for HTML
+        maturity_colors = {
+            'Low': '#ff6b6b',
+            'Medium': '#ffc107',
+            'High': '#4caf50'
+        }
+        maturity_level = application_data.get('digital_maturity', 'Medium')
+        for level in maturity_colors:
+            if level.lower() in maturity_level.lower():
+                maturity_color = maturity_colors[level]
+                break
+        else:
+            maturity_color = '#999999'
+        
+        # Build dashboard link
+        dashboard_link = f"http://10.33.10.104:8080/admin/pilot-application-detail.html?id={application_data.get('application_id', '')}"
+        
+        # Basic replacements
+        replacements = {
+            '{{application_ref}}': application_data.get('application_ref', 'N/A'),
+            '{{company_name}}': application_data.get('company_name', ''),
+            '{{contact_name}}': application_data.get('contact_name', ''),
+            '{{contact_position}}': application_data.get('contact_position', ''),
+            '{{contact_email}}': application_data.get('contact_email', ''),
+            '{{contact_phone}}': application_data.get('contact_phone', ''),
+            '{{city_address}}': application_data.get('city_address', ''),
+            '{{manufacturing_sector}}': application_data.get('manufacturing_sector', ''),
+            '{{num_employees}}': application_data.get('num_employees', ''),
+            '{{facility_area}}': application_data.get('facility_area', ''),
+            '{{annual_electricity}}': application_data.get('annual_electricity', ''),
+            '{{num_production_operations}}': application_data.get('num_production_operations', ''),
+            '{{num_digital_meters}}': application_data.get('num_digital_meters', 'N/A'),
+            '{{has_energy_responsible}}': application_data.get('has_energy_responsible', ''),
+            '{{digital_maturity}}': maturity_level,
+            '{{maturity_color}}': maturity_color,
+            '{{preferred_meeting_week}}': application_data.get('preferred_meeting_week', 'Not specified'),
+            '{{preferred_installation_week}}': application_data.get('preferred_installation_week', 'Not specified'),
+            '{{ip_address}}': application_data.get('ip_address', ''),
+            '{{user_agent}}': application_data.get('user_agent', ''),
+            '{{submission_date}}': application_data.get('submission_date', ''),
+            '{{dashboard_link}}': dashboard_link
+        }
+        
+        for placeholder, value in replacements.items():
+            html_content = html_content.replace(placeholder, str(value))
+            text_content = text_content.replace(placeholder, str(value))
+        
+        # Handle boolean conditional replacements for Mustache-style tags
+        # Digital monitoring
+        if application_data.get('digital_monitoring'):
+            html_content = html_content.replace('{{#digital_monitoring}}', '').replace('{{/digital_monitoring}}', '')
+            html_content = html_content.replace('{{^digital_monitoring}}', '<!--').replace('{{^digital_monitoring}}', '-->')
+            text_content = text_content.replace('{{#digital_monitoring}}', '').replace('{{/digital_monitoring}}', '')
+            text_content = text_content.replace('{{^digital_monitoring}}', '').replace('{{^digital_monitoring}}', '')
+        else:
+            html_content = html_content.replace('{{^digital_monitoring}}', '').replace('{{^digital_monitoring}}', '')
+            html_content = html_content.replace('{{#digital_monitoring}}', '<!--').replace('{{/digital_monitoring}}', '-->')
+            text_content = text_content.replace('{{^digital_monitoring}}', '').replace('{{^digital_monitoring}}', '')
+            text_content = text_content.replace('{{#digital_monitoring}}', '').replace('{{/digital_monitoring}}', '')
+        
+        # Has SCADA
+        if application_data.get('has_scada'):
+            html_content = html_content.replace('{{#has_scada}}', '').replace('{{/has_scada}}', '')
+            html_content = html_content.replace('{{^has_scada}}', '<!--').replace('{{^has_scada}}', '-->')
+            text_content = text_content.replace('{{#has_scada}}', '').replace('{{/has_scada}}', '')
+            text_content = text_content.replace('{{^has_scada}}', '').replace('{{^has_scada}}', '')
+        else:
+            html_content = html_content.replace('{{^has_scada}}', '').replace('{{^has_scada}}', '')
+            html_content = html_content.replace('{{#has_scada}}', '<!--').replace('{{/has_scada}}', '-->')
+            text_content = text_content.replace('{{^has_scada}}', '').replace('{{^has_scada}}', '')
+            text_content = text_content.replace('{{#has_scada}}', '').replace('{{/has_scada}}', '')
+        
+        # Willing to participate
+        if application_data.get('willing_to_participate'):
+            html_content = html_content.replace('{{#willing_to_participate}}', '').replace('{{/willing_to_participate}}', '')
+            html_content = html_content.replace('{{^willing_to_participate}}', '<!--').replace('{{^willing_to_participate}}', '-->')
+            text_content = text_content.replace('{{#willing_to_participate}}', '').replace('{{/willing_to_participate}}', '')
+            text_content = text_content.replace('{{^willing_to_participate}}', '').replace('{{^willing_to_participate}}', '')
+        else:
+            html_content = html_content.replace('{{^willing_to_participate}}', '').replace('{{^willing_to_participate}}', '')
+            html_content = html_content.replace('{{#willing_to_participate}}', '<!--').replace('{{/willing_to_participate}}', '-->')
+            text_content = text_content.replace('{{^willing_to_participate}}', '').replace('{{^willing_to_participate}}', '')
+            text_content = text_content.replace('{{#willing_to_participate}}', '').replace('{{/willing_to_participate}}', '')
+        
+        # Confirms collaboration
+        if application_data.get('confirms_collaboration'):
+            html_content = html_content.replace('{{#confirms_collaboration}}', '').replace('{{/confirms_collaboration}}', '')
+            text_content = text_content.replace('{{#confirms_collaboration}}', '').replace('{{/confirms_collaboration}}', '')
+        else:
+            html_content = html_content.replace('{{#confirms_collaboration}}', '<!--').replace('{{/confirms_collaboration}}', '-->')
+            text_content = text_content.replace('{{#confirms_collaboration}}', '').replace('{{/confirms_collaboration}}', '')
+        
+        # Handle optional fields (preferred weeks)
+        if application_data.get('preferred_meeting_week'):
+            html_content = html_content.replace('{{#preferred_meeting_week}}', '').replace('{{/preferred_meeting_week}}', '')
+            text_content = text_content.replace('{{#preferred_meeting_week}}', '\n').replace('{{/preferred_meeting_week}}', '')
+        else:
+            html_content = html_content.replace('{{#preferred_meeting_week}}', '<!--').replace('{{/preferred_meeting_week}}', '-->')
+            text_content = text_content.replace('{{#preferred_meeting_week}}', '').replace('{{/preferred_meeting_week}}', '')
+        
+        if application_data.get('preferred_installation_week'):
+            html_content = html_content.replace('{{#preferred_installation_week}}', '').replace('{{/preferred_installation_week}}', '')
+            text_content = text_content.replace('{{#preferred_installation_week}}', '\n').replace('{{/preferred_installation_week}}', '')
+        else:
+            html_content = html_content.replace('{{#preferred_installation_week}}', '<!--').replace('{{/preferred_installation_week}}', '-->')
+            text_content = text_content.replace('{{#preferred_installation_week}}', '').replace('{{/preferred_installation_week}}', '')
+        
+        # Create email message
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"🏭 New Pilot Factory Application - {application_data.get('company_name', '')} ({application_data.get('application_ref', '')})"
+        msg['From'] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
+        msg['To'] = ', '.join(admin_emails)
+        msg['Reply-To'] = application_data.get('contact_email', '')
+        
+        # Attach both plain text and HTML versions
+        part1 = MIMEText(text_content, 'plain', 'utf-8')
+        part2 = MIMEText(html_content, 'html', 'utf-8')
+        msg.attach(part1)
+        msg.attach(part2)
+        
+        # Send email
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+        
+        logger.info(f"Pilot factory admin notification sent for {application_data.get('company_name')} (Ref: {application_data.get('application_ref')})")
+        return True
+        
+    except FileNotFoundError as e:
+        logger.error(f"Email template not found: {e}")
+        return False
+    except smtplib.SMTPException as e:
+        logger.error(f"SMTP error sending pilot factory admin notification: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"Error sending pilot factory admin notification: {e}")
+        return False

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Pilot Factory Application</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table width="700" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); padding: 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 600;">
+                                🏭 New Pilot Factory Application
+                            </h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 15px; opacity: 0.95;">
+                                Application deadline: January 23, 2026
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Urgency Banner -->
+                    <tr>
+                        <td style="background-color: #fff3cd; border-bottom: 3px solid #ffc107; padding: 15px 30px; text-align: center;">
+                            <p style="margin: 0; color: #856404; font-size: 14px; font-weight: 600;">
+                                ⚠️ Action Required - Review this application promptly
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Summary Card -->
+                    <tr>
+                        <td style="padding: 30px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
+                                <tr>
+                                    <td style="padding: 25px;">
+                                        <h2 style="margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">
+                                            Application Reference: {{application_ref}}
+                                        </h2>
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding: 5px 0; font-size: 14px; opacity: 0.9;">Company:</td>
+                                                <td style="padding: 5px 0; font-size: 14px; font-weight: 600;">{{company_name}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 5px 0; font-size: 14px; opacity: 0.9;">Contact:</td>
+                                                <td style="padding: 5px 0; font-size: 14px; font-weight: 600;">{{contact_name}} ({{contact_position}})</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 5px 0; font-size: 14px; opacity: 0.9;">Email:</td>
+                                                <td style="padding: 5px 0; font-size: 14px; font-weight: 600;">
+                                                    <a href="mailto:{{contact_email}}" style="color: white; text-decoration: underline;">{{contact_email}}</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 5px 0; font-size: 14px; opacity: 0.9;">Phone:</td>
+                                                <td style="padding: 5px 0; font-size: 14px; font-weight: 600;">
+                                                    <a href="tel:{{contact_phone}}" style="color: white; text-decoration: none;">{{contact_phone}}</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 5px 0; font-size: 14px; opacity: 0.9;">Sector:</td>
+                                                <td style="padding: 5px 0; font-size: 14px; font-weight: 600;">{{manufacturing_sector}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 5px 0; font-size: 14px; opacity: 0.9;">Location:</td>
+                                                <td style="padding: 5px 0; font-size: 14px; font-weight: 600;">{{city_address}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 5px 0; font-size: 14px; opacity: 0.9;">Submitted:</td>
+                                                <td style="padding: 5px 0; font-size: 14px; font-weight: 600;">{{submission_date}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Factory Profile -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h3 style="margin: 0 0 15px 0; color: #1e3c72; font-size: 18px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
+                                🏭 Factory Profile
+                            </h3>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px;">
+                                <tr>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; width: 50%;">Employees:</td>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; font-weight: 600;">{{num_employees}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 10px; width: 50%;">Facility Area:</td>
+                                    <td style="padding: 8px 10px; font-weight: 600;">{{facility_area}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; width: 50%;">Annual Electricity:</td>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; font-weight: 600; color: #ff6b6b;">{{annual_electricity}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 10px; width: 50%;">Production Operations:</td>
+                                    <td style="padding: 8px 10px; font-weight: 600;">{{num_production_operations}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Digital Readiness -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h3 style="margin: 0 0 15px 0; color: #1e3c72; font-size: 18px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
+                                💻 Digital & Energy Readiness
+                            </h3>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px;">
+                                <tr>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; width: 50%;">Digital Monitoring:</td>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; font-weight: 600;">
+                                        {{#digital_monitoring}}
+                                        <span style="color: #4caf50;">✅ Yes</span>
+                                        {{/digital_monitoring}}
+                                        {{^digital_monitoring}}
+                                        <span style="color: #ff6b6b;">❌ No</span>
+                                        {{/digital_monitoring}}
+                                    </td>
+                                </tr>
+                                {{#digital_monitoring}}
+                                <tr>
+                                    <td style="padding: 8px 10px; width: 50%;">Digital Meters:</td>
+                                    <td style="padding: 8px 10px; font-weight: 600;">{{num_digital_meters}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; width: 50%;">SCADA System:</td>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; font-weight: 600;">
+                                        {{#has_scada}}
+                                        <span style="color: #4caf50;">✅ Yes</span>
+                                        {{/has_scada}}
+                                        {{^has_scada}}
+                                        <span style="color: #ff6b6b;">❌ No</span>
+                                        {{/has_scada}}
+                                    </td>
+                                </tr>
+                                {{/digital_monitoring}}
+                                <tr>
+                                    <td style="padding: 8px 10px; width: 50%;">Energy Responsible:</td>
+                                    <td style="padding: 8px 10px; font-weight: 600;">{{has_energy_responsible}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; width: 50%;">Digital Maturity:</td>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9;">
+                                        {{#digital_maturity_basic}}
+                                        <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; background-color: #ff6b6b; color: white;">
+                                            {{digital_maturity}}
+                                        </span>
+                                        {{/digital_maturity_basic}}
+                                        {{#digital_maturity_intermediate}}
+                                        <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; background-color: #ffa726; color: white;">
+                                            {{digital_maturity}}
+                                        </span>
+                                        {{/digital_maturity_intermediate}}
+                                        {{#digital_maturity_advanced}}
+                                        <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; background-color: #4caf50; color: white;">
+                                            {{digital_maturity}}
+                                        </span>
+                                        {{/digital_maturity_advanced}}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Participation Commitment -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h3 style="margin: 0 0 15px 0; color: #1e3c72; font-size: 18px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
+                                ✅ Participation & Availability
+                            </h3>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px;">
+                                <tr>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; width: 50%;">Willing to Participate:</td>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; font-weight: 600;">
+                                        {{#willing_to_participate}}
+                                        <span style="color: #4caf50; font-size: 16px;">✅ YES</span>
+                                        {{/willing_to_participate}}
+                                        {{^willing_to_participate}}
+                                        <span style="color: #ff6b6b;">❌ NO</span>
+                                        {{/willing_to_participate}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 10px; width: 50%;">Confirms Collaboration:</td>
+                                    <td style="padding: 8px 10px; font-weight: 600;">
+                                        {{#confirms_collaboration}}
+                                        <span style="color: #4caf50; font-size: 16px;">✅ YES</span>
+                                        {{/confirms_collaboration}}
+                                        {{^confirms_collaboration}}
+                                        <span style="color: #ff6b6b;">❌ NO</span>
+                                        {{/confirms_collaboration}}
+                                    </td>
+                                </tr>
+                                {{#preferred_meeting_week}}
+                                <tr>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; width: 50%;">Preferred Meeting Week:</td>
+                                    <td style="padding: 8px 10px; background-color: #f9f9f9; font-weight: 600;">{{preferred_meeting_week}}</td>
+                                </tr>
+                                {{/preferred_meeting_week}}
+                                {{#preferred_installation_week}}
+                                <tr>
+                                    <td style="padding: 8px 10px; width: 50%;">Preferred Installation Week:</td>
+                                    <td style="padding: 8px 10px; font-weight: 600;">{{preferred_installation_week}}</td>
+                                </tr>
+                                {{/preferred_installation_week}}
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Submission Metadata -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h3 style="margin: 0 0 15px 0; color: #1e3c72; font-size: 18px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
+                                📊 Submission Details
+                            </h3>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #666666;">
+                                <tr>
+                                    <td style="padding: 5px 10px;">IP Address:</td>
+                                    <td style="padding: 5px 10px; font-family: 'Courier New', monospace;">{{ip_address}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 10px;">User Agent:</td>
+                                    <td style="padding: 5px 10px; font-family: 'Courier New', monospace; font-size: 11px;">{{user_agent}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Quick Actions -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" style="padding: 10px;">
+                                        <a href="{{dashboard_link}}" style="display: inline-block; padding: 14px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+                                            View in Admin Dashboard
+                                        </a>
+                                    </td>
+                                    <td align="center" style="padding: 10px;">
+                                        <a href="mailto:{{contact_email}}?subject=HumanEnerDIA%20Pilot%20Factory%20-%20{{application_ref}}" style="display: inline-block; padding: 14px 30px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+                                            Contact Applicant
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f5f5f5; padding: 25px 40px; text-align: center;">
+                            <p style="margin: 0 0 10px 0; color: #666666; font-size: 13px;">
+                                <strong>HumanEnerDIA WASABI Project - Admin Notification</strong>
+                            </p>
+                            <p style="margin: 0; color: #999999; font-size: 11px;">
+                                This is an automated notification. Review deadline: January 23, 2026
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

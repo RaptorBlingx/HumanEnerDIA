@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Application Received - HumanEnerDIA WASABI Project</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: rgba(10, 36, 99, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo svg {
+            flex-shrink: 0;
+        }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .hamburger:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            padding: 40px 20px;
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-header {
+            background: linear-gradient(135deg, #0A2463 0%, #00A8E8 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.6s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0) rotate(-180deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(10deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .success-icon svg {
+            width: 60px;
+            height: 60px;
+        }
+
+        .success-header h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .success-header p {
+            font-size: 18px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .content {
+            padding: 50px 40px;
+        }
+
+        .reference-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f0f9ff 100%);
+            border: 3px solid #00A8E8;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 35px;
+            box-shadow: 0 4px 15px rgba(0,168,232,0.1);
+        }
+
+        .reference-box .label {
+            font-size: 13px;
+            color: #0A2463;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .reference-box .value {
+            font-size: 38px;
+            font-weight: 700;
+            color: #0A2463;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .reference-box .sublabel {
+            font-size: 13px;
+            color: #666;
+            margin-top: 12px;
+        }
+
+        /* Important Notice Box */
+        .notice-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+            border-left: 5px solid #4caf50;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 35px;
+            box-shadow: 0 2px 10px rgba(76,175,80,0.1);
+        }
+
+        .notice-box h3 {
+            color: #2e7d32;
+            margin-bottom: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notice-box p {
+            color: #1b5e20;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .info-section {
+            margin-bottom: 35px;
+        }
+
+        .info-section h2 {
+            font-size: 22px;
+            color: #0A2463;
+            margin-bottom: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-section h2 svg {
+            flex-shrink: 0;
+        }
+
+        .info-section p {
+            line-height: 1.7;
+            color: #555;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section ul li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .info-section ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #00A8E8;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .contact-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 35px;
+        }
+
+        .contact-box h3 {
+            color: #f57c00;
+            margin-bottom: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .contact-box p {
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .contact-box a {
+            color: #0A2463;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .contact-box a:hover {
+            text-decoration: underline;
+            color: #00A8E8;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 35px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00A8E8 0%, #0A2463 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #0A2463;
+            border: 2px solid #0A2463;
+        }
+
+        .btn-secondary:hover {
+            background: #0A2463;
+            color: white;
+        }
+
+        .btn-print {
+            background: #f5f5f5;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-print:hover {
+            background: #e0e0e0;
+        }
+
+        /* Footer */
+        footer {
+            background: #0A2463;
+            padding: 30px;
+            margin-top: 0;
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logos {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .footer-logos img {
+            filter: brightness(0) invert(1);
+            opacity: 0.9;
+        }
+
+        .footer-logos img:first-child {
+            height: 120px;
+        }
+
+        .footer-logos img:last-child {
+            height: 50px;
+        }
+
+        .footer-text {
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            header, footer, .action-buttons, .hamburger, .sidebar {
+                display: none !important;
+            }
+
+            .main-wrapper {
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper {
+                padding: 20px 15px;
+            }
+
+            .content {
+                padding: 30px 25px;
+            }
+
+            .success-header {
+                padding: 40px 25px;
+            }
+
+            .success-header h1 {
+                font-size: 28px;
+            }
+
+            .success-header p {
+                font-size: 16px;
+            }
+
+            .reference-box .value {
+                font-size: 28px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .footer-logos {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .footer-logos img:first-child,
+            .footer-logos img:last-child {
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo-section">
+                <a href="/" class="logo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00A8E8" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    HUMANERGY
+                </a>
+            </div>
+            <div class="hamburger" onclick="toggleSidebar()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar"></div>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <div class="container">
+            <div class="success-header">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                </div>
+                <h1>Application Received!</h1>
+                <p>Thank you for applying to the HumanEnerDIA Pilot Factory Program</p>
+            </div>
+
+            <div class="content">
+                <!-- Reference Number -->
+                <div class="reference-box">
+                    <div class="label">Your Application Reference Number</div>
+                    <div class="value" id="applicationRef">Loading...</div>
+                    <div class="sublabel">Please save this reference number for your records</div>
+                </div>
+
+                <!-- No Action Required Notice -->
+                <div class="notice-box">
+                    <h3>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                            <path d="M22 4L12 14.01l-3-3"/>
+                        </svg>
+                        No Action Required
+                    </h3>
+                    <p>Your application is complete. There is <strong>nothing further you need to do at this time</strong>. We will contact you via email if your factory is shortlisted.</p>
+                </div>
+
+                <!-- Email Confirmation -->
+                <div class="info-section">
+                    <h2>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A2463" stroke-width="2">
+                            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        Email Confirmation
+                    </h2>
+                    <p>A confirmation email has been sent to <strong id="applicantEmail">your email address</strong>. Please check your inbox (and spam folder) for details about your application.</p>
+                </div>
+
+                <!-- What Happens Next -->
+                <div class="info-section">
+                    <h2>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A2463" stroke-width="2">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        What Happens Next?
+                    </h2>
+                    <ul>
+                        <li>Our team will review your application within <strong>5-7 business days</strong></li>
+                        <li>We will evaluate your factory's suitability for the HumanEnerDIA project</li>
+                        <li>Shortlisted candidates will be contacted via email for next steps</li>
+                        <li>Selected pilot factories will be invited for an initial assessment meeting</li>
+                        <li>Final selection will be announced by <strong>early February 2026</strong></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="contact-box">
+                    <h3>📞 Questions or Need Assistance?</h3>
+                    <p>If you have any questions about your application or the HumanEnerDIA project, please don't hesitate to contact us:</p>
+                    <p><strong>Email:</strong> <a href="mailto:bilgi@aartimuhendislik.com">bilgi@aartimuhendislik.com</a></p>
+                    <p><strong>Subject:</strong> Include your application reference number (<span id="refInSubject">REF</span>) for faster response</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="/" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        </svg>
+                        Return to Homepage
+                    </a>
+                    <a href="/pilot-factory-call.html" class="btn btn-secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                        View Call Details
+                    </a>
+                    <button onclick="window.print()" class="btn btn-print">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+                            <rect x="6" y="14" width="12" height="8"/>
+                        </svg>
+                        Print Confirmation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logos">
+                <img src="/images/aplus-logo.png" alt="APlus Engineering" onerror="this.style.display='none'">
+                <img src="/images/wasabi-logo.png" alt="WASABI Project" onerror="this.style.display='none'">
+            </div>
+            <div class="footer-text">
+                <p>© 2026 HUMANERGY - Powered by APlus Engineering • Funded by WASABI Project. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/sidebar.js?v=20260102115822"></script>
+    <script>
+        // Load application data from sessionStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const appRef = sessionStorage.getItem('pilot_app_ref');
+            const appEmail = sessionStorage.getItem('pilot_app_email');
+            const appCompany = sessionStorage.getItem('pilot_app_company');
+
+            // Display reference number
+            const refElement = document.getElementById('applicationRef');
+            if (appRef) {
+                refElement.textContent = appRef;
+                document.getElementById('refInSubject').textContent = appRef;
+            } else {
+                refElement.textContent = 'Not Available';
+                // Redirect to application page if no reference found
+                setTimeout(() => {
+                    if (!appRef) {
+                        window.location.href = '/pilot-factory-application.html';
+                    }
+                }, 3000);
+            }
+
+            // Display email
+            const emailElement = document.getElementById('applicantEmail');
+            if (appEmail) {
+                emailElement.textContent = appEmail;
+            }
+
+            // Update page title with company name if available
+            if (appCompany) {
+                document.title = `Application Received - ${appCompany} - HumanEnerDIA`;
+            }
+        });
+    </script>
+</body>
+</html>
