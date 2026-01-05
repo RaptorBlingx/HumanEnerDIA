@@ -107,11 +107,11 @@ class ActionRetrieveAnswer(Action):
         # Anahtar kelime mapping - hangi kelimeler hangi alt konuya ait
         keyword_to_topic = {
             # HumanEnerDIA PLATFORM topics (NEW - longer keywords for specificity)
-            "humenerdia platform": "ask_humenerdia_platform",
-            "humenerdia": "ask_humenerdia_platform",
-            "what is humenerdia": "ask_humenerdia_platform",
-            "humenerdia features": "ask_humenerdia_platform",
-            "navigate humenerdia": "ask_humenerdia_platform",
+            "humanenerdia platform": "ask_humenerdia_platform",
+            "humanenerdia": "ask_humenerdia_platform",
+            "what is humanenerdia": "ask_humenerdia_platform",
+            "humanenerdia features": "ask_humenerdia_platform",
+            "navigate humanenerdia": "ask_humenerdia_platform",
             
             # PORTAL DASHBOARD topics (Phase 2)
             "main dashboard": "ask_portal_dashboard",
@@ -573,7 +573,7 @@ class ActionRetrieveAnswer(Action):
             "general": "ask_general_info",
             "general information": "ask_general_info",
             "overview": "ask_general_info",
-            "about humenerdia": "ask_general_info",
+            "about humanenerdia": "ask_general_info",
             
             # PROCESS topics (expanded coverage for Phase 8)
             "planning": "ask_energy_planning",
