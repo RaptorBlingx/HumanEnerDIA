@@ -12,7 +12,7 @@
         backendUrl: '/api/chatbot',  // Proxied through nginx
         welcomeMessage: 'Hello! How can I help you with your Energy Management questions?',
         placeholder: 'Type your message...',
-        title: 'EnMS Assistant',
+        title: 'HumanEnerDIA Assistant',
         sessionPrefix: 'enms_chat_'
     };
 
