@@ -10,11 +10,11 @@ intents:
 - requirement
 - thank
 responses:
-  utter_ask_humanergy_platform:
-  - text: Humanergy is an intelligent energy management platform combining real-time monitoring, ML analytics, and ISO 50001 compliance. It features dashboards for baseline prediction, anomaly detection, forecasting, KPIs, plus Grafana visualizations and OVOS voice assistant.
-  - text: Humanergy is a comprehensive Energy Management System (EnMS) with Analytics dashboards, 11 Grafana SOTA dashboards, voice assistant integration, and automated reporting. Navigate using the sidebar menu to access all features.
+  utter_ask_humenerdia_platform:
+  - text: HumanEnerDIA is an intelligent energy management platform combining real-time monitoring, ML analytics, and ISO 50001 compliance. It features dashboards for baseline prediction, anomaly detection, forecasting, KPIs, plus Grafana visualizations and OVOS voice assistant.
+  - text: HumanEnerDIA is a comprehensive Energy Management System (EnMS) with Analytics dashboards, 11 Grafana SOTA dashboards, voice assistant integration, and automated reporting. Navigate using the sidebar menu to access all features.
   utter_ask_portal_dashboard:
-  - text: The main dashboard is your command center showing real-time energy metrics, alerts, machine status, and quick navigation to all Humanergy features via the sidebar menu.
+  - text: The main dashboard is your command center showing real-time energy metrics, alerts, machine status, and quick navigation to all HumanEnerDIA features via the sidebar menu.
   - text: Dashboard shows total consumption, active machines, recent anomalies, and KPI summaries. Use the left sidebar to navigate to Analytics, Visualizations, and Grafana.
   utter_ask_portal_baseline:
   - text: The Baseline page trains ML models to predict expected energy consumption based on drivers (temperature, pressure, load, production). View R², RMSE, MAE metrics and coefficient impact charts.
@@ -41,7 +41,7 @@ responses:
   - text: The Comparison page displays side-by-side metrics for multiple machines including consumption, peak demand, load factor, and efficiency ratings.
   - text: Compare machines to identify best/worst performers, efficiency gaps, and candidates for maintenance or upgrades.
   utter_ask_grafana_general:
-  - text: Humanergy includes 11 SOTA (State Of The Art) Grafana dashboards covering Factory Overview, ISO 50001 EnPI, Anomaly Detection, Cost Analytics, and more. Access via sidebar menu.
+  - text: HumanEnerDIA includes 11 SOTA (State Of The Art) Grafana dashboards covering Factory Overview, ISO 50001 EnPI, Anomaly Detection, Cost Analytics, and more. Access via sidebar menu.
   - text: SOTA dashboards provide premium visualizations with ML insights. Use the machine selector to filter views. Dashboards refresh every 30-60 seconds (Real-Time is faster).
   utter_ask_grafana_factory:
   - text: SOTA Factory Overview is the Command Center showing real-time status - Active Machines, Energy Today, Cost, Anomalies, Live Power chart, and Machine Status & Health.
@@ -125,7 +125,7 @@ responses:
   - text: Prophet is Facebook's forecasting model for medium-term predictions (24h-7d). Handles seasonality, holidays, and missing data automatically.
   - text: Prophet excels at capturing daily/weekly patterns. More robust than ARIMA for business data with seasonal cycles.
   utter_ask_concept_anomaly_ml:
-  - text: Humanergy uses Z-score (statistical outliers), Isolation Forest (ML), and baseline deviation to detect anomalies. Severity based on magnitude and impact.
+  - text: HumanEnerDIA uses Z-score (statistical outliers), Isolation Forest (ML), and baseline deviation to detect anomalies. Severity based on magnitude and impact.
   - text: Anomalies can indicate equipment issues, process deviations, or sensor problems. Investigate root cause when detected.
   utter_ask_concept_oee:
   - text: OEE = Availability × Performance × Quality. World-class is 85%+. Low OEE correlates with poor energy efficiency due to idle time and rework.

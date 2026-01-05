@@ -10241,32 +10241,32 @@
       "A commitment to comply with applicable legal requirements and other requirements"
     ]
   ],
-  "ask_humanergy_platform": [
+  "ask_humenerdia_platform": [
     [
-      "What is Humanergy?",
-      "Humanergy is an intelligent energy management platform that combines real-time monitoring, machine learning analytics, and ISO 50001 compliance tools to help industrial facilities optimize energy consumption and reduce costs."
+      "What is HumanEnerDIA?",
+      "HumanEnerDIA is an intelligent energy management platform that combines real-time monitoring, machine learning analytics, and ISO 50001 compliance tools to help industrial facilities optimize energy consumption and reduce costs."
     ],
     [
-      "What is the Humanergy platform?",
-      "Humanergy is a comprehensive Energy Management System (EnMS) platform featuring real-time dashboards, baseline prediction, anomaly detection, forecasting, KPI tracking, and voice assistant capabilities through OVOS integration."
+      "What is the HumanEnerDIA platform?",
+      "HumanEnerDIA is a comprehensive Energy Management System (EnMS) platform featuring real-time dashboards, baseline prediction, anomaly detection, forecasting, KPI tracking, and voice assistant capabilities through OVOS integration."
     ],
     [
-      "What features does Humanergy have?",
-      "Humanergy includes: Analytics dashboards (Baseline, Anomaly, KPI, Forecast), Grafana visualizations (11 SOTA dashboards), OVOS voice assistant for hands-free queries, PDF report generation, and Node-RED data pipelines."
+      "What features does HumanEnerDIA have?",
+      "HumanEnerDIA includes: Analytics dashboards (Baseline, Anomaly, KPI, Forecast), Grafana visualizations (11 SOTA dashboards), OVOS voice assistant for hands-free queries, PDF report generation, and Node-RED data pipelines."
     ],
     [
-      "What can I do with Humanergy?",
+      "What can I do with HumanEnerDIA?",
       "You can monitor energy consumption in real-time, predict baseline usage with ML models, detect anomalies, forecast future demand, track KPIs, generate reports, and query data using voice commands."
     ],
     [
-      "How do I navigate Humanergy?",
+      "How do I navigate HumanEnerDIA?",
       "Use the sidebar menu to access different sections: Dashboard (overview), Analytics (Baseline, Anomaly, KPI, Forecast), Visualizations (Sankey, Heatmap, Comparison), and Grafana dashboards for detailed metrics."
     ]
   ],
   "ask_portal_dashboard": [
     [
       "What is the main dashboard?",
-      "The main dashboard is your command center showing real-time energy consumption, key metrics, alerts, and quick access to all Humanergy features."
+      "The main dashboard is your command center showing real-time energy consumption, key metrics, alerts, and quick access to all HumanEnerDIA features."
     ],
     [
       "What can I see on the dashboard?",
@@ -10282,7 +10282,7 @@
     ],
     [
       "What is the difference between Analytics and Grafana?",
-      "Analytics pages are Humanergy's custom interfaces for training ML models and detailed analysis. Grafana dashboards provide real-time visualization with 11 pre-built SOTA dashboards for monitoring."
+      "Analytics pages are HumanEnerDIA's custom interfaces for training ML models and detailed analysis. Grafana dashboards provide real-time visualization with 11 pre-built SOTA dashboards for monitoring."
     ],
     [
       "Where can I find energy consumption data?",
@@ -10290,14 +10290,14 @@
     ],
     [
       "What is the sidebar menu for?",
-      "The sidebar provides navigation to all Humanergy sections: Home, Analytics (Baseline, Anomaly, KPI, Forecast), Visualizations, Grafana Dashboards, and OVOS voice assistant status."
+      "The sidebar provides navigation to all HumanEnerDIA sections: Home, Analytics (Baseline, Anomaly, KPI, Forecast), Visualizations, Grafana Dashboards, and OVOS voice assistant status."
     ],
     [
       "How do I access different features?",
       "Click on any section in the left sidebar. Analytics features have dropdown menus. Grafana opens in a new embedded view. Reports can be generated from the Analytics sections."
     ],
     [
-      "What are the main sections of Humanergy?",
+      "What are the main sections of HumanEnerDIA?",
       "Main sections: Dashboard (overview), Baseline (ML prediction), Anomaly Detection (alerts), KPI (metrics), Forecast (demand prediction), Visualizations (Sankey/Heatmap), and Grafana (11 dashboards)."
     ],
     [
@@ -10978,15 +10978,15 @@
   "ask_grafana_general": [
     [
       "What is Grafana?",
-      "Grafana is an open-source data visualization and monitoring platform. In Humanergy's EnMS, Grafana provides 12 interactive dashboards (SOTA collection) for visualizing energy data, machine performance, anomalies, costs, and ISO 50001 compliance metrics in real-time."
+      "Grafana is an open-source data visualization and monitoring platform. In HumanEnerDIA's EnMS, Grafana provides 12 interactive dashboards (SOTA collection) for visualizing energy data, machine performance, anomalies, costs, and ISO 50001 compliance metrics in real-time."
     ],
     [
       "What does SOTA stand for?",
-      "SOTA stands for 'State Of The Art' - Humanergy's premium dashboard collection with best-practice visualizations and ML-powered insights."
+      "SOTA stands for 'State Of The Art' - HumanEnerDIA's premium dashboard collection with best-practice visualizations and ML-powered insights."
     ],
     [
       "How many Grafana dashboards are there?",
-      "Humanergy includes 11 SOTA Grafana dashboards: Factory Overview, ISO 50001 EnPI, Anomaly Detection, Cost Analytics, Executive Summary, Machine Health, ML Performance, Operational Efficiency, Predictive Analytics, Real-Time Production, and Environmental Impact."
+      "HumanEnerDIA includes 11 SOTA Grafana dashboards: Factory Overview, ISO 50001 EnPI, Anomaly Detection, Cost Analytics, Executive Summary, Machine Health, ML Performance, Operational Efficiency, Predictive Analytics, Real-Time Production, and Environmental Impact."
     ],
     [
       "How do I access Grafana dashboards?",
@@ -11040,7 +11040,7 @@
     ],
     [
       "What is OVOS?",
-      "OVOS (Open Voice Operating System) is the voice assistant integrated with Humanergy. It lets you query energy data, check machine status, get KPIs, forecasts, and reports using natural voice commands without touching the keyboard."
+      "OVOS (Open Voice Operating System) is the voice assistant integrated with HumanEnerDIA. It lets you query energy data, check machine status, get KPIs, forecasts, and reports using natural voice commands without touching the keyboard."
     ],
     [
       "Can OVOS generate reports?",
@@ -11220,7 +11220,7 @@
   "ask_concept_baseline": [
     [
       "What is energy baseline?",
-      "Energy baseline is a quantitative reference point that represents expected energy consumption under normal operating conditions. In Humanergy, baselines are ML models trained on historical data with drivers like temperature, pressure, load, and production volume."
+      "Energy baseline is a quantitative reference point that represents expected energy consumption under normal operating conditions. In HumanEnerDIA, baselines are ML models trained on historical data with drivers like temperature, pressure, load, and production volume."
     ],
     [
       "How is energy baseline calculated?",
@@ -11236,7 +11236,7 @@
     ],
     [
       "What are baseline drivers?",
-      "Drivers are independent variables affecting energy consumption: temperature (HVAC load), pressure (compressor work), production volume (machine utilization), and equipment load percentage. Humanergy supports multi-driver baseline models."
+      "Drivers are independent variables affecting energy consumption: temperature (HVAC load), pressure (compressor work), production volume (machine utilization), and equipment load percentage. HumanEnerDIA supports multi-driver baseline models."
     ],
     [
       "What is baseline deviation?",
@@ -11248,7 +11248,7 @@
     ],
     [
       "How often should baseline be retrained?",
-      "Retrain when: R\u00b2 drops below 0.7, operational changes occur (new equipment, process changes), or seasonally (quarterly). Humanergy supports manual and scheduled retraining."
+      "Retrain when: R\u00b2 drops below 0.7, operational changes occur (new equipment, process changes), or seasonally (quarterly). HumanEnerDIA supports manual and scheduled retraining."
     ],
     [
       "What is normalized baseline?",
