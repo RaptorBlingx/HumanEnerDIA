@@ -14,7 +14,7 @@ function initializeSidebar() {
             <!-- Dashboard Links (Only for Authenticated Users) -->
             <div id="dashboard-section" class="sidebar-section" style="display: none;">
                 <div class="sidebar-section-title">Dashboard</div>
-                <a href="/" class="sidebar-link">
+                <a href="/index.html" class="sidebar-link">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"></rect>
                         <rect x="14" y="3" width="7" height="7"></rect>
@@ -355,8 +355,8 @@ function logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_data');
     
-    // Redirect to auth page
-    window.location.href = '/auth.html';
+    // Redirect to about page (new landing page)
+    window.location.href = '/about.html';
 }
 
 // Initialize sidebar when DOM is ready

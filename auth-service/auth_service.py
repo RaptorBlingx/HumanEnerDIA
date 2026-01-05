@@ -140,7 +140,7 @@ def send_verification_email(email: str, token: str, full_name: str) -> bool:
         verification_link = f"{FRONTEND_URL}/verify-email.html?token={token}"
         
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = 'Verify Your ENMS Account'
+        msg['Subject'] = 'Verify Your HumanEnerDIA Account'
         msg['From'] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
         msg['To'] = email
         
@@ -151,27 +151,27 @@ def send_verification_email(email: str, token: str, full_name: str) -> bool:
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                <h1 style="color: white; margin: 0; font-size: 28px;">ENMS Platform</h1>
+        <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0; font-size: 28px;">HumanEnerDIA</h1>
                 <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Energy Management System</p>
             </div>
             
             <div style="background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none;">
-                <h2 style="color: #667eea; margin-top: 0;">Welcome, {full_name}!</h2>
+                <h2 style="color: #0A2463; margin-top: 0;">Welcome, {full_name}!</h2>
                 
-                <p>Thank you for registering with ENMS Platform. To complete your registration and access your dashboard, please verify your email address.</p>
+                <p>Thank you for registering with HumanEnerDIA. To complete your registration and access your dashboard, please verify your email address.</p>
                 
                 <div style="text-align: center; margin: 30px 0;">
                     <a href="{verification_link}" 
-                       style="display: inline-block; padding: 14px 32px; background: #667eea; color: white; 
+                       style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #0A2463 0%, #00A8E8 100%); color: white; 
                               text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">
                         Verify Email Address
                     </a>
                 </div>
                 
                 <p style="color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>
-                <p style="background: #f5f5f5; padding: 12px; border-radius: 4px; word-break: break-all; font-size: 12px; color: #667eea;">
+                <p style="background: #f5f5f5; padding: 12px; border-radius: 4px; word-break: break-all; font-size: 12px; color: #0A2463;">
                     {verification_link}
                 </p>
                 
@@ -182,13 +182,13 @@ def send_verification_email(email: str, token: str, full_name: str) -> bool:
                 </div>
                 
                 <p style="color: #999; font-size: 13px; margin-top: 30px;">
-                    If you didn't create an account with ENMS, please ignore this email.
+                    If you didn't create an account with HumanEnerDIA, please ignore this email.
                 </p>
             </div>
             
             <div style="background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
                 <p style="color: #666; font-size: 12px; margin: 0;">
-                    © 2025 ENMS Platform. All rights reserved.
+                    © 2026 HumanEnerDIA. All rights reserved.
                 </p>
             </div>
         </body>
@@ -226,7 +226,7 @@ def send_signup_notification(user_data: Dict) -> bool:
             return True
         
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = '🆕 New User Registration - ENMS Platform'
+        msg['Subject'] = '🆕 New User Registration - HumanEnerDIA'
         msg['From'] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
         msg['To'] = ', '.join(recipients)
         
@@ -237,13 +237,13 @@ def send_signup_notification(user_data: Dict) -> bool:
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
                 <h1 style="color: white; margin: 0; font-size: 24px;">New User Registration</h1>
             </div>
             
             <div style="background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none;">
-                <p style="font-size: 16px; margin-top: 0;">A new user has registered on the ENMS Platform:</p>
+                <p style="font-size: 16px; margin-top: 0;">A new user has registered on HumanEnerDIA:</p>
                 
                 <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
                     <table style="width: 100%; border-collapse: collapse;">
@@ -284,7 +284,7 @@ def send_signup_notification(user_data: Dict) -> bool:
                 
                 <div style="text-align: center; margin: 25px 0;">
                     <a href="{FRONTEND_URL}/admin/dashboard.html" 
-                       style="display: inline-block; padding: 12px 28px; background: #667eea; color: white; 
+                       style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #0A2463 0%, #00A8E8 100%); color: white; 
                               text-decoration: none; border-radius: 6px; font-weight: bold;">
                         View Admin Dashboard
                     </a>
@@ -293,7 +293,7 @@ def send_signup_notification(user_data: Dict) -> bool:
             
             <div style="background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
                 <p style="color: #666; font-size: 12px; margin: 0;">
-                    © 2025 ENMS Platform - Automated Notification
+                    © 2026 HumanEnerDIA - Automated Notification
                 </p>
             </div>
         </body>
@@ -1093,7 +1093,7 @@ def send_pilot_factory_admin_notification(application_data: dict) -> bool:
     try:
         # Admin email addresses
         admin_emails = [
-            'swe.mohamad.jarad@gmail.com',
+            'yazilim.aarti.muhendislik@gmail.com',
             'umut.ogur@aartimuhendislik.com'
         ]
         
