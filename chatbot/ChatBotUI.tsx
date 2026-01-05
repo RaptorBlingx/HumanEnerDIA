@@ -166,7 +166,7 @@ const ChatBotUI: React.FC = () => {
               <Zap size={18} className="tw-text-white" fill="currentColor" />
             </div>
             <div>
-              <h2 className="tw-font-bold tw-text-sm tw-leading-tight">Rasa Asistan</h2>
+              <h2 className="tw-font-bold tw-text-sm tw-leading-tight">HumanEnerDIA Assistant</h2>
               <p className="tw-text-[10px] tw-text-blue-100 tw-font-medium tw-opacity-90">
                 Online • AI Chatbot
               </p>
