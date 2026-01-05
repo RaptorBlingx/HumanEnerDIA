@@ -10244,23 +10244,51 @@
   "ask_humenerdia_platform": [
     [
       "What is HumanEnerDIA?",
-      "HumanEnerDIA is an intelligent energy management platform that combines real-time monitoring, machine learning analytics, and ISO 50001 compliance tools to help industrial facilities optimize energy consumption and reduce costs."
+      "HumanEnerDIA (Human-Centric Intelligent Energy Management System with Digital Intelligent Assistant) is an AI-powered energy management platform that combines real-time monitoring, machine learning analytics, and ISO 50001 compliance. It features voice and text-based digital intelligent assistants integrated with OVOS to enhance human engagement and well-being while improving energy performance in industrial facilities."
     ],
     [
       "What is the HumanEnerDIA platform?",
-      "HumanEnerDIA is a comprehensive Energy Management System (EnMS) platform featuring real-time dashboards, baseline prediction, anomaly detection, forecasting, KPI tracking, and voice assistant capabilities through OVOS integration."
+      "HumanEnerDIA is a comprehensive Energy Management System (EnMS) developed by A Plus Engineering with WASABI technology integration. It features real-time dashboards, baseline prediction, anomaly detection, forecasting, KPI tracking, and voice assistant capabilities through OVOS. The platform prioritizes worker engagement and human-centric digitalization while managing energy, manufacturing, climate, and operational data."
     ],
     [
       "What features does HumanEnerDIA have?",
-      "HumanEnerDIA includes: Analytics dashboards (Baseline, Anomaly, KPI, Forecast), Grafana visualizations (11 SOTA dashboards), OVOS voice assistant for hands-free queries, PDF report generation, and Node-RED data pipelines."
+      "HumanEnerDIA includes: Analytics dashboards (Baseline, Anomaly, KPI, Forecast), Grafana visualizations (11 SOTA dashboards), OVOS voice assistant for hands-free queries, text-based digital assistant for learning ISO 50001 standards, PDF report generation, Node-RED data pipelines, Docker-based deployment, and AI-assisted decision support system for energy efficiency measures."
     ],
     [
       "What can I do with HumanEnerDIA?",
-      "You can monitor energy consumption in real-time, predict baseline usage with ML models, detect anomalies, forecast future demand, track KPIs, generate reports, and query data using voice commands."
+      "You can monitor energy consumption in real-time, predict baseline usage with ML models, detect anomalies, forecast future demand, track KPIs, generate reports, query data using voice commands, learn about ISO 50001 standards through text-based assistant, get warnings and advice for resource efficiency, and receive appreciation for actions affecting energy performance."
     ],
     [
       "How do I navigate HumanEnerDIA?",
-      "Use the sidebar menu to access different sections: Dashboard (overview), Analytics (Baseline, Anomaly, KPI, Forecast), Visualizations (Sankey, Heatmap, Comparison), and Grafana dashboards for detailed metrics."
+      "Use the sidebar menu to access different sections: Dashboard (overview), Analytics (Baseline, Anomaly, KPI, Forecast), Visualizations (Sankey, Heatmap, Comparison), and Grafana dashboards for detailed metrics. You can also interact with the system using voice commands through OVOS or ask questions through the text-based digital assistant."
+    ],
+    [
+      "What is the goal of HumanEnerDIA?",
+      "HumanEnerDIA aims to enhance sustainability of industrial SMEs by facilitating energy system management and increasing human engagement. It promotes human-centric green digitalization, AI-driven decision making, and resource efficiency leading to carbon emissions reduction. The platform is offered as open-source to manufacturing SMEs to increase awareness and widespread usage of digital intelligent assistant technology."
+    ],
+    [
+      "Who developed HumanEnerDIA?",
+      "HumanEnerDIA is developed by A Plus Engineering (A Arti Muhendislik San. ve Tic. A.S.) in Turkey as part of the WASABI 1st Open Call for Experiments. It builds upon the Intel50001 Energy Management System with human-centric features and digital intelligent assistant integration using WASABI's OVOS framework."
+    ],
+    [
+      "What makes HumanEnerDIA human-centric?",
+      "HumanEnerDIA prioritizes worker engagement and well-being by making complex energy data easily accessible through voice and text interfaces. It reduces the technical expertise needed to interact with the system, provides learning support through digital assistant, warns and advises users on efficiency measures, and appreciates positive actions - making energy management more inclusive and user-friendly."
+    ],
+    [
+      "What industries can use HumanEnerDIA?",
+      "HumanEnerDIA is designed for industrial manufacturing sectors, particularly energy-intensive industries. It has been successfully deployed in electronic equipment production, household appliances manufacturing, mining, and textile industries in Turkey and Romania. The system is sector-independent and applicable to all manufacturing SMEs needing energy management."
+    ],
+    [
+      "What is WASABI and how does it relate to HumanEnerDIA?",
+      "WASABI (White-label shop for digital intelligent Assistance and human-AI collaboration in manufacturing) is an EU project providing the technology framework for HumanEnerDIA. HumanEnerDIA integrates WASABI's OVOS (Open Voice Operating System) platform to enable voice-based interaction and conversational AI interfaces for energy management."
+    ],
+    [
+      "How does HumanEnerDIA help with ISO 50001 compliance?",
+      "HumanEnerDIA is compliant with ISO 50001 standards for Energy Management Systems. It automates energy baseline establishment, EnPI calculations, energy review processes, monitoring and measurement of key characteristics, and documentation requirements. The text-based assistant helps users learn ISO 50001 requirements and their company's energy management policy and procedures."
+    ],
+    [
+      "What data does HumanEnerDIA collect?",
+      "HumanEnerDIA collects manufacturing data (raw materials, production volume, water consumption, working hours, waste amount), climate-related data (HDD, CDD, humidity, precipitation), operational data (maintenance, training activities), and energy consumption data from various sources to determine significant energy users, energy drivers, KPIs, and energy baselines."
     ]
   ],
   "ask_portal_dashboard": [
