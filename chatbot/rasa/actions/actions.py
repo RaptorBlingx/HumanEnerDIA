@@ -106,12 +106,12 @@ class ActionRetrieveAnswer(Action):
         
         # Anahtar kelime mapping - hangi kelimeler hangi alt konuya ait
         keyword_to_topic = {
-            # HUMANERGY PLATFORM topics (NEW - longer keywords for specificity)
-            "humanergy platform": "ask_humanergy_platform",
-            "humanergy": "ask_humanergy_platform",
-            "what is humanergy": "ask_humanergy_platform",
-            "humanergy features": "ask_humanergy_platform",
-            "navigate humanergy": "ask_humanergy_platform",
+            # HumanEnerDIA PLATFORM topics (NEW - longer keywords for specificity)
+            "humenerdia platform": "ask_humenerdia_platform",
+            "humenerdia": "ask_humenerdia_platform",
+            "what is humenerdia": "ask_humenerdia_platform",
+            "humenerdia features": "ask_humenerdia_platform",
+            "navigate humenerdia": "ask_humenerdia_platform",
             
             # PORTAL DASHBOARD topics (Phase 2)
             "main dashboard": "ask_portal_dashboard",
@@ -573,7 +573,7 @@ class ActionRetrieveAnswer(Action):
             "general": "ask_general_info",
             "general information": "ask_general_info",
             "overview": "ask_general_info",
-            "about humanergy": "ask_general_info",
+            "about humenerdia": "ask_general_info",
             
             # PROCESS topics (expanded coverage for Phase 8)
             "planning": "ask_energy_planning",
@@ -723,7 +723,7 @@ class ActionRetrieveAnswer(Action):
         scope_keywords = ['scope', 'boundary', 'boundaries']
         user_has_scope = any(keyword in user_message_lower for keyword in scope_keywords)
         
-        # PRIORITY 1: Topic-specific categories (e.g., ask_humanergy_platform) take precedence
+        # PRIORITY 1: Topic-specific categories (e.g., ask_humenerdia_platform) take precedence
         # This ensures keyword-matched topics are checked BEFORE generic process/definition lookups
         if topic and topic not in ["ask_scope"] and topic in QA_DATA and QA_DATA[topic]:
             best_answer = self._find_best_answer(user_message_lower, QA_DATA[topic])
@@ -778,8 +778,8 @@ class ActionRetrieveAnswer(Action):
         
         # Q&A verisinde bulunamazsa, domain'deki response'ları kullan
         topic_to_response = {
-            # HUMANERGY PLATFORM (NEW)
-            "ask_humanergy_platform": "utter_ask_humanergy_platform",
+            # HumanEnerDIA PLATFORM (NEW)
+            "ask_humenerdia_platform": "utter_ask_humenerdia_platform",
             
             # PORTAL PAGES (Phase 2)
             "ask_portal_dashboard": "utter_ask_portal_dashboard",
