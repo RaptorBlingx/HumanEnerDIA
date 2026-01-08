@@ -515,10 +515,11 @@ app.include_router(factory_router, prefix=settings.API_PREFIX)  # /factory/* end
 app.include_router(analytics_router, prefix=settings.API_PREFIX)  # /analytics/* endpoints
 app.include_router(performance_router, prefix=settings.API_PREFIX)  # /performance/* endpoints (Phase 2)
 app.include_router(iso50001_router)  # /api/v1/iso50001/* endpoints (Phase 3)
+# WebSocket routes for real-time updates (Phase 4 Session 5)
+app.include_router(websocket_router)  # /ws/* endpoints for real-time data
 # DEPRECATED: Old /ovos/* routes (still work but marked for removal)
 app.include_router(ovos_router, prefix=settings.API_PREFIX)  # DEPRECATED - Use /factory, /analytics
 app.include_router(ovos_training_router, prefix=f"{settings.API_PREFIX}/ovos", tags=["OVOS Training (DEPRECATED)"])  # DEPRECATED - Use /baseline/train-seu
-app.include_router(websocket_router, prefix=settings.API_PREFIX)  # Phase 4 Session 5: WebSocket Routes
 app.include_router(seu_router, prefix=settings.API_PREFIX)  # ISO 50001 EnPI
 app.include_router(energy_sources_router, prefix=settings.API_PREFIX)  # Energy Sources & Features API
 app.include_router(multi_energy_router, prefix=settings.API_PREFIX)  # Multi-Energy Machine Support (Oct 27, 2025)

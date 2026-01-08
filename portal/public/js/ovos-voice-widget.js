@@ -16,11 +16,11 @@
         // API endpoint - works with nginx proxy
         // Updated to use cleaner /api/ovos/ route (nginx → analytics → OVOS bridge)
         apiUrl: window.location.port === '8001' 
-            ? '/api/v1/ovos/voice/query'  // Direct to analytics (dev)
-            : '/api/ovos/voice/query',     // Via nginx proxy (production)
+            ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/query'  // Direct to analytics (dev)
+            : 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/query',     // Via nginx proxy (production)
         healthUrl: window.location.port === '8001' 
-            ? '/api/v1/ovos/voice/health'  // Direct to analytics (dev)
-            : '/api/ovos/voice/health',    // Via nginx proxy (production)
+            ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/health'  // Direct to analytics (dev)
+            : 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/health',    // Via nginx proxy (production)
         welcomeMessage: 'Hello! I\'m your EnMS voice assistant. Ask me about energy consumption, machine status, anomalies, forecasts, or say "factory overview" for a summary. Say "Jarvis" to activate hands-free!',
         placeholder: 'Ask about energy, machines, anomalies...',
         title: 'OVOS Voice Assistant',
@@ -44,6 +44,225 @@
     let voicePermissionGranted = false;  // One-time permission flag
     let porcupine = null;
     let webVp = null;  // Web Voice Processor
+
+    // WebSocket for proactive warnings (WASABI Phase 1)
+    let ws = null;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_DELAY = 30000; // 30 seconds
+    const WS_URL = 'ws://' + window.location.hostname + ':8080/api/analytics/ws/anomalies';
+
+    // Notification Management (WASABI Phase 1)
+    let notifications = JSON.parse(localStorage.getItem('ovos_notifications') || '[]');
+    let unreadCount = 0;
+
+    // Load notifications from localStorage on startup
+    function loadNotifications() {
+        notifications = JSON.parse(localStorage.getItem('ovos_notifications') || '[]');
+        unreadCount = notifications.filter(n => !n.read).length;
+        updateNotificationBadge();
+        renderNotificationList();
+    }
+
+    // Save notifications to localStorage
+    function saveNotifications() {
+        localStorage.setItem('ovos_notifications', JSON.stringify(notifications));
+    }
+
+    // Add new notification
+    function addNotification(data) {
+        const notification = {
+            id: Date.now() + Math.random().toString(36).substring(2, 9),
+            timestamp: new Date().toISOString(),
+            message: data.message || 'New notification',
+            severity: data.severity || 'warning',
+            machine_id: data.machine_id || 'Unknown',
+            metric: data.metric || '',
+            value: data.value || '',
+            expected: data.expected || '',
+            read: false
+        };
+        
+        // Add to beginning of array
+        notifications.unshift(notification);
+        
+        // Keep only last 50 notifications
+        if (notifications.length > 50) {
+            notifications = notifications.slice(0, 50);
+        }
+        
+        unreadCount++;
+        saveNotifications();
+        updateNotificationBadge();
+        renderNotificationList();
+        
+        return notification;
+    }
+
+    // Mark notification as read
+    function markAsRead(notificationId) {
+        const notification = notifications.find(n => n.id === notificationId);
+        if (notification && !notification.read) {
+            notification.read = true;
+            unreadCount = Math.max(0, unreadCount - 1);
+            saveNotifications();
+            updateNotificationBadge();
+            renderNotificationList();
+        }
+    }
+
+    // Mark all as read
+    function markAllAsRead() {
+        notifications.forEach(n => n.read = true);
+        unreadCount = 0;
+        saveNotifications();
+        updateNotificationBadge();
+        renderNotificationList();
+    }
+
+    // Remove single notification
+    function removeNotification(notificationId) {
+        const notification = notifications.find(n => n.id === notificationId);
+        if (notification && !notification.read) {
+            unreadCount = Math.max(0, unreadCount - 1);
+        }
+        notifications = notifications.filter(n => n.id !== notificationId);
+        saveNotifications();
+        updateNotificationBadge();
+        renderNotificationList();
+    }
+
+    // Clear all notifications
+    function clearAllNotifications() {
+        if (notifications.length === 0) return;
+        
+        if (confirm('Clear all notifications?')) {
+            notifications = [];
+            unreadCount = 0;
+            saveNotifications();
+            updateNotificationBadge();
+            renderNotificationList();
+        }
+    }
+
+    // Update badge (red dot)
+    function updateNotificationBadge() {
+        const badge = document.getElementById('notification-badge');
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+
+    // Toggle notification panel
+    function toggleNotificationPanel() {
+        const panel = document.getElementById('notification-panel');
+        if (panel) {
+            if (panel.style.display === 'none' || !panel.style.display) {
+                panel.style.display = 'block';
+                renderNotificationList();
+                // Mark all as read when panel is opened
+                setTimeout(() => markAllAsRead(), 1000);
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+    }
+
+    // Close panel when clicking outside
+    document.addEventListener('click', function(event) {
+        const panel = document.getElementById('notification-panel');
+        const bell = document.getElementById('notification-bell');
+        
+        if (panel && bell && panel.style.display === 'block') {
+            if (!panel.contains(event.target) && !bell.contains(event.target)) {
+                panel.style.display = 'none';
+            }
+        }
+    });
+
+    // Render notification list
+    function renderNotificationList() {
+        const listContainer = document.getElementById('notification-list');
+        if (!listContainer) return;
+        
+        if (notifications.length === 0) {
+            listContainer.innerHTML = `
+                <div class="notification-empty">
+                    <i class="bi bi-bell-slash"></i>
+                    <p>No notifications yet</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const html = notifications.map(notification => {
+            const date = new Date(notification.timestamp);
+            const timeAgo = getTimeAgo(date);
+            const iconClass = notification.severity || 'warning';
+            const unreadClass = notification.read ? '' : 'unread';
+            
+            return `
+                <div class="notification-item ${unreadClass}" onclick="markAsRead('${notification.id}')">
+                    <div style="display: flex; gap: 12px;">
+                        <div class="notification-item-icon ${iconClass}">
+                            <i class="bi bi-${getIconForSeverity(notification.severity)}"></i>
+                        </div>
+                        <div class="notification-item-content">
+                            <div class="notification-item-message">${escapeHtml(notification.message)}</div>
+                            <div class="notification-item-time">
+                                <i class="bi bi-clock"></i>
+                                ${timeAgo}
+                            </div>
+                        </div>
+                        <button class="notification-item-close" onclick="event.stopPropagation(); removeNotification('${notification.id}')" title="Remove">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        listContainer.innerHTML = html;
+    }
+
+    // Get icon for severity
+    function getIconForSeverity(severity) {
+        const icons = {
+            'warning': 'exclamation-triangle-fill',
+            'error': 'exclamation-circle-fill',
+            'critical': 'exclamation-octagon-fill',
+            'info': 'info-circle-fill'
+        };
+        return icons[severity] || 'bell-fill';
+    }
+
+    // Get time ago string
+    function getTimeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        
+        if (seconds < 60) return 'Just now';
+        if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
+        if (seconds < 86400) return Math.floor(seconds / 3600) + ' hr ago';
+        if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
+        
+        return date.toLocaleDateString();
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Make functions global for onclick handlers
+    window.toggleNotificationPanel = toggleNotificationPanel;
+    window.clearAllNotifications = clearAllNotifications;
+    window.markAsRead = markAsRead;
+    window.removeNotification = removeNotification;
 
     // Create floating "Enable Voice" button (shown until user grants permission)
     function createEnableVoiceButton() {
@@ -75,6 +294,200 @@
         const container = document.createElement('div');
         container.innerHTML = btnHTML;
         document.body.appendChild(container.firstElementChild);
+    }
+
+    // WebSocket Functions (WASABI Phase 1: Proactive Warnings)
+    function connectWebSocket() {
+        console.log('[OVOS Widget] Connecting to WebSocket:', WS_URL);
+        
+        try {
+            ws = new WebSocket(WS_URL);
+            
+            ws.onopen = () => {
+                console.log('[OVOS Widget] ✅ WebSocket connected');
+                reconnectAttempts = 0; // Reset on successful connection
+                updateStatus('Connected', 'green');
+            };
+            
+            ws.onmessage = (event) => handleWebSocketMessage(event);
+            
+            ws.onerror = (error) => {
+                console.error('[OVOS Widget] WebSocket error:', error);
+            };
+            
+            ws.onclose = (event) => {
+                console.log('[OVOS Widget] WebSocket closed:', event.code, event.reason);
+                updateStatus('Reconnecting...', 'orange');
+                reconnectWebSocket();
+            };
+        } catch (error) {
+            console.error('[OVOS Widget] Failed to create WebSocket:', error);
+            reconnectWebSocket();
+        }
+    }
+
+    function handleWebSocketMessage(event) {
+        console.log('[OVOS Widget] WebSocket message received:', event.data);
+        
+        try {
+            const message = JSON.parse(event.data);
+            console.log('[OVOS Widget] Parsed message:', message);
+            console.log('[OVOS Widget] Message type:', message.type);
+            console.log('[OVOS Widget] Message data:', message.data);
+            
+            // Handle different message types
+            if (message.type === 'welcome') {
+                console.log('[OVOS Widget] Connected to channel:', message.data?.channel);
+            } else if (message.type === 'anomaly_detected' || message.type === 'anomaly') {
+                // Handle double-nested data structure from event subscriber
+                const eventData = message.data?.data || message.data;
+                console.log('[OVOS Widget] Calling showProactiveWarning with data:', eventData);
+                showProactiveWarning(eventData);
+            } else if (message.type === 'system_alert' || message.type === 'alert') {
+                const eventData = message.data?.data || message.data;
+                showProactiveWarning(eventData);
+            } else {
+                console.log('[OVOS Widget] Unhandled message type:', message.type);
+            }
+        } catch (error) {
+            console.error('[OVOS Widget] Failed to parse WebSocket message:', error);
+        }
+    }
+
+    function reconnectWebSocket() {
+        if (reconnectAttempts >= 10) {
+            console.log('[OVOS Widget] Max reconnect attempts reached, stopping');
+            updateStatus('Disconnected', 'red');
+            return;
+        }
+        
+        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), MAX_RECONNECT_DELAY);
+        reconnectAttempts++;
+        console.log(`[OVOS Widget] Reconnecting in ${delay}ms (attempt ${reconnectAttempts}/10)`);
+        
+        setTimeout(connectWebSocket, delay);
+    }
+
+    function updateStatus(text, color) {
+        const statusEl = document.getElementById('ovos-status');
+        if (statusEl) {
+            statusEl.textContent = text;
+            statusEl.style.color = color || '';
+        }
+    }
+
+    function showProactiveWarning(data) {
+        console.log('[OVOS Widget] Showing proactive warning:', data);
+        
+        // Create warning message from event data
+        const machine = data.machine_id || data.machine || 'Unknown Machine';
+        const metric = data.metric || 'status';
+        const value = data.value !== undefined ? data.value : (data.current_value || 'N/A');
+        const severity = data.severity || 'warning';
+        
+        // Format message based on available data
+        let message;
+        if (data.message) {
+            // Use provided message if available
+            message = `⚠️ ${machine}: ${data.message}`;
+        } else if (data.expected) {
+            // Show deviation from expected
+            message = `⚠️ ${machine}: ${metric} is ${value} (expected: ${data.expected})`;
+        } else {
+            // Basic format
+            message = `⚠️ ${machine}: ${metric} is ${value}`;
+        }
+        
+        // Add to notification bell
+        addNotification({
+            message: message,
+            severity: severity,
+            machine_id: machine,
+            metric: metric,
+            value: value,
+            expected: data.expected
+        });
+        
+        // Add message to chat (even if widget is closed)
+        addBotMessage(message, severity);
+        
+        // Show notification popup if widget is closed
+        if (!isOpen) {
+            showNotificationPopup(message, severity);
+        }
+        
+        // Play alert sound if audio enabled
+        if (audioEnabled) {
+            playAlertSound();
+        }
+    }
+
+    function showNotificationPopup(message, severity) {
+        // Create popup toast notification
+        const toast = document.createElement('div');
+        toast.className = 'ovos-toast ovos-toast-' + severity;
+        toast.innerHTML = `
+            <div class="ovos-toast-icon">⚠️</div>
+            <div class="ovos-toast-content">
+                <div class="ovos-toast-title">Proactive Warning</div>
+                <div class="ovos-toast-message">${message}</div>
+            </div>
+            <button class="ovos-toast-close">×</button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Auto-dismiss after 10 seconds
+        setTimeout(() => {
+            toast.classList.add('ovos-toast-hide');
+            setTimeout(() => toast.remove(), 300);
+        }, 10000);
+        
+        // Close button
+        toast.querySelector('.ovos-toast-close').addEventListener('click', () => {
+            toast.classList.add('ovos-toast-hide');
+            setTimeout(() => toast.remove(), 300);
+        });
+        
+        // Click to open widget
+        toast.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('ovos-toast-close')) {
+                if (!isOpen) toggleWidget();
+                toast.classList.add('ovos-toast-hide');
+                setTimeout(() => toast.remove(), 300);
+            }
+        });
+    }
+
+    function playAlertSound() {
+        // Simple beep using Web Audio API
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800; // Hz
+            gainNode.gain.value = 0.3; // Volume
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        } catch (error) {
+            console.error('[OVOS Widget] Failed to play alert sound:', error);
+        }
+    }
+
+    function addBotMessage(text, className) {
+        const messagesDiv = document.getElementById('ovos-messages');
+        if (!messagesDiv) return;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'ovos-message ovos-bot' + (className ? ' ovos-' + className : '');
+        messageDiv.innerHTML = `<div class="ovos-bubble">${text}</div>`;
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
     // Create widget HTML
@@ -1347,6 +1760,9 @@
         createStyles();
         createWidget();
         
+        // Load notifications from localStorage
+        loadNotifications();
+        
         // Create floating "Enable Voice" button (for one-time permission)
         createEnableVoiceButton();
 
@@ -1384,6 +1800,9 @@
         
         // Initialize speech recognition
         initSpeechRecognition();
+
+        // Connect to WebSocket for proactive warnings (WASABI Phase 1)
+        connectWebSocket();
 
         console.log('✅ EnMS OVOS Voice Widget loaded (hands-free ready - click "Enable Voice" to start)');
     }
