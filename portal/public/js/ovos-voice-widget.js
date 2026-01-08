@@ -13,14 +13,14 @@
 
     // Configuration
     const CONFIG = {
-        // API endpoint - works with nginx proxy
-        // Updated to use cleaner /api/ovos/ route (nginx → analytics → OVOS bridge)
+        // API endpoint - MUST use nginx proxy to avoid CORS issues
+        // Browser on :8080 cannot directly access :8001 due to CORS
         apiUrl: window.location.port === '8001' 
-            ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/query'  // Direct to analytics (dev)
-            : 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/query',     // Via nginx proxy (production)
+            ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/query'  // Direct (when testing from :8001)
+            : '/api/ovos/voice/query',     // Via nginx proxy (production - relative path)
         healthUrl: window.location.port === '8001' 
-            ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/health'  // Direct to analytics (dev)
-            : 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/health',    // Via nginx proxy (production)
+            ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/health'  // Direct (when testing from :8001)
+            : '/api/ovos/voice/health',    // Via nginx proxy (production - relative path)
         welcomeMessage: 'Hello! I\'m your EnMS voice assistant. Ask me about energy consumption, machine status, anomalies, forecasts, or say "factory overview" for a summary. Say "Jarvis" to activate hands-free!',
         placeholder: 'Ask about energy, machines, anomalies...',
         title: 'OVOS Voice Assistant',
@@ -49,7 +49,7 @@
     let ws = null;
     let reconnectAttempts = 0;
     const MAX_RECONNECT_DELAY = 30000; // 30 seconds
-    const WS_URL = 'ws://' + window.location.hostname + ':8080/api/analytics/ws/anomalies';
+    const WS_URL = '/api/analytics/ws/anomalies'; // Relative path through nginx
 
     // Notification Management (WASABI Phase 1)
     let notifications = JSON.parse(localStorage.getItem('ovos_notifications') || '[]');
@@ -298,10 +298,15 @@
 
     // WebSocket Functions (WASABI Phase 1: Proactive Warnings)
     function connectWebSocket() {
-        console.log('[OVOS Widget] Connecting to WebSocket:', WS_URL);
+        // Build WebSocket URL based on current page protocol
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = window.location.host; // Includes port if present
+        const wsFullUrl = `${wsProtocol}//${wsHost}${WS_URL}`;
+        
+        console.log('[OVOS Widget] Connecting to WebSocket:', wsFullUrl);
         
         try {
-            ws = new WebSocket(WS_URL);
+            ws = new WebSocket(wsFullUrl);
             
             ws.onopen = () => {
                 console.log('[OVOS Widget] ✅ WebSocket connected');
