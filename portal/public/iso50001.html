@@ -31,14 +31,14 @@
         header {
             background: rgba(10, 36, 99, 0.95);
             backdrop-filter: blur(10px);
-            padding: 1rem 2rem 1rem 0;
+            padding: 1rem 0;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             border-bottom: 2px solid rgba(0, 168, 232, 0.3);
         }
 
         nav {
-            max-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
+            padding: 0 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -189,6 +189,10 @@
             }
         }
     </style>
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
 </head>
 <body>
     <!-- Simplified Header with Logo and Hamburger Only -->
@@ -208,15 +212,6 @@
                     </svg>
                     HumanEnerDIA
                 </a>
-            </div>
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <button id="ovos-enable-voice-nav" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    </svg>
-                    <span>Enable Voice</span>
-                </button>
             </div>
         </nav>
     </header>
@@ -346,25 +341,6 @@
                 <li><strong>Carbon Reduction:</strong> Track and reduce greenhouse gas emissions</li>
                 <li><strong>Stakeholder Confidence:</strong> Build trust with customers, investors, regulators</li>
             </ul>
-
-            <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>Implementation Roadmap</h2>
-
-            <div class="highlight-box">
-                <h3>Phase 1: Energy Review (Months 1-2)</h3>
-                <p>Data collection, SEU identification, baseline establishment</p>
-                
-                <h3>Phase 2: Planning (Month 3)</h3>
-                <p>Set energy objectives, targets, and action plans</p>
-                
-                <h3>Phase 3: Implementation (Months 4-6)</h3>
-                <p>Deploy systems, train team, establish processes</p>
-                
-                <h3>Phase 4: Measurement (Months 7-10)</h3>
-                <p>Monitor EnPIs, track progress, internal audits</p>
-                
-                <h3>Phase 5: Certification (Months 11-12)</h3>
-                <p>Management review, external audit, ISO 50001 certification</p>
-            </div>
 
             <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 16 16 12 12 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line></svg>Get Started</h2>
             <p>

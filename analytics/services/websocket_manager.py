@@ -36,7 +36,13 @@ class ConnectionManager:
             client_id: Unique client identifier
             connection_type: Type of connection (dashboard, anomalies, training, events)
         """
-        await websocket.accept()
+        # Accept WebSocket with CORS support (allow any origin for dev)
+        # In production, specify allowed origins: await websocket.accept(headers=[("Access-Control-Allow-Origin", "...")])
+        try:
+            await websocket.accept()
+        except Exception as e:
+            logger.error(f"Failed to accept WebSocket connection: {e}")
+            raise
         
         if connection_type not in self.active_connections:
             self.active_connections[connection_type] = {}
@@ -49,11 +55,12 @@ class ConnectionManager:
         # Send welcome message
         await self.send_personal_message(
             {
-                "type": "connection",
-                "status": "connected",
-                "client_id": client_id,
-                "connection_type": connection_type,
-                "timestamp": datetime.utcnow().isoformat()
+                "type": "welcome",
+                "data": {
+                    "channel": connection_type,
+                    "client_id": client_id,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
             },
             websocket
         )

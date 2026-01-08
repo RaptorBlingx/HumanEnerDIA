@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Image as ImageIcon, X, Trash2, Zap, MessageCircle, Minimize2 } from 'lucide-react';
 import { Message, Role, Attachment } from './types';
-import { initChat, sendMessageStream } from './services/rasa';
+import { initChat, sendMessageStream } from './services/ovos';
 import { generateId, fileToAttachment } from './utils/helpers';
 import MessageBubble from './components/MessageBubble';
 import TypingIndicator from './components/TypingIndicator';
