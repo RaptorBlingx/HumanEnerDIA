@@ -289,6 +289,9 @@ a:hover {
  * ============================================================================ */
 
 .industrial-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     background-color: var(--bg-header);
     color: var(--text-inverse);
     padding: var(--space-4) 0;
