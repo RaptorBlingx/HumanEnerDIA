@@ -1,7 +1,7 @@
 # 🏭 Pilot Factory Application System - Implementation Plan
 
 **Project:** HumanEnerDIA Pilot Factory Recruitment for WASABI Project  
-**Deadline:** Application deadline is 23 January 2026  
+**Deadline:** Application deadline is 30 January 2026  
 **Created:** January 2, 2025  
 **Last Updated:** January 2, 2026 - 17:30 UTC
 
@@ -893,7 +893,7 @@ function initializeFooter() {
   - "How to apply" section
 - [x] Add prominent "Apply Now" button linking to `/pilot-factory-application.html`
 - [x] Add contact info: `bilgi@aartimuhendislik.com`
-- [x] Add deadline notice: "Deadline: 23 January 2026"
+- [x] Add deadline notice: "Deadline: 30 January 2026"
 - [x] Add footer with APlus Engineering and WASABI logos
 - [x] Apply blue gradient industrial theme (same as other pages)
 - [x] Ensure responsive design (mobile-friendly)
@@ -1624,7 +1624,7 @@ function initializeFooter() {
 
 2. **Contact Info:** Use `bilgi@aartimuhendislik.com` for general inquiries on invitation page
 
-3. **Deadline:** Application deadline is **23 January 2026** (hardcoded, no countdown timer)
+3. **Deadline:** Application deadline is **30 January 2026** (hardcoded, no countdown timer)
 
 4. **Security:** Admin dashboard requires authentication, public pages don't
 
