@@ -54,7 +54,7 @@
 
 ✅ **Accessibility:** Public (like About, ISO50001, Contact pages)  
 ✅ **Form Handling:** Database + Email notifications  
-✅ **Deadline:** 23 January 2026 (displayed, no countdown timer)  
+✅ **Deadline:** 30 January 2026 (displayed, no countdown timer)  
 ✅ **Notifications:** Applicant confirmation + Admin alerts  
 ✅ **Design:** Blue gradient industrial theme  
 ✅ **Required Fields:** All form fields mandatory  
@@ -160,7 +160,7 @@ portal/public/
 
 ## ⚠️ Important Notes
 
-- Application deadline: **23 January 2026** (3 weeks from now)
+- Application deadline: **30 January 2026** (3 weeks from now)
 - Contact email for inquiries: **bilgi@aartimuhendislik.com**
 - Admin notifications go to: **swe.mohamad.jarad@gmail.com** and **umut.ogur@aartimuhendislik.com**
 - No countdown timer (manager's preference)
