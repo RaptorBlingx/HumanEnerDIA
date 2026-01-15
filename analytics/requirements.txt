@@ -41,6 +41,7 @@ joblib==1.3.2
 
 # PDF Report Generation
 reportlab>=4.0.0
+playwright==1.40.0
 
 # Logging & Monitoring
 python-json-logger==2.0.7
@@ -62,6 +63,6 @@ pytest==7.4.3
 pytest-asyncio==0.21.1
 
 # PDF Report Generation (reports_v2)
-playwright>=1.40.0
+# playwright is already installed above (v1.40.0)
 kaleido>=0.2.1
 plotly>=5.18.0

@@ -297,7 +297,7 @@ function renderApplicationsTable(applications) {
     }
 
     tbody.innerHTML = applications.map(app => `
-        <tr>
+        <tr data-app-id="${app.id}">
             <td><a href="/admin/pilot-application-detail.html?id=${app.id}" class="ref-link">${app.application_ref}</a></td>
             <td><strong>${app.company_name}</strong></td>
             <td>${app.contact_name}</td>
@@ -311,6 +311,7 @@ function renderApplicationsTable(applications) {
                 <div class="action-buttons">
                     <button class="btn-small btn-view" onclick="viewApplication(${app.id})">View</button>
                     <button class="btn-small btn-email" onclick="quickEmail('${app.contact_email}', '${app.application_ref}')">Email</button>
+                    <button class="btn-small btn-delete" onclick="deleteApplication(${app.id}, '${app.application_ref}', '${app.company_name}')" style="background: #dc3545;">Delete</button>
                 </div>
             </td>
         </tr>
@@ -604,6 +605,57 @@ function changePage(page) {
 // View application
 function viewApplication(id) {
     window.location.href = `/admin/pilot-application-detail.html?id=${id}`;
+}
+
+// Delete application
+async function deleteApplication(id, ref, companyName) {
+    if (!confirm(`⚠️ Are you sure you want to DELETE this application?\n\nRef: ${ref}\nCompany: ${companyName}\n\nThis action CANNOT be undone!`)) {
+        return;
+    }
+    
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/auth.html';
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/admin/pilot-applications/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            showToast(data.message || 'Application deleted successfully', 'success');
+            
+            // Remove row from table with animation
+            const row = document.querySelector(`tr[data-app-id="${id}"]`);
+            if (row) {
+                row.style.transition = 'opacity 0.3s ease';
+                row.style.opacity = '0';
+                setTimeout(() => {
+                    row.remove();
+                    // Reload to update stats and pagination
+                    loadApplications();
+                    loadStats();
+                }, 300);
+            } else {
+                // If row not found, just reload
+                loadApplications();
+                loadStats();
+            }
+        } else {
+            showToast(data.error || 'Failed to delete application', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting application:', error);
+        showToast('Failed to delete application', 'error');
+    }
 }
 
 // Quick email

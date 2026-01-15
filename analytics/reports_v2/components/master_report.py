@@ -162,7 +162,106 @@ class MasterReport:
         
         logger.info(f"Complete report generated: {result_path}")
         return result_path
-    
+
+    async def generate_complete_report_async(self,
+                                 facility_name: str,
+                                 reporting_period: str,
+                                 generated_date: str,
+                                 cover_data: Dict[str, Any],
+                                 dashboard_data: Dict[str, Any],
+                                 energy_data: Dict[str, Any],
+                                 machine_ranking_data: Optional[Dict[str, Any]] = None,
+                                 machine_profiles: Optional[List[Dict[str, Any]]] = None,
+                                 cost_data: Optional[Dict[str, Any]] = None,
+                                 carbon_data: Optional[Dict[str, Any]] = None,
+                                 output_path: Path = None) -> Path:
+        """
+        Generate complete report PDF using ASYNC Playwright.
+        Use this method when calling from uvicorn/FastAPI endpoints.
+        """
+        logger.info("Generating complete report (async)...")
+        
+        # Build HTML using same logic as sync version
+        if output_path is None:
+            output_path = Path("/tmp/enms_report.pdf")
+            
+        toc_items = self._build_toc_items(machine_ranking_data, machine_profiles, cost_data, carbon_data)
+        sections_html = self._build_sections_html(
+            cover_data, dashboard_data, energy_data, 
+            machine_ranking_data, machine_profiles, cost_data, carbon_data
+        )
+        
+        full_html = self._build_complete_html(
+            facility_name=facility_name,
+            reporting_period=reporting_period,
+            generated_date=generated_date,
+            toc_items=toc_items,
+            sections_html=sections_html
+        )
+        
+        # Generate PDF using ASYNC method
+        logger.info(f"Rendering PDF (async) to {output_path}...")
+        result_path = await self.pdf_gen.generate_from_html_async(full_html, str(output_path))
+        
+        logger.info(f"Complete report generated (async): {result_path}")
+        return result_path
+
+    def _build_toc_items(self, machine_ranking_data, machine_profiles, cost_data, carbon_data):
+        """Build table of contents items."""
+        toc_items = [
+            {'title': 'Cover Page', 'page': 1},
+            {'title': 'Table of Contents', 'page': 2},
+            {'title': 'Executive Dashboard', 'page': 3},
+            {'title': 'Energy Overview', 'page': 4},
+        ]
+        current_page = 5
+        if machine_ranking_data:
+            toc_items.append({'title': 'Machine Ranking', 'page': current_page})
+            current_page += 1
+            if machine_profiles:
+                for profile in machine_profiles:
+                    name = profile.get('machine_name', profile.get('name', 'Machine'))
+                    toc_items.append({'title': f'  → {name}', 'page': current_page})
+                    current_page += 1
+        if cost_data:
+            toc_items.append({'title': 'Cost Analysis', 'page': current_page})
+            current_page += 1
+        if carbon_data:
+            toc_items.append({'title': 'Carbon Footprint', 'page': current_page})
+        return toc_items
+
+    def _build_sections_html(self, cover_data, dashboard_data, energy_data, 
+                            machine_ranking_data, machine_profiles, cost_data, carbon_data):
+        """Build HTML for all sections."""
+        sections_html = []
+        
+        cover_html = self.html_gen.render('sections/cover_page.html', cover_data)
+        sections_html.append(cover_html)
+        
+        dashboard_html = self.html_gen.render('sections/executive_dashboard.html', dashboard_data)
+        sections_html.append(dashboard_html)
+        
+        energy_html = self.html_gen.render('sections/energy_overview.html', energy_data)
+        sections_html.append(energy_html)
+        
+        if machine_ranking_data:
+            ranking_html = self.html_gen.render('sections/machine_ranking.html', machine_ranking_data)
+            sections_html.append(ranking_html)
+            if machine_profiles:
+                for profile_data in machine_profiles:
+                    profile_html = self.html_gen.render('sections/machine_profile.html', profile_data)
+                    sections_html.append(profile_html)
+        
+        if cost_data:
+            cost_html = self.html_gen.render('sections/cost_analysis.html', cost_data)
+            sections_html.append(cost_html)
+        
+        if carbon_data:
+            carbon_html = self.html_gen.render('sections/carbon_analysis.html', carbon_data)
+            sections_html.append(carbon_html)
+            
+        return sections_html
+
     def _build_complete_html(self,
                             facility_name: str,
                             reporting_period: str,
