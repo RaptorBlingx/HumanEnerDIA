@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 41,
+  "id": 38,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -27,38 +27,34 @@
         "type": "postgres",
         "uid": "TimescaleDB"
       },
-      "description": "Overall Equipment Effectiveness = Availability × Performance × Quality",
+      "description": "Monthly carbon footprint with target",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 1,
+          "decimals": 0,
           "mappings": [],
-          "max": 100,
+          "max": 200000,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": null
               },
               {
-                "color": "orange",
-                "value": 40
-              },
-              {
                 "color": "yellow",
-                "value": 60
+                "value": 150000
               },
               {
-                "color": "green",
-                "value": 85
+                "color": "red",
+                "value": 180000
               }
             ]
           },
-          "unit": "percent"
+          "unit": "kg"
         },
         "overrides": []
       },
@@ -73,14 +69,17 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "sum"
           ],
           "fields": "",
           "values": false
         },
         "showThresholdLabels": false,
         "showThresholdMarkers": true,
-        "text": {}
+        "text": {
+          "titleSize": 16,
+          "valueSize": 28
+        }
       },
       "pluginVersion": "10.2.0",
       "targets": [
@@ -92,11 +91,11 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "WITH oee_calc AS (\n  SELECT \n    COUNT(*) FILTER (WHERE ms.is_running) * 100.0 / NULLIF(COUNT(*), 0) as availability,\n    AVG(pd.production_count) * 100.0 / NULLIF(MAX(pd.production_count), 0) as performance,\n    100.0 as quality\n  FROM machine_status ms\n  CROSS JOIN LATERAL (\n    SELECT production_count \n    FROM production_data \n    WHERE time >= NOW() - INTERVAL '24 hours'\n  ) pd\n)\nSELECT ROUND((availability * performance * quality / 10000)::numeric, 1) as \"OEE\"\nFROM oee_calc;",
+          "rawSql": "SELECT \n  ROUND(SUM(er.total_energy_kwh * cf.emission_factor_kg_co2_per_kwh)::numeric, 0) as \"CO2 (kg)\"\nFROM energy_readings_1day er\nCROSS JOIN carbon_factors cf\nWHERE er.bucket >= DATE_TRUNC('month', NOW())\n  AND cf.region = 'default'\n  AND cf.is_active = true;",
           "refId": "A"
         }
       ],
-      "title": "Overall Equipment Effectiveness (OEE)",
+      "title": "Monthly Carbon Footprint",
       "type": "gauge"
     },
     {
@@ -104,30 +103,28 @@
         "type": "postgres",
         "uid": "TimescaleDB"
       },
-      "description": "Machine availability in last 24 hours",
+      "description": "Carbon emissions vs last month",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 1,
+          "decimals": 0,
           "mappings": [],
-          "max": 100,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": null
               },
               {
                 "color": "yellow",
-                "value": 80
+                "value": 0
               },
               {
-                "color": "green",
-                "value": 95
+                "color": "red",
+                "value": 5
               }
             ]
           },
@@ -143,6 +140,9 @@
       },
       "id": 2,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -151,9 +151,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "textMode": "auto"
       },
       "pluginVersion": "10.2.0",
       "targets": [
@@ -165,46 +163,36 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  ROUND((COUNT(*) FILTER (WHERE ms.is_running) * 100.0 / NULLIF(COUNT(*), 0))::numeric, 1) as \"Availability\"\nFROM machine_status ms;",
+          "rawSql": "WITH current_month AS (\n  SELECT SUM(er.total_energy_kwh * cf.emission_factor_kg_co2_per_kwh) as co2\n  FROM energy_readings_1day er\n  CROSS JOIN carbon_factors cf\n  WHERE er.bucket >= DATE_TRUNC('month', NOW())\n    AND cf.region = 'default' AND cf.is_active = true\n),\nlast_month AS (\n  SELECT SUM(er.total_energy_kwh * cf.emission_factor_kg_co2_per_kwh) as co2\n  FROM energy_readings_1day er\n  CROSS JOIN carbon_factors cf\n  WHERE er.bucket >= DATE_TRUNC('month', NOW()) - INTERVAL '1 month'\n    AND er.bucket < DATE_TRUNC('month', NOW())\n    AND cf.region = 'default' AND cf.is_active = true\n)\nSELECT ROUND(((cm.co2 - lm.co2) / NULLIF(lm.co2, 0) * 100)::numeric, 1) as \"Change %\"\nFROM current_month cm, last_month lm;",
           "refId": "A"
         }
       ],
-      "title": "Availability Rate",
-      "type": "gauge"
+      "title": "Emissions Change vs Last Month",
+      "type": "stat"
     },
     {
       "datasource": {
         "type": "postgres",
         "uid": "TimescaleDB"
       },
-      "description": "Performance rate based on production output",
+      "description": "Total carbon emissions this month",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 1,
+          "decimals": 0,
           "mappings": [],
-          "max": 100,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
-              },
-              {
-                "color": "green",
-                "value": 90
               }
             ]
           },
-          "unit": "percent"
+          "unit": "kg"
         },
         "overrides": []
       },
@@ -216,17 +204,18 @@
       },
       "id": 3,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "sum"
           ],
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "textMode": "auto"
       },
       "pluginVersion": "10.2.0",
       "targets": [
@@ -238,120 +227,19 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  ROUND((AVG(production_count) * 100.0 / NULLIF(MAX(production_count), 0))::numeric, 1) as \"Performance\"\nFROM production_data\nWHERE time >= NOW() - INTERVAL '24 hours';",
+          "rawSql": "SELECT \n  ROUND(SUM(er.total_energy_kwh * cf.emission_factor_kg_co2_per_kwh)::numeric, 0) as \"Total Emissions\"\nFROM energy_readings_1day er\nCROSS JOIN carbon_factors cf\nWHERE er.bucket >= DATE_TRUNC('month', NOW())\n  AND cf.region = 'default'\n  AND cf.is_active = true;",
           "refId": "A"
         }
       ],
-      "title": "Performance Rate",
-      "type": "gauge"
+      "title": "Total CO2 Emissions (MTD)",
+      "type": "stat"
     },
     {
       "datasource": {
         "type": "postgres",
         "uid": "TimescaleDB"
       },
-      "description": "Availability percentage by machine (last 24h)",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "Availability %",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 1,
-          "mappings": [],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 80
-              },
-              {
-                "color": "green",
-                "value": 95
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 4,
-      "options": {
-        "barRadius": 0,
-        "barWidth": 0.97,
-        "fullHighlight": false,
-        "groupWidth": 0.7,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "orientation": "horizontal",
-        "showValue": "always",
-        "stacking": "none",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        },
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0
-      },
-      "pluginVersion": "10.2.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "TimescaleDB"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT \n  m.name as \"Machine\",\n  CASE WHEN ms.is_running THEN 100.0 ELSE 0.0 END as \"Availability\"\nFROM machine_status ms\nJOIN machines m ON ms.machine_id = m.id\nORDER BY \"Availability\" DESC;",
-          "refId": "A"
-        }
-      ],
-      "title": "Availability by Machine",
-      "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "TimescaleDB"
-      },
-      "description": "Production vs Energy consumption scatter plot",
+      "description": "Daily carbon emissions trend",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -360,233 +248,12 @@
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "Energy (kWh)",
-            "axisPlacement": "auto",
-            "fillOpacity": 70,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "show": "points"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
-      "id": 5,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "10.2.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "TimescaleDB"
-          },
-          "editorMode": "code",
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT \n  er.bucket as time,\n  m.name as metric,\n  AVG(pd.production_count) as value\nFROM production_data pd\nJOIN energy_readings_1min er ON pd.machine_id = er.machine_id \n  AND DATE_TRUNC('minute', pd.time) = er.bucket\nJOIN machines m ON pd.machine_id = m.id\nWHERE pd.time >= $__timeFrom()\n  AND pd.time <= $__timeTo()\n  AND er.bucket >= $__timeFrom()\n  AND er.bucket <= $__timeTo()\nGROUP BY er.bucket, m.name\nORDER BY er.bucket;",
-          "refId": "A"
-        }
-      ],
-      "title": "Production vs Energy Efficiency",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "TimescaleDB"
-      },
-      "description": "Current machine status and health",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "center",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Status"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background"
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "Running": {
-                        "color": "green",
-                        "index": 0,
-                        "text": "✓ Running"
-                      },
-                      "Stopped": {
-                        "color": "red",
-                        "index": 1,
-                        "text": "✗ Stopped"
-                      }
-                    },
-                    "type": "value"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Health"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background"
-                }
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "red",
-                      "value": null
-                    },
-                    {
-                      "color": "yellow",
-                      "value": 75
-                    },
-                    {
-                      "color": "green",
-                      "value": 90
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "id": 6,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": false,
-            "displayName": "Machine"
-          }
-        ]
-      },
-      "pluginVersion": "10.2.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "TimescaleDB"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT \n  m.name as \"Machine\",\n  m.type as \"Type\",\n  CASE WHEN ms.is_running THEN 'Running' ELSE 'Stopped' END as \"Status\",\n  ms.current_mode as \"Mode\",\n  ROUND(ms.health_score, 0) as \"Health\",\n  ROUND(ms.current_power_kw, 1) as \"Power (kW)\",\n  ms.production_total_units as \"Total Production\"\nFROM machine_status ms\nJOIN machines m ON ms.machine_id = m.id\nORDER BY m.name;",
-          "refId": "A"
-        }
-      ],
-      "title": "Machine Status Overview",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "TimescaleDB"
-      },
-      "description": "Production output by hour of day",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "Production Units",
+            "axisLabel": "CO2 (kg)",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 20,
-            "gradientMode": "none",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -608,6 +275,7 @@
               "mode": "off"
             }
           },
+          "decimals": 0,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -618,25 +286,26 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "kg"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 16
+        "x": 0,
+        "y": 8
       },
-      "id": 7,
+      "id": 4,
       "options": {
         "legend": {
           "calcs": [
             "mean",
-            "max"
+            "max",
+            "sum"
           ],
           "displayMode": "table",
-          "placement": "right",
+          "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
@@ -654,44 +323,337 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT \n  DATE_TRUNC('hour', pd.time) as time,\n  m.name as metric,\n  AVG(pd.production_count) as value\nFROM production_data pd\nJOIN machines m ON pd.machine_id = m.id\nWHERE pd.time >= $__timeFrom()\n  AND pd.time <= $__timeTo()\nGROUP BY DATE_TRUNC('hour', pd.time), m.name\nORDER BY time;",
+          "rawSql": "SELECT \n  er.bucket as time,\n  'CO2 Emissions' as metric,\n  SUM(er.total_energy_kwh * cf.emission_factor_kg_co2_per_kwh) as value\nFROM energy_readings_1day er\nCROSS JOIN carbon_factors cf\nWHERE er.bucket >= $__timeFrom()\n  AND er.bucket <= $__timeTo()\n  AND cf.region = 'default'\n  AND cf.is_active = true\nGROUP BY er.bucket\nORDER BY er.bucket;",
           "refId": "A"
         }
       ],
-      "title": "Production Output Over Time",
+      "title": "CO2 Emissions Trend",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "TimescaleDB"
+      },
+      "description": "Carbon intensity per production unit",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "kg CO2 / unit",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "TimescaleDB"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  DATE_TRUNC('day', er.bucket) as time,\n  m.name as metric,\n  (SUM(er.total_energy_kwh * cf.emission_factor_kg_co2_per_kwh) / NULLIF(SUM(pd.production_count), 0)) as value\nFROM energy_readings_1hour er\nJOIN machines m ON er.machine_id = m.id\nJOIN production_data pd ON er.machine_id = pd.machine_id \n  AND DATE_TRUNC('hour', pd.time) = er.bucket\nCROSS JOIN carbon_factors cf\nWHERE er.bucket >= $__timeFrom()\n  AND er.bucket <= $__timeTo()\n  AND cf.region = 'default'\n  AND cf.is_active = true\nGROUP BY DATE_TRUNC('day', er.bucket), m.name\nORDER BY time, m.name;",
+          "refId": "A"
+        }
+      ],
+      "title": "Emission Intensity (kg CO2 per unit produced)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "TimescaleDB"
+      },
+      "description": "Carbon emissions by machine",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "unit": "kg"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 6,
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "TimescaleDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  m.name as metric,\n  SUM(er.total_energy_kwh * cf.emission_factor_kg_co2_per_kwh) as value\nFROM energy_readings_1day er\nJOIN machines m ON er.machine_id = m.id\nCROSS JOIN carbon_factors cf\nWHERE er.bucket >= DATE_TRUNC('month', NOW())\n  AND cf.region = 'default'\n  AND cf.is_active = true\nGROUP BY m.name\nORDER BY value DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "CO2 Emissions by Machine (MTD)",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "TimescaleDB"
+      },
+      "description": "Monthly emission reduction progress",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "CO2 (kg)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "kg"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Target (-5%)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Actual"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 7,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.6,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "TimescaleDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH baseline AS (\n  SELECT \n    DATE_TRUNC('month', er.bucket) as month,\n    SUM(er.total_energy_kwh * cf.emission_factor_kg_co2_per_kwh) as co2\n  FROM energy_readings_1day er\n  CROSS JOIN carbon_factors cf\n  WHERE er.bucket >= NOW() - INTERVAL '7 months'\n    AND er.bucket < NOW() - INTERVAL '6 months'\n    AND cf.region = 'default'\n    AND cf.is_active = true\n  GROUP BY DATE_TRUNC('month', er.bucket)\n)\nSELECT \n  TO_CHAR(DATE_TRUNC('month', er.bucket), 'Mon YYYY') as \"Month\",\n  ROUND(SUM(er.total_energy_kwh * cf.emission_factor_kg_co2_per_kwh)::numeric, 0) as \"Actual\",\n  ROUND((SELECT co2 * 0.95 FROM baseline)::numeric, 0) as \"Target (-5%)\"\nFROM energy_readings_1day er\nCROSS JOIN carbon_factors cf\nWHERE er.bucket >= NOW() - INTERVAL '6 months'\n  AND cf.region = 'default'\n  AND cf.is_active = true\nGROUP BY DATE_TRUNC('month', er.bucket)\nORDER BY DATE_TRUNC('month', er.bucket);",
+          "refId": "A"
+        }
+      ],
+      "title": "Monthly Emission Reduction Progress",
+      "type": "barchart"
     }
   ],
-  "refresh": "30s",
+  "refresh": "5m",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
     "sota",
-    "oee",
-    "operations",
-    "efficiency",
-    "production"
+    "environmental",
+    "carbon",
+    "sustainability",
+    "esg"
   ],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
-      "10s",
-      "30s",
-      "1m",
       "5m",
       "15m",
-      "30m"
+      "30m",
+      "1h"
     ]
   },
   "timezone": "",
-  "title": "SOTA Operational Efficiency",
-  "uid": "sota-operational-efficiency",
-  "version": 12,
+  "title": "SOTA Environmental Impact",
+  "uid": "sota-environmental-impact",
+  "version": 14,
   "weekStart": ""
 }
