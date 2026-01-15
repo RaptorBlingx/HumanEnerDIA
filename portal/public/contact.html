@@ -437,25 +437,33 @@
                 email: document.getElementById('email').value,
                 organization: document.getElementById('organization').value,
                 subject: document.getElementById('subject').value,
+                organization: document.getElementById('organization').value,
                 message: document.getElementById('message-text').value
             };
             
-            // Simulate form submission (in production, this would send to a backend API)
-            setTimeout(() => {
-                showMessage('Thank you for contacting us! We will get back to you within 24 hours.', 'success');
-                document.getElementById('contact-form').reset();
+            // Send to backend API
+            fetch('/api/contact', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    document.getElementById('contact-form').reset();
+                } else {
+                    showMessage(data.error || 'Failed to send message. Please try again.', 'error');
+                }
                 btn.disabled = false;
                 btn.textContent = 'Send Message';
-                
-                // In production, you would send this to your backend:
-                // fetch('/api/contact', {
-                //     method: 'POST',
-                //     headers: {'Content-Type': 'application/json'},
-                //     body: JSON.stringify(formData)
-                // });
-                
-                console.log('Contact form submitted:', formData);
-            }, 1000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Failed to send message. Please try again later.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Send Message';
+            });
         }
     </script>
     

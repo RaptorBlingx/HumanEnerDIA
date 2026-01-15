@@ -83,12 +83,9 @@ class ReportGenerationService:
         cost_data = await self._prepare_cost_data(factory_id, start_date, end_date)
         carbon_data = await self._prepare_carbon_data(factory_id, start_date, end_date)
         
-        # Generate complete report (Playwright is sync, run in executor)
+        # Generate complete report using ASYNC Playwright (no executor needed)
         master = MasterReport()
-        loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            None,
-            master.generate_complete_report,
+        result = await master.generate_complete_report_async(
             factory['name'],  # facility_name
             start_date.strftime("%B %Y"),  # reporting_period
             datetime.now().strftime("%B %d, %Y at %H:%M"),  # generated_date

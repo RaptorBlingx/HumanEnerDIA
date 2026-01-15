@@ -1157,65 +1157,55 @@ def send_pilot_factory_admin_notification(application_data: dict) -> bool:
             html_content = html_content.replace(placeholder, str(value))
             text_content = text_content.replace(placeholder, str(value))
         
-        # Handle boolean conditional replacements for Mustache-style tags
-        # Digital monitoring
-        if application_data.get('digital_monitoring'):
-            html_content = html_content.replace('{{#digital_monitoring}}', '').replace('{{/digital_monitoring}}', '')
-            html_content = html_content.replace('{{^digital_monitoring}}', '<!--').replace('{{^digital_monitoring}}', '-->')
-            text_content = text_content.replace('{{#digital_monitoring}}', '').replace('{{/digital_monitoring}}', '')
-            text_content = text_content.replace('{{^digital_monitoring}}', '').replace('{{^digital_monitoring}}', '')
-        else:
-            html_content = html_content.replace('{{^digital_monitoring}}', '').replace('{{^digital_monitoring}}', '')
-            html_content = html_content.replace('{{#digital_monitoring}}', '<!--').replace('{{/digital_monitoring}}', '-->')
-            text_content = text_content.replace('{{^digital_monitoring}}', '').replace('{{^digital_monitoring}}', '')
-            text_content = text_content.replace('{{#digital_monitoring}}', '').replace('{{/digital_monitoring}}', '')
+        # Handle boolean conditional replacements using regex for proper Mustache-style parsing
+        import re
         
-        # Has SCADA
-        if application_data.get('has_scada'):
-            html_content = html_content.replace('{{#has_scada}}', '').replace('{{/has_scada}}', '')
-            html_content = html_content.replace('{{^has_scada}}', '<!--').replace('{{^has_scada}}', '-->')
-            text_content = text_content.replace('{{#has_scada}}', '').replace('{{/has_scada}}', '')
-            text_content = text_content.replace('{{^has_scada}}', '').replace('{{^has_scada}}', '')
-        else:
-            html_content = html_content.replace('{{^has_scada}}', '').replace('{{^has_scada}}', '')
-            html_content = html_content.replace('{{#has_scada}}', '<!--').replace('{{/has_scada}}', '-->')
-            text_content = text_content.replace('{{^has_scada}}', '').replace('{{^has_scada}}', '')
-            text_content = text_content.replace('{{#has_scada}}', '').replace('{{/has_scada}}', '')
+        # Helper function to handle conditional sections
+        def handle_conditional(content, tag_name, condition):
+            # Positive conditional {{#tag}}...{{/tag}}
+            positive_pattern = r'\{\{#' + tag_name + r'\}\}(.*?)\{\{/' + tag_name + r'\}\}'
+            # Negative conditional {{^tag}}...{{/tag}}  (note: closing tag has no ^)
+            negative_pattern = r'\{\{\^' + tag_name + r'\}\}(.*?)\{\{/' + tag_name + r'\}\}'
+            
+            if condition:
+                # Show positive, hide negative
+                content = re.sub(positive_pattern, r'\1', content, flags=re.DOTALL)
+                content = re.sub(negative_pattern, '', content, flags=re.DOTALL)
+            else:
+                # Hide positive, show negative
+                content = re.sub(positive_pattern, '', content, flags=re.DOTALL)
+                content = re.sub(negative_pattern, r'\1', content, flags=re.DOTALL)
+            
+            return content
         
-        # Willing to participate
-        if application_data.get('willing_to_participate'):
-            html_content = html_content.replace('{{#willing_to_participate}}', '').replace('{{/willing_to_participate}}', '')
-            html_content = html_content.replace('{{^willing_to_participate}}', '<!--').replace('{{^willing_to_participate}}', '-->')
-            text_content = text_content.replace('{{#willing_to_participate}}', '').replace('{{/willing_to_participate}}', '')
-            text_content = text_content.replace('{{^willing_to_participate}}', '').replace('{{^willing_to_participate}}', '')
-        else:
-            html_content = html_content.replace('{{^willing_to_participate}}', '').replace('{{^willing_to_participate}}', '')
-            html_content = html_content.replace('{{#willing_to_participate}}', '<!--').replace('{{/willing_to_participate}}', '-->')
-            text_content = text_content.replace('{{^willing_to_participate}}', '').replace('{{^willing_to_participate}}', '')
-            text_content = text_content.replace('{{#willing_to_participate}}', '').replace('{{/willing_to_participate}}', '')
+        # Apply conditionals
+        html_content = handle_conditional(html_content, 'digital_monitoring', application_data.get('digital_monitoring'))
+        text_content = handle_conditional(text_content, 'digital_monitoring', application_data.get('digital_monitoring'))
         
-        # Confirms collaboration
-        if application_data.get('confirms_collaboration'):
-            html_content = html_content.replace('{{#confirms_collaboration}}', '').replace('{{/confirms_collaboration}}', '')
-            text_content = text_content.replace('{{#confirms_collaboration}}', '').replace('{{/confirms_collaboration}}', '')
-        else:
-            html_content = html_content.replace('{{#confirms_collaboration}}', '<!--').replace('{{/confirms_collaboration}}', '-->')
-            text_content = text_content.replace('{{#confirms_collaboration}}', '').replace('{{/confirms_collaboration}}', '')
+        html_content = handle_conditional(html_content, 'has_scada', application_data.get('has_scada'))
+        text_content = handle_conditional(text_content, 'has_scada', application_data.get('has_scada'))
+        
+        html_content = handle_conditional(html_content, 'willing_to_participate', application_data.get('willing_to_participate'))
+        text_content = handle_conditional(text_content, 'willing_to_participate', application_data.get('willing_to_participate'))
+        
+        html_content = handle_conditional(html_content, 'confirms_collaboration', application_data.get('confirms_collaboration'))
+        text_content = handle_conditional(text_content, 'confirms_collaboration', application_data.get('confirms_collaboration'))
+        
+        # Handle digital maturity levels (only one will be true)
+        digital_maturity = application_data.get('digital_maturity', '')
+        html_content = handle_conditional(html_content, 'digital_maturity_basic', 'Low' in digital_maturity or 'Basic' in digital_maturity)
+        html_content = handle_conditional(html_content, 'digital_maturity_intermediate', 'Medium' in digital_maturity or 'Intermediate' in digital_maturity)
+        html_content = handle_conditional(html_content, 'digital_maturity_advanced', 'High' in digital_maturity or 'Advanced' in digital_maturity)
+        text_content = handle_conditional(text_content, 'digital_maturity_basic', 'Low' in digital_maturity or 'Basic' in digital_maturity)
+        text_content = handle_conditional(text_content, 'digital_maturity_intermediate', 'Medium' in digital_maturity or 'Intermediate' in digital_maturity)
+        text_content = handle_conditional(text_content, 'digital_maturity_advanced', 'High' in digital_maturity or 'Advanced' in digital_maturity)
         
         # Handle optional fields (preferred weeks)
-        if application_data.get('preferred_meeting_week'):
-            html_content = html_content.replace('{{#preferred_meeting_week}}', '').replace('{{/preferred_meeting_week}}', '')
-            text_content = text_content.replace('{{#preferred_meeting_week}}', '\n').replace('{{/preferred_meeting_week}}', '')
-        else:
-            html_content = html_content.replace('{{#preferred_meeting_week}}', '<!--').replace('{{/preferred_meeting_week}}', '-->')
-            text_content = text_content.replace('{{#preferred_meeting_week}}', '').replace('{{/preferred_meeting_week}}', '')
+        html_content = handle_conditional(html_content, 'preferred_meeting_week', application_data.get('preferred_meeting_week'))
+        text_content = handle_conditional(text_content, 'preferred_meeting_week', application_data.get('preferred_meeting_week'))
         
-        if application_data.get('preferred_installation_week'):
-            html_content = html_content.replace('{{#preferred_installation_week}}', '').replace('{{/preferred_installation_week}}', '')
-            text_content = text_content.replace('{{#preferred_installation_week}}', '\n').replace('{{/preferred_installation_week}}', '')
-        else:
-            html_content = html_content.replace('{{#preferred_installation_week}}', '<!--').replace('{{/preferred_installation_week}}', '-->')
-            text_content = text_content.replace('{{#preferred_installation_week}}', '').replace('{{/preferred_installation_week}}', '')
+        html_content = handle_conditional(html_content, 'preferred_installation_week', application_data.get('preferred_installation_week'))
+        text_content = handle_conditional(text_content, 'preferred_installation_week', application_data.get('preferred_installation_week'))
         
         # Create email message
         msg = MIMEMultipart('alternative')

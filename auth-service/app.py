@@ -904,6 +904,57 @@ def update_pilot_application(app_id):
             'error': 'Failed to update application'
         }), 500
 
+@app.route('/api/auth/admin/pilot-applications/<int:app_id>', methods=['DELETE'])
+@require_admin
+def delete_pilot_application(app_id):
+    """Delete pilot factory application (admin only)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get application ref before deleting (for logging)
+        cursor.execute("""
+            SELECT application_ref, company_name
+            FROM pilot_factory_applications
+            WHERE id = %s
+        """, (app_id,))
+        
+        result = cursor.fetchone()
+        
+        if not result:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'Application not found'
+            }), 404
+        
+        app_ref, company_name = result
+        
+        # Delete the application
+        cursor.execute("""
+            DELETE FROM pilot_factory_applications
+            WHERE id = %s
+        """, (app_id,))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        logger.info(f"Pilot application {app_ref} ({company_name}) deleted by admin")
+        
+        return jsonify({
+            'success': True,
+            'message': f'Application {app_ref} deleted successfully'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error deleting pilot application: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to delete application'
+        }), 500
+
 @app.route('/api/auth/admin/pilot-applications/stats', methods=['GET'])
 @require_admin
 def get_pilot_applications_stats():
@@ -939,6 +990,208 @@ def get_pilot_applications_stats():
             'success': False,
             'error': 'Failed to fetch statistics'
         }), 500
+
+# ============================================================================
+# Contact Form
+# ============================================================================
+
+@app.route('/api/contact', methods=['POST'])
+def contact_form():
+    """Handle contact form submissions"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['name', 'email', 'subject', 'message']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'{field.capitalize()} is required'
+                }), 400
+        
+        # Get admin emails from environment
+        admin_emails = os.environ.get('ADMIN_EMAILS', '').split(',')
+        admin_emails = [email.strip() for email in admin_emails if email.strip()]
+        
+        if not admin_emails:
+            logger.error("No admin emails configured for contact form")
+            return jsonify({
+                'success': False,
+                'error': 'Contact form is not configured'
+            }), 500
+        
+        # Send email to admins
+        success = send_contact_form_email(data, admin_emails)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Thank you for contacting us! We will get back to you within 24 hours.'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to send message. Please try again later.'
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Contact form endpoint error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to process contact form'
+        }), 500
+
+def send_contact_form_email(data: dict, admin_emails: list) -> bool:
+    """Send contact form data to admin emails"""
+    from auth_service import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM_EMAIL, SMTP_FROM_NAME, EMAIL_ENABLED
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    import smtplib
+    
+    if not EMAIL_ENABLED:
+        logger.warning("Email not enabled - skipping contact form email")
+        return False
+    
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"📧 Contact Form: {data.get('subject', 'No Subject')}"
+        msg['From'] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
+        msg['To'] = ', '.join(admin_emails)
+        msg['Reply-To'] = data.get('email', '')
+        
+        # Create HTML email
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+                <tr>
+                    <td align="center">
+                        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            
+                            <!-- Header -->
+                            <tr>
+                                <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 30px; text-align: center;">
+                                    <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">
+                                        📧 New Contact Form Submission
+                                    </h1>
+                                    <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 14px; opacity: 0.95;">
+                                        HumanEnerDIA Website
+                                    </p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Content -->
+                            <tr>
+                                <td style="padding: 30px;">
+                                    <h2 style="color: #333; font-size: 18px; margin: 0 0 20px 0;">Contact Details</h2>
+                                    
+                                    <table width="100%" cellpadding="8" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 6px;">
+                                        <tr style="background-color: #f9fafb;">
+                                            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; width: 30%; font-weight: 600; color: #4b5563;">
+                                                Full Name:
+                                            </td>
+                                            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #1f2937;">
+                                                {data.get('name', 'N/A')}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #4b5563;">
+                                                Email:
+                                            </td>
+                                            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #1f2937;">
+                                                <a href="mailto:{data.get('email', '')}" style="color: #3b82f6; text-decoration: none;">
+                                                    {data.get('email', 'N/A')}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr style="background-color: #f9fafb;">
+                                            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #4b5563;">
+                                                Organization:
+                                            </td>
+                                            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #1f2937;">
+                                                {data.get('organization', 'Not provided')}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px; font-weight: 600; color: #4b5563;">
+                                                Subject:
+                                            </td>
+                                            <td style="padding: 12px; color: #1f2937;">
+                                                {data.get('subject', 'N/A')}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <h3 style="color: #333; font-size: 16px; margin: 30px 0 15px 0;">Message:</h3>
+                                    <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; color: #1f2937; line-height: 1.6;">
+                                        {data.get('message', 'No message provided')}
+                                    </div>
+                                    
+                                    <div style="margin-top: 30px; padding: 15px; background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                                        <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                                            <strong>💡 Tip:</strong> Reply directly to this email to respond to {data.get('name', 'the sender')}.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Footer -->
+                            <tr>
+                                <td style="background-color: #f5f5f5; padding: 20px; text-align: center;">
+                                    <p style="margin: 0; color: #666666; font-size: 12px;">
+                                        This is an automated notification from the HumanEnerDIA contact form.
+                                    </p>
+                                </td>
+                            </tr>
+                            
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+        
+        # Create plain text version
+        text_body = f"""
+New Contact Form Submission - HumanEnerDIA
+
+Contact Details:
+================
+Full Name: {data.get('name', 'N/A')}
+Email: {data.get('email', 'N/A')}
+Organization: {data.get('organization', 'Not provided')}
+Subject: {data.get('subject', 'N/A')}
+
+Message:
+========
+{data.get('message', 'No message provided')}
+
+---
+Reply directly to this email to respond to {data.get('name', 'the sender')}.
+        """
+        
+        msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
+        msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+        
+        # Send email
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+        
+        logger.info(f"Contact form email sent to admins from {data.get('email')}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send contact form email: {e}")
+        return False
 
 # ============================================================================
 # Main Entry Point

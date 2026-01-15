@@ -52,7 +52,7 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
-    playwright install --with-deps chromium
+    playwright install chromium
 
 # Copy application code
 COPY . .

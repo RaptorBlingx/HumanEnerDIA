@@ -4,7 +4,7 @@ HumanEnerDIA WASABI Project
 ========================================
 
 ⚠️ ACTION REQUIRED - Review this application promptly
-Application deadline: January 23, 2026
+Application deadline: January 30, 2026
 
 ========================================
 APPLICATION REFERENCE: {{application_ref}}
@@ -75,6 +75,6 @@ mailto:{{contact_email}}?subject=HumanEnerDIA%20Pilot%20Factory%20-%20{{applicat
 ========================================
 
 This is an automated admin notification.
-Review deadline: January 23, 2026
+Review deadline: January 30, 2026
 
 HumanEnerDIA WASABI Project - Admin Team

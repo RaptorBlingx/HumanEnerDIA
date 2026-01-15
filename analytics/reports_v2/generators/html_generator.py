@@ -92,11 +92,21 @@ class HTMLGenerator:
             }
             return status_map.get(str(value).lower(), 'text-gray-600 bg-gray-50')
         
+        def safe_round(value, precision=2):
+            """Safely round a value, handling None and undefined."""
+            if value is None or value == '' or str(value).lower() == 'undefined':
+                return 0
+            try:
+                return round(float(value), precision)
+            except (ValueError, TypeError, AttributeError):
+                return 0
+        
         # Register filters
         self.env.filters['format_number'] = format_number
         self.env.filters['format_percent'] = format_percent
         self.env.filters['format_energy'] = format_energy
         self.env.filters['status_class'] = status_class
+        self.env.filters['round'] = safe_round  # Override default round filter
     
     def render(self, template_name: str, context: Dict[str, Any]) -> str:
         """
