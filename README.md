@@ -77,6 +77,8 @@ EnMS is a comprehensive energy monitoring and analytics platform designed for **
 
 ### Installation
 
+**Option 1: Automated Setup (Recommended)**
+
 ```bash
 # Clone the repository
 git clone https://github.com/raptorblingx/enms.git
@@ -85,7 +87,7 @@ cd enms
 # Copy environment template
 cp .env.example .env
 
-# Edit .env and set your passwords (or let setup.sh auto-generate them)
+# (Optional) Edit passwords - defaults work for development
 nano .env
 
 # Run the setup script
@@ -93,17 +95,33 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-That's it! 🎉
+**Option 2: Manual Setup**
+
+```bash
+# Clone and configure
+git clone https://github.com/raptorblingx/enms.git
+cd enms
+cp .env.example .env
+
+# Build and start (defaults in .env.example work out of the box)
+docker compose build
+docker compose up -d
+```
+
+That's it! 🎉 The system is ready to use with sensible defaults.
 
 ### Access the System
 
 After installation completes:
 
-- **Unified Portal**: http://localhost
-- **Grafana**: http://localhost:3000 (admin/your-password)
+- **Unified Portal**: http://localhost:8080
+- **Grafana**: http://localhost:8080/grafana (credentials in .env)
 - **Node-RED**: http://localhost:1880
-- **API Documentation**: http://localhost/api/docs
+- **Analytics UI**: http://localhost:8080/analytics/ui/
+- **API Documentation**: http://localhost:8080/api/analytics/docs
 - **Simulator Control**: http://localhost:8003/docs
+
+> **Note**: Replace `localhost` with your server IP for remote access
 
 ### ✨ **Automatic Dashboard Backup**
 
