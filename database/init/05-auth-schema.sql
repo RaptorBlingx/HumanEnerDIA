@@ -130,11 +130,11 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- 6. Grant Permissions
 -- ============================================================================
--- Grant permissions to postgres user (adjust based on your setup)
-GRANT ALL PRIVILEGES ON public.demo_users TO postgres;
-GRANT ALL PRIVILEGES ON public.demo_sessions TO postgres;
-GRANT ALL PRIVILEGES ON public.demo_audit_log TO postgres;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO postgres;
+-- Grant permissions to current database user
+GRANT ALL PRIVILEGES ON public.demo_users TO CURRENT_USER;
+GRANT ALL PRIVILEGES ON public.demo_sessions TO CURRENT_USER;
+GRANT ALL PRIVILEGES ON public.demo_audit_log TO CURRENT_USER;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO CURRENT_USER;
 
 -- ============================================================================
 -- Initialization Complete
