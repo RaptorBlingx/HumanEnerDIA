@@ -10,8 +10,8 @@
         "id": "mqtt_broker_config",
         "type": "mqtt-broker",
         "name": "EnMS MQTT Broker",
-        "broker": "$(MQTT_HOST)",
-        "port": "$(MQTT_PORT)",
+        "broker": "${MQTT_HOST}",
+        "port": "${MQTT_PORT}",
         "tls": "",
         "clientid": "",
         "autoConnect": true,
@@ -37,8 +37,8 @@
         "userProps": "",
         "sessionExpiry": "",
         "credentials": {
-            "user": "$(MQTT_USERNAME)",
-            "password": "$(MQTT_PASSWORD)"
+            "user": "${MQTT_USERNAME}",
+            "password": "${MQTT_PASSWORD}"
         },
         "autoUnsubscribe": true,
         "birthTopic": "",
@@ -60,11 +60,11 @@
         "id": "f1b784ca20120cfd",
         "type": "postgreSQLConfig",
         "name": "",
-        "host": "$(POSTGRES_HOST)",
+        "host": "${POSTGRES_HOST}",
         "hostFieldType": "str",
-        "port": "$(POSTGRES_PORT)",
+        "port": "${POSTGRES_PORT}",
         "portFieldType": "num",
-        "database": "$(POSTGRES_DB)",
+        "database": "${POSTGRES_DB}",
         "databaseFieldType": "str",
         "ssl": "false",
         "sslFieldType": "bool",
@@ -76,17 +76,17 @@
         "idleFieldType": "num",
         "connectionTimeout": "10000",
         "connectionTimeoutFieldType": "num",
-        "user": "$(POSTGRES_USER)",
+        "user": "${POSTGRES_USER}",
         "userFieldType": "str",
-        "password": "$(POSTGRES_PASSWORD)",
+        "password": "${POSTGRES_PASSWORD}",
         "passwordFieldType": "str"
     },
     {
         "id": "becc22b8f4461a4d",
         "type": "mqtt-broker",
         "name": "",
-        "broker": "$(MQTT_HOST)",
-        "port": "$(MQTT_PORT)",
+        "broker": "${MQTT_HOST}",
+        "port": "${MQTT_PORT}",
         "clientid": "",
         "autoConnect": true,
         "usetls": false,
@@ -111,8 +111,8 @@
         "userProps": "",
         "sessionExpiry": "",
         "credentials": {
-            "user": "$(MQTT_USERNAME)",
-            "password": "$(MQTT_PASSWORD)"
+            "user": "${MQTT_USERNAME}",
+            "password": "${MQTT_PASSWORD}"
         },
         "autoUnsubscribe": true,
         "birthTopic": "",
@@ -137,8 +137,8 @@
         "id": "6d13ac5b8da148e5",
         "type": "mqtt-broker",
         "name": "",
-        "broker": "$(MQTT_HOST)",
-        "port": "$(MQTT_PORT)",
+        "broker": "${MQTT_HOST}",
+        "port": "${MQTT_PORT}",
         "clientid": "",
         "autoConnect": true,
         "usetls": false,
@@ -163,8 +163,8 @@
         "userProps": "",
         "sessionExpiry": "",
         "credentials": {
-            "user": "$(MQTT_USERNAME)",
-            "password": "$(MQTT_PASSWORD)"
+            "user": "${MQTT_USERNAME}",
+            "password": "${MQTT_PASSWORD}"
         },
         "autoUnsubscribe": true,
         "birthTopic": "",
