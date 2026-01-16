@@ -225,11 +225,13 @@ async def voice_bridge_health():
             
             if response.status_code == 200:
                 data = response.json()
+                # OVOS bridge returns 'messagebus_connected', map to 'ovos_connected'
+                is_connected = data.get("messagebus_connected", data.get("ovos_connected", False))
                 return VoiceBridgeHealth(
-                    status="ok" if data.get("ovos_connected") else "degraded",
+                    status="ok" if is_connected else "degraded",
                     bridge_reachable=True,
                     bridge_url=OVOS_BRIDGE_URL,
-                    ovos_connected=data.get("ovos_connected", False),
+                    ovos_connected=is_connected,
                     tts_available=data.get("tts_available", False),
                     tts_engine=data.get("tts_engine"),
                     error=None
