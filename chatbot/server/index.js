@@ -14,7 +14,7 @@ const RASA_PORT = process.env.RASA_PORT || 5005;
 const RASA_URL = `http://${RASA_HOST}:${RASA_PORT}`;
 
 // OVOS REST Bridge configuration
-const OVOS_HOST = process.env.OVOS_HOST || 'ovos-enms';
+const OVOS_HOST = process.env.OVOS_HOST || '172.18.0.1';
 const OVOS_PORT = process.env.OVOS_PORT || 5000;
 const OVOS_URL = `http://${OVOS_HOST}:${OVOS_PORT}`;
 
