@@ -1256,15 +1256,29 @@
             utterance.volume = 1.0;    // Full volume
             utterance.lang = 'en-US';  // English US
             
-            // Try to use a good voice if available
+            // Try to use the best quality voice available
             const voices = window.speechSynthesis.getVoices();
-            const preferredVoice = voices.find(v => 
-                v.name.includes('Google') || 
-                v.name.includes('Microsoft') || 
-                v.lang === 'en-US'
-            );
-            if (preferredVoice) {
-                utterance.voice = preferredVoice;
+            
+            // Priority order: Google UK Male > Microsoft Natural > Other good voices
+            const voicePriority = [
+                v => v.name.includes('Google UK English Male'),
+                v => v.name.includes('Google') && v.name.includes('Male'),
+                v => v.name.includes('Microsoft') && v.name.includes('Natural'),
+                v => v.name.includes('Microsoft') && (v.name.includes('Guy') || v.name.includes('David')),
+                v => v.name.includes('Google') && v.lang === 'en-GB',
+                v => v.name.includes('Google') && v.lang === 'en-US',
+                v => !v.name.includes('Female') && v.lang.startsWith('en-')
+            ];
+            
+            let selectedVoice = null;
+            for (const matcher of voicePriority) {
+                selectedVoice = voices.find(matcher);
+                if (selectedVoice) break;
+            }
+            
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+                console.log('🎤 Using voice:', selectedVoice.name);
             }
             
             utterance.onerror = (e) => {
@@ -1827,6 +1841,19 @@
         
         // Create floating "Enable Voice" button (for one-time permission)
         createEnableVoiceButton();
+        
+        // Log available voices for debugging
+        if (window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                const voices = window.speechSynthesis.getVoices();
+                console.log('🎤 Available TTS voices:', voices.map(v => `${v.name} (${v.lang})`));
+            };
+            // Trigger immediately if voices already loaded
+            if (window.speechSynthesis.getVoices().length > 0) {
+                const voices = window.speechSynthesis.getVoices();
+                console.log('🎤 Available TTS voices:', voices.map(v => `${v.name} (${v.lang})`));
+            }
+        }
 
         document.getElementById('ovos-toggle').addEventListener('click', toggleWidget);
         document.getElementById('ovos-minimize').addEventListener('click', toggleWidget);
