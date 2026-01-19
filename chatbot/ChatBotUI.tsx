@@ -9,6 +9,7 @@ import TypingIndicator from './components/TypingIndicator';
 const ChatBotUI: React.FC = () => {
   // State for Chat Widget visibility
   const [isOpen, setIsOpen] = useState(false);
+  const [showQuickReplies, setShowQuickReplies] = useState(true);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -19,6 +20,15 @@ const ChatBotUI: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Quick reply suggestions for first-time users
+  const QUICK_REPLIES = [
+    "How do I get started with HumanEnerDIA?",
+    "What is ISO 50001?",
+    "How many Grafana dashboards are there?",
+    "Why is my Grafana dashboard not showing data?",
+    "What is an energy baseline?"
+  ];
 
   // Initialize chat on mount
   useEffect(() => {
@@ -49,6 +59,15 @@ const ChatBotUI: React.FC = () => {
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
     }
   }, [inputText]);
+
+  const handleQuickReply = (text: string) => {
+    setInputText(text);
+    setShowQuickReplies(false);
+    // Auto-submit after slight delay for better UX
+    setTimeout(() => {
+      handleSendMessage();
+    }, 100);
+  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -93,6 +112,7 @@ const ChatBotUI: React.FC = () => {
 
     setInputText('');
     setAttachments([]);
+    setShowQuickReplies(false); // Hide quick replies after first message
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
     setError(null);
 
@@ -196,6 +216,33 @@ const ChatBotUI: React.FC = () => {
             {messages.map((msg) => (
               <MessageBubble key={msg.id} message={msg} />
             ))}
+
+            {/* Quick Reply Buttons - Show only at start */}
+            {showQuickReplies && messages.length === 1 && !isLoading && (
+              <div className="tw-flex tw-flex-col tw-gap-2 tw-mt-4 tw-mb-2">
+                <div className="tw-text-xs tw-text-slate-500 tw-font-medium tw-mb-1 tw-px-1">
+                  💡 Quick suggestions:
+                </div>
+                {QUICK_REPLIES.map((query, idx) => {
+                  // Extract short display text from full query
+                  const displayText = query
+                    .replace("How do I get started with HumanEnerDIA?", "How do I get started?")
+                    .replace("How many Grafana dashboards are there?", "Grafana dashboards")
+                    .replace("Why is my Grafana dashboard not showing data?", "Troubleshooting")
+                    .replace("What is an energy baseline?", "Energy baseline");
+                  
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleQuickReply(query)}
+                      className="tw-text-left tw-px-4 tw-py-2.5 tw-bg-white tw-border tw-border-blue-200 tw-rounded-lg tw-text-sm tw-text-slate-700 hover:tw-bg-blue-50 hover:tw-border-blue-400 tw-transition-all tw-shadow-sm hover:tw-shadow-md tw-font-medium"
+                    >
+                      {displayText}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             {isLoading && messages.length > 0 && !messages[messages.length - 1].isStreaming && (
               <div className="tw-flex tw-justify-start tw-mb-6">
