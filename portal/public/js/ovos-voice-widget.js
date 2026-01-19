@@ -38,6 +38,7 @@
     let isLoading = false;
     let audioEnabled = true;  // TTS audio playback enabled by default
     let currentAudio = null;  // Track currently playing audio
+    let abortController = null;  // Track current request for cancellation
     
     // Wake word state
     let wakeWordEnabled = false;
@@ -540,13 +541,16 @@
                         <div class="ovos-message ovos-bot">
                             <div class="ovos-bubble">${CONFIG.welcomeMessage}</div>
                         </div>
+                        <!-- Quick Reply Buttons in Chat -->
+                        <div class="ovos-quick-replies">
+                            <button class="ovos-quick-btn" data-query="factory overview">Overview</button>
+                            <button class="ovos-quick-btn" data-query="any anomalies today?">Anomalies</button>
+                            <button class="ovos-quick-btn" data-query="top energy consumers">Top Consumers</button>
+                        </div>
                     </div>
 
-                    <!-- Quick Actions -->
-                    <div class="ovos-quick-actions">
-                        <button class="ovos-quick-btn" data-query="factory overview">Overview</button>
-                        <button class="ovos-quick-btn" data-query="any anomalies today?">Anomalies</button>
-                        <button class="ovos-quick-btn" data-query="top energy consumers">Top Consumers</button>
+                    <!-- Controls (Audio + Wake Word) -->
+                    <div class="ovos-controls">
                         <button id="ovos-wakeword-toggle" class="ovos-wakeword-toggle" title="Enable 'Jarvis' wake word">Jarvis</button>
                         <button id="ovos-audio-toggle" class="ovos-audio-toggle" title="Toggle audio">🔊</button>
                     </div>
@@ -807,21 +811,21 @@
                 box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
             }
 
-            .ovos-quick-actions {
-                padding: 8px 12px;
-                background: white;
-                border-top: 1px solid #e5e7eb;
+            /* Quick Reply Buttons inside Chat */
+            .ovos-quick-replies {
+                padding: 12px 16px 8px;
                 display: flex;
-                gap: 6px;
+                gap: 8px;
                 flex-wrap: wrap;
+                align-items: flex-start;
             }
 
             .ovos-quick-btn {
-                padding: 5px 10px;
+                padding: 6px 12px;
                 border: 1px solid #d1fae5;
-                border-radius: 14px;
+                border-radius: 16px;
                 background: #ecfdf5;
-                font-size: 11px;
+                font-size: 12px;
                 cursor: pointer;
                 transition: all 0.2s;
                 color: #065f46;
@@ -831,12 +835,24 @@
                 background: #10B981;
                 border-color: #10B981;
                 color: white;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+            }
+
+            /* Controls Bar (Wake Word + Audio) */
+            .ovos-controls {
+                padding: 8px 12px;
+                background: #f9fafb;
+                border-top: 1px solid #e5e7eb;
+                display: flex;
+                gap: 8px;
+                align-items: center;
             }
 
             .ovos-wakeword-toggle {
-                padding: 5px 10px;
+                padding: 6px 12px;
                 border: 1px solid #d1fae5;
-                border-radius: 14px;
+                border-radius: 16px;
                 background: #ecfdf5;
                 font-size: 11px;
                 cursor: pointer;
@@ -861,9 +877,9 @@
             }
 
             .ovos-audio-toggle {
-                padding: 5px 10px;
+                padding: 6px 10px;
                 border: 1px solid #d1fae5;
-                border-radius: 14px;
+                border-radius: 16px;
                 background: #ecfdf5;
                 font-size: 14px;
                 cursor: pointer;
@@ -1069,7 +1085,8 @@
             const res = await fetch(CONFIG.healthUrl);
             if (res.ok) {
                 const data = await res.json();
-                if (data.ovos_connected) {
+                // Check bridge_reachable (nginx proxy) or messagebus_connected (direct)
+                if (data.bridge_reachable || data.messagebus_connected) {
                     statusEl.textContent = 'Connected';
                     statusEl.className = 'ovos-status online';
                 } else {
@@ -1087,9 +1104,30 @@
     }
 
     async function sendMessage(text) {
-        if (!text.trim() || isLoading) return;
+        if (!text.trim()) return;
+        
+        // Cancel previous request if running
+        if (isLoading && abortController) {
+            console.log('🚫 Cancelling previous request...');
+            abortController.abort();
+            hideTyping();
+            addMessage('(Previous request cancelled)', false, false);
+            
+            // Call REST bridge cancel endpoint with OLD session ID
+            const oldSessionId = sessionId;
+            try {
+                const cancelUrl = CONFIG.apiUrl.replace('/query', '/cancel') + `?session_id=${oldSessionId}`;
+                await fetch(cancelUrl, { method: 'POST' });
+            } catch (e) {
+                console.warn('Cancel request failed (non-critical):', e);
+            }
+            
+            // Wait 1 second for cleanup to complete
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
 
         isLoading = true;
+        abortController = new AbortController();
         const input = document.getElementById('ovos-input');
         const sendBtn = document.getElementById('ovos-send');
         
@@ -1106,14 +1144,18 @@
             currentAudio = null;
         }
 
+        // Generate unique session ID for this query
+        const querySessionId = sessionId + '_' + Date.now();
+
         try {
             const res = await fetch(CONFIG.apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     text: text, 
-                    session_id: sessionId
+                    session_id: querySessionId
                 }),
+                signal: abortController.signal
             });
 
             hideTyping();
@@ -1158,14 +1200,20 @@
             }
         } catch (err) {
             hideTyping();
-            console.error('OVOS error:', err);
-            addMessage('Connection error. Is OVOS REST Bridge running?', false, true);
+            if (err.name === 'AbortError') {
+                console.log('✅ Request aborted successfully');
+                // Don't show error - already showed "(cancelled)" message
+            } else {
+                console.error('OVOS error:', err);
+                addMessage('Connection error. Is OVOS REST Bridge running?', false, true);
+            }
+        } finally {
+            isLoading = false;
+            abortController = null;
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
         }
-
-        isLoading = false;
-        input.disabled = false;
-        sendBtn.disabled = false;
-        input.focus();
     }
 
     function playAudio(base64Data, format) {
@@ -1583,6 +1631,13 @@
     function onWakeWordDetected() {
         console.log('🎯 Wake word activated!');
         
+        // Abort any in-flight request
+        if (isLoading && abortController) {
+            console.log('🚫 Interrupting current request...');
+            abortController.abort();
+            hideTyping();
+        }
+        
         // Visual feedback on indicator
         const indicator = document.getElementById('ovos-wakeword-indicator');
         if (indicator) {
@@ -1595,8 +1650,10 @@
             toggleWidget();
         }
         
-        // Add feedback message
-        addMessage('Jarvis activated! Listening for your command...', false, false);
+        // Add feedback message (only if not cancelling)
+        if (!isLoading) {
+            addMessage('Jarvis activated! Listening for your command...', false, false);
+        }
         
         // Start query listening
         setTimeout(() => {
