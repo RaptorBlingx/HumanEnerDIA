@@ -31,88 +31,131 @@
     
     <style>
         body {
-            font-family: var(--font-primary);
-            background-color: var(--bg-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f8fafc;
             min-height: 100vh;
         }
         
         .main-container {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            margin: 2rem auto;
-            padding: 2rem;
             max-width: 1400px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 3px solid var(--color-primary);
-        }
-        
-        .header h1 {
-            color: var(--text-primary);
-            font-weight: var(--font-bold);
-            margin-bottom: 0.5rem;
-            font-family: var(--font-headings);
-        }
-        
-        .header p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
+            margin: 0 auto;
+            padding: 64px 40px 80px;
         }
         
         .controls-panel {
-            background: var(--color-gray-100);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border-light);
+            background: white;
+            border-radius: 16px;
+            padding: 32px 40px;
+            margin-bottom: 48px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .controls-panel label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #374151;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .controls-panel input,
+        .controls-panel button {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .controls-panel input:focus {
+            outline: none;
+            border-color: #00A8E8;
+            box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.1);
+        }
+        
+        .controls-panel button {
+            background: linear-gradient(135deg, #0A2463 0%, #00A8E8 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .controls-panel button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(10, 36, 99, 0.4);
         }
         
         .metric-card {
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-            color: white;
-            border-radius: var(--radius-lg);
-            padding: 1rem;
             text-align: center;
-            margin-bottom: 1rem;
-            box-shadow: var(--shadow-md);
+            padding: 24px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        
+        .metric-card .icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .metric-card h3 {
-            font-size: 2rem;
+            font-size: 42px;
             font-weight: 700;
-            margin: 0;
+            margin-bottom: 8px;
+            line-height: 1;
         }
         
         .metric-card p {
+            font-size: 13px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
             margin: 0;
-            opacity: 0.9;
         }
         
         #sankey-chart {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
             min-height: 600px;
             position: relative;
-            border: 1px solid var(--border-light);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
         
         .node rect {
             cursor: pointer;
-            stroke: var(--text-primary);
+            stroke: #1f2937;
             stroke-width: 1px;
         }
         
         .node text {
             pointer-events: none;
             font-size: 12px;
-            font-weight: var(--font-semibold);
-            font-family: var(--font-primary);
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            fill: #1f2937;
         }
         
         .link {
@@ -149,26 +192,39 @@
         }
         
         .legend {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: var(--color-gray-100);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-light);
+            margin-top: 32px;
+            padding: 24px 32px;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .legend strong {
+            font-size: 14px;
+            color: #1f2937;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
         }
         
         .legend-item {
             display: inline-block;
-            margin-right: 2rem;
-            margin-bottom: 0.5rem;
+            margin-right: 32px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
         }
         
         .legend-color {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            margin-right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            margin-right: 10px;
             vertical-align: middle;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
     </style>
 </head>
@@ -188,7 +244,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
                     </svg>
-                    <span>HumanEnerDIA Analytics</span>
+                    <span>HumanEnerDIA</span>
                 </a>
             </div>
             <div style="display: flex; align-items: center; gap: 20px;">
@@ -226,34 +282,61 @@
     
     <!-- Sidebar will be injected by sidebar.js -->
 
-    <div class="main-container">
-        <!-- Header -->
-        <div class="header">
-            <h1>
-                <i class="bi bi-diagram-3"></i>
+    <!-- Hero Section - Premium Design -->
+    <section style="background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%); 
+                    color: white; 
+                    padding: 80px 0; 
+                    position: relative;
+                    overflow: hidden;">
+        <!-- Subtle pattern overlay -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                    background-image: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                                      radial-gradient(circle at 80% 80%, rgba(0, 168, 232, 0.1) 0%, transparent 50%);
+                    pointer-events: none;"></div>
+        
+        <div style="position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; text-align: center; padding: 0 40px;">
+            <h1 style="font-size: 56px; 
+                       font-weight: 700; 
+                       margin-bottom: 24px; 
+                       line-height: 1.2;
+                       letter-spacing: -0.02em;
+                       color: #FFFFFF;
+                       text-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);">
+                <i class="bi bi-diagram-3" style="margin-right: 16px;"></i>
                 Energy Flow Visualization
             </h1>
-            <p>Sankey diagram showing energy distribution across your facility</p>
+            <p style="font-size: 22px; 
+                     color: #FFFFFF; 
+                     margin-bottom: 0;
+                     line-height: 1.6;
+                     font-weight: 400;
+                     max-width: 700px;
+                     margin: 0 auto;
+                     text-shadow: 0 1px 4px rgba(0,0,0,0.3);">
+                Interactive Sankey diagram showing energy distribution across your facility
+            </p>
         </div>
-        
+    </section>
+
+    <div class="main-container">
         <!-- Controls Panel -->
         <div class="controls-panel">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label"><strong>Start Date</strong></label>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;">
+                <div>
+                    <label><i class="bi bi-calendar-event" style="margin-right: 6px; color: #0A2463;"></i>Start Date</label>
                     <input type="date" id="start-date" class="form-control">
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label"><strong>End Date</strong></label>
+                <div>
+                    <label><i class="bi bi-calendar-check" style="margin-right: 6px; color: #00A8E8;"></i>End Date</label>
                     <input type="date" id="end-date" class="form-control">
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label"><strong>Min Energy (kWh)</strong></label>
+                <div>
+                    <label><i class="bi bi-lightning-charge" style="margin-right: 6px; color: #FF6B35;"></i>Min Energy (kWh)</label>
                     <input type="number" id="min-energy" class="form-control" value="0" min="0" step="10">
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label"><strong>&nbsp;</strong></label>
-                    <button class="btn btn-primary w-100" onclick="loadSankeyData()">
+                <div>
+                    <label>&nbsp;</label>
+                    <button onclick="loadSankeyData()">
                         <i class="bi bi-arrow-repeat"></i> Update
                     </button>
                 </div>
@@ -261,30 +344,42 @@
         </div>
         
         <!-- Metrics Row -->
-        <div class="row mb-4" id="metrics-row">
-            <div class="col-md-3">
-                <div class="metric-card">
-                    <h3 id="total-energy">-</h3>
-                    <p>Total Energy (kWh)</p>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; margin-bottom: 48px;" id="metrics-row">
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 100%); box-shadow: 0 4px 14px rgba(10, 36, 99, 0.3);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
                 </div>
+                <h3 id="total-energy" style="color: #0A2463;">-</h3>
+                <p>Total Energy (kWh)</p>
             </div>
-            <div class="col-md-3">
-                <div class="metric-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <h3 id="factory-count">-</h3>
-                    <p>Factories</p>
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 4px 14px rgba(240, 147, 251, 0.4);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
                 </div>
+                <h3 id="factory-count" style="color: #f5576c;">-</h3>
+                <p>Factories</p>
             </div>
-            <div class="col-md-3">
-                <div class="metric-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                    <h3 id="dept-count">-</h3>
-                    <p>Departments</p>
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 4px 14px rgba(79, 172, 254, 0.4);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                    </svg>
                 </div>
+                <h3 id="dept-count" style="color: #00A8E8;">-</h3>
+                <p>Departments</p>
             </div>
-            <div class="col-md-3">
-                <div class="metric-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                    <h3 id="machine-count">-</h3>
-                    <p>Machines</p>
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); box-shadow: 0 4px 14px rgba(67, 233, 123, 0.4);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                    </svg>
                 </div>
+                <h3 id="machine-count" style="color: #2ECC71;">-</h3>
+                <p>Machines</p>
             </div>
         </div>
         
@@ -298,30 +393,23 @@
         
         <!-- Legend -->
         <div class="legend">
-            <strong>Legend:</strong>
+            <strong><i class="bi bi-palette" style="margin-right: 8px;"></i>Color Legend:</strong>
             <div class="legend-item">
-                <span class="legend-color" style="background: #667eea;"></span>
+                <span class="legend-color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></span>
                 Grid
             </div>
             <div class="legend-item">
-                <span class="legend-color" style="background: #f093fb;"></span>
+                <span class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></span>
                 Factory
             </div>
             <div class="legend-item">
-                <span class="legend-color" style="background: #4facfe;"></span>
+                <span class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></span>
                 Department
             </div>
             <div class="legend-item">
-                <span class="legend-color" style="background: #43e97b;"></span>
+                <span class="legend-color" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></span>
                 Machine
             </div>
-        </div>
-        
-        <!-- Back Button -->
-        <div class="text-center mt-4">
-            <a href="/ui/" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Dashboard
-            </a>
         </div>
     </div>
     
