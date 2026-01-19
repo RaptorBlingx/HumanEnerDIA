@@ -209,6 +209,69 @@ class ActionRetrieveAnswer(Action):
             "machine comparison": "ask_viz_comparison",
             "compare energy": "ask_viz_comparison",
             
+            # GETTING STARTED - New user onboarding (Phase 3.1)
+            "how do i get started": "ask_getting_started",
+            "get started": "ask_getting_started",
+            "getting started": "ask_getting_started",
+            "first time user": "ask_getting_started",
+            "new user": "ask_getting_started",
+            "where should i start": "ask_getting_started",
+            "start using": "ask_getting_started",
+            "quick start": "ask_getting_started",
+            "onboarding": "ask_getting_started",
+            
+            # TROUBLESHOOTING - High priority specific issues (Phase 3.5)
+            "dashboard not showing data": "ask_troubleshooting",
+            "grafana dashboard not showing data": "ask_troubleshooting",
+            "grafana dashboard empty": "ask_troubleshooting",
+            "dashboard empty": "ask_troubleshooting",
+            "no data in dashboard": "ask_troubleshooting",
+            "charts empty": "ask_troubleshooting",
+            "troubleshooting": "ask_troubleshooting",
+            "troubleshoot": "ask_troubleshooting",
+            "fix issues": "ask_troubleshooting",
+            "problems": "ask_troubleshooting",
+            "not working": "ask_troubleshooting",
+            "error": "ask_troubleshooting",
+            
+            # MULTI-ENERGY - Multiple fuel types (Phase 3.2)
+            "multi-energy": "ask_multi_energy",
+            "multiple energy": "ask_multi_energy",
+            "multi energy": "ask_multi_energy",
+            "natural gas": "ask_multi_energy",
+            "steam energy": "ask_multi_energy",
+            "compressed air": "ask_multi_energy",
+            "fuel types": "ask_multi_energy",
+            "energy source": "ask_multi_energy",
+            "fuel switching": "ask_multi_energy",
+            
+            # ALERTS CONFIG - Threshold and notification setup (Phase 3.3)
+            "alerts config": "ask_alerts_config",
+            "alert configuration": "ask_alerts_config",
+            "threshold configuration": "ask_alerts_config",
+            "notification settings": "ask_alerts_config",
+            "email alerts": "ask_alerts_config",
+            "sms alerts": "ask_alerts_config",
+            "push notifications": "ask_alerts_config",
+            "configure thresholds": "ask_alerts_config",
+            
+            # DATA EXPORT - Export and reporting (Phase 3.4)
+            "data export": "ask_data_export",
+            "export data": "ask_data_export",
+            "download data": "ask_data_export",
+            "csv export": "ask_data_export",
+            "excel export": "ask_data_export",
+            "export to": "ask_data_export",
+            "scheduled export": "ask_data_export",
+            
+            # WASABI PROJECT - Project context and support (Phase 3.6)
+            "wasabi project": "ask_wasabi_project",
+            "wasabi experiment": "ask_wasabi_project",
+            "about wasabi": "ask_wasabi_project",
+            "green edih": "ask_wasabi_project",
+            "a plus engineering": "ask_wasabi_project",
+            "open source": "ask_wasabi_project",
+            
             # GRAFANA DASHBOARDS - General (Phase 3)
             "grafana": "ask_grafana_general",
             "grafana dashboards": "ask_grafana_general",
@@ -735,6 +798,8 @@ class ActionRetrieveAnswer(Action):
                 logger.info(json.dumps(query_log))
                 
                 dispatcher.utter_message(text=best_answer)
+                # Trigger advice after answer
+                self._give_contextual_advice(dispatcher, tracker, topic, user_message_lower)
                 return []
         
         # PRIORITY 2: Process intent için QA_DATA["process"]'e bak
@@ -901,7 +966,68 @@ class ActionRetrieveAnswer(Action):
         # Send the selected response
         dispatcher.utter_message(text=selected_response)
         
+        # Trigger advice system after answer
+        self._give_contextual_advice(dispatcher, tracker, topic or intent, user_message_lower)
+        
         return []
+    
+    def _give_contextual_advice(self, dispatcher, tracker, matched_category, user_message_lower):
+        """Give contextual advice/appreciation based on matched category and user message."""
+        # Advice map for different intent categories
+        advice_map = {
+            'ask_portal_anomaly': [
+                "💡 Tip: Set up email alerts for critical anomalies to catch issues early!",
+                "💡 Tip: Review anomalies weekly - quick action prevents energy waste.",
+                "💡 Tip: Fine-tune thresholds per machine to reduce false positives."
+            ],
+            'ask_concept_baseline': [
+                "💡 Tip: Retrain baselines quarterly or after major production changes.",
+                "💡 Tip: Check R² score - aim for >0.85 for reliable predictions.",
+                "💡 Tip: Exclude anomalies when training for better model accuracy."
+            ],
+            'ask_portal_kpi': [
+                "💡 Tip: Export KPI reports weekly to track trends over time.",
+                "💡 Tip: Focus on improving load factor to reduce demand charges.",
+                "💡 Tip: SEC (specific energy consumption) is key for efficiency tracking."
+            ],
+            'ask_portal_forecast': [
+                "💡 Tip: Use forecasts to schedule high-load operations during low-cost periods.",
+                "💡 Tip: ARIMA works best for short-term, Prophet for seasonal patterns.",
+                "💡 Tip: Validate forecasts monthly - retrain if accuracy drops below 85%."
+            ],
+            'ask_significant_energy_use': [
+                "💡 Tip: Focus on SEUs first - 80/20 rule applies to energy management.",
+                "💡 Tip: Monitor top 3 energy consumers daily for maximum impact."
+            ],
+            'ask_grafana_environmental': [
+                "💡 Tip: Track carbon intensity (kg CO₂/kWh) to measure true environmental impact.",
+                "💡 Tip: Set carbon reduction targets aligned with your ISO 50001 goals."
+            ],
+            'ask_concept_peakdemand': [
+                "💡 Tip: Peak demand charges can be 30-50% of your bill - worth managing!",
+                "💡 Tip: Stagger equipment startups to avoid simultaneous peak loads."
+            ],
+            'ask_troubleshooting': [
+                "💡 Tip: Check our comprehensive troubleshooting guide first - covers 90% of issues.",
+                "💡 Tip: Hard refresh (Ctrl+F5) solves most UI rendering issues."
+            ]
+        }
+        
+        # Check if matched category has advice
+        if matched_category in advice_map:
+            advice = random.choice(advice_map[matched_category])
+            dispatcher.utter_message(text=advice)
+        
+        # Appreciation triggers for positive actions
+        appreciation_keywords = ['fix', 'reduce', 'improve', 'train', 'invest', 'achieve']
+        if any(keyword in user_message_lower for keyword in appreciation_keywords):
+            appreciation_messages = [
+                "🌟 Great work! Actions like this directly improve your energy performance.",
+                "👏 Excellent! This is exactly the proactive approach ISO 50001 encourages.",
+                "🎯 Well done! Continuous improvement is key to energy management success.",
+                "💪 Outstanding! Your team's commitment to efficiency is commendable."
+            ]
+            dispatcher.utter_message(text=random.choice(appreciation_messages))
     
     def _extract_keywords(self, text: str) -> set:
         """Extract important keywords from text, filtering out stop words."""
@@ -1326,3 +1452,86 @@ class ActionRetrieveAnswer(Action):
         message_hash = abs(hash(user_message)) % len(responses)
         return responses[message_hash].get("text", "")
 
+
+class ActionGiveAdvice(Action):
+    """Proactive advice system that provides contextual tips and appreciates positive actions.
+    Fulfills WASABI proposal commitment to 'warn & advise users for resource efficiency'."""
+    
+    def name(self) -> Text:
+        return "action_give_advice"
+    
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        intent = tracker.latest_message.get('intent', {}).get('name', '')
+        user_message = tracker.latest_message.get('text', '').lower()
+        
+        # Advice map: contextual tips per intent
+        advice_map = {
+            'ask_portal_anomaly': [
+                "💡 **Proactive Tip:** Regular anomaly monitoring prevents energy waste. Set up email alerts for critical anomalies to catch issues early!",
+                "💡 **Best Practice:** Review anomalies within 4 hours to minimize wasted energy. Quick action = better savings.",
+                "💡 **Advice:** Consider adjusting thresholds per machine - critical equipment benefits from stricter monitoring (1.5σ instead of 2σ)."
+            ],
+            'ask_energy_baseline': [
+                "💡 **Energy Tip:** Retrain your baseline every quarter or after major operational changes for accurate predictions and reliable EnPI tracking.",
+                "💡 **Best Practice:** A baseline with R² > 0.8 is good for ISO 50001. Below 0.7? Add more drivers or extend your training period.",
+                "💡 **Advice:** Exclude anomalies from training data to prevent skewed models. Enable 'Exclude Anomalies' in training settings."
+            ],
+            'ask_portal_kpi': [
+                "💡 **Performance Tip:** Export KPI reports weekly to track trends and share with management for data-driven decisions.",
+                "💡 **Efficiency Advice:** Load Factor > 70% is good. Below that? Consider load scheduling to smooth out peaks and reduce demand charges.",
+                "💡 **Best Practice:** Monitor SEC (Specific Energy Consumption) as your primary efficiency metric - it accounts for production volume changes."
+            ],
+            'ask_portal_forecast': [
+                "💡 **Planning Tip:** Use Optimal Load Scheduling to shift energy-intensive tasks to off-peak hours and save 15-30% on demand charges!",
+                "💡 **Forecast Advice:** ARIMA for short-term (1-4h), Prophet for medium-term (24h-7d). Different tools for different needs.",
+                "💡 **Best Practice:** Validate forecast accuracy monthly. High MAPE (>15%)? Retrain your models with recent data."
+            ],
+            'ask_concept_seu': [
+                "💡 **ISO 50001 Tip:** Focus improvement efforts on SEUs (Significant Energy Uses) - typically 20% of equipment accounts for 80% of consumption.",
+                "💡 **Efficiency Advice:** Identify your top 3 energy consumers and monitor them closely. Small improvements here = big impact."
+            ],
+            'ask_grafana_environmental': [
+                "💡 **Sustainability Tip:** Track carbon intensity (kg CO2/unit) not just total emissions. Production-normalized metrics show true efficiency gains.",
+                "💡 **Green Advice:** Set carbon reduction targets in Settings → Environmental. Dashboard tracks progress automatically for ESG reporting."
+            ],
+            'ask_concept_peakdemand': [
+                "💡 **Cost Warning:** Peak demand charges can be 30-50% of your electricity bill! A single spike affects the entire month.",
+                "💡 **Savings Tip:** Stagger equipment startups by 5-10 minutes to avoid simultaneous peaks. Simple change, major savings."
+            ],
+            'ask_troubleshooting': [
+                "💡 **Support Tip:** Check our comprehensive troubleshooting guide first - covers 90% of common issues. Saves time and gets you back online faster!",
+                "💡 **Performance Advice:** If dashboards are slow, check your time range - shorter periods (24h vs 30d) load faster."
+            ],
+        }
+        
+        # Appreciation messages for positive actions
+        appreciation_triggers = {
+            'fix': ["🌟 **Great work!** Fixing issues promptly prevents energy waste and maintains system efficiency.",
+                   "👏 **Excellent action!** Quick problem resolution is exactly what ISO 50001 encourages."],
+            'reduc': ["🎉 **Congratulations!** Reducing energy consumption shows commitment to sustainability and cost savings.",
+                     "🌟 **Well done!** Energy reduction initiatives directly improve your carbon footprint."],
+            'improv': ["👏 **Fantastic!** Continuous improvement is the cornerstone of effective energy management.",
+                      "🌟 **Excellent progress!** Proactive improvements lead to significant long-term savings."],
+            'train': ["🎯 **Smart move!** Regular model retraining ensures accurate predictions and reliable baseline tracking.",
+                     "👏 **Good practice!** Keeping models updated is key to maintaining system effectiveness."],
+            'invest': ["🌟 **Great decision!** Investing in efficiency improvements has both environmental and economic benefits.",
+                      "👏 **Forward thinking!** Energy efficiency projects typically pay back within 2-3 years."],
+            'achiev': ["🎉 **Milestone reached!** Celebrating achievements keeps teams motivated for further improvements.",
+                      "🌟 **Outstanding!** Recognizing progress is essential for maintaining energy management momentum."],
+        }
+        
+        # Check if user message indicates positive action (appreciation)
+        for trigger, messages in appreciation_triggers.items():
+            if trigger in user_message:
+                dispatcher.utter_message(text=random.choice(messages))
+                return []
+        
+        # Provide contextual advice based on intent
+        if intent in advice_map:
+            advice = random.choice(advice_map[intent])
+            dispatcher.utter_message(text=advice)
+        
+        return []

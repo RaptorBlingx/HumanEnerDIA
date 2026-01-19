@@ -267,8 +267,39 @@ responses:
   utter_ask_general_info:
   - text: 'The concept of energy performance includes three key aspects: energy use, energy efficiency, and energy consumption. This allows the organization a wide range of activities through which to demonstrate performance improvement. For instance, an organization could focus on reducing peak demand, utilizing surplus or waste energy, or improving the operations of its systems, processes, or equipment.'
   - text: The organization determines the rate, extent, and timescale of the continual improvement process. The organization has the flexibility to take into account economic and other considerations when making these determinations. The worldwide application of this International Standard is intended to contribute to the more efficient use of available energy sources, leading to enhanced competitiveness for organizations.
+  utter_appreciate_action:
+  - text: "🌟 Great work! Actions like this directly improve your energy performance and support ISO 50001 continual improvement."
+  - text: "👏 Excellent! This proactive approach is exactly what effective energy management requires."
+  - text: "🎯 Well done! Your commitment to energy efficiency makes a real difference."
+  - text: "✨ Fantastic effort! Taking action on energy issues prevents waste and reduces costs."
+  utter_celebrate_milestone:
+  - text: "🎉 Congratulations! You've achieved a significant milestone in energy efficiency improvement!"
+  - text: "🌟 Outstanding achievement! This progress demonstrates your commitment to sustainability."
+  - text: "🏆 Milestone reached! Celebrating successes keeps the team motivated for further improvements."
+  - text: "🎊 Great accomplishment! Your energy performance gains contribute to both cost savings and environmental protection."
+  utter_energy_saving_tip:
+  - text: "💡 Tip: Focus on your top 3 energy consumers (SEUs) - small improvements here create big impact!"
+  - text: "💡 Tip: Stagger equipment startups to avoid peak demand spikes and reduce utility charges by 15-30%."
+  - text: "💡 Tip: Set up automated alerts for anomalies - early detection saves energy and prevents equipment damage."
+  - text: "💡 Tip: Retrain baseline models quarterly to maintain accuracy and reliable performance tracking."
+  utter_efficiency_advice:
+  - text: "💡 Best Practice: Load Factor > 70% indicates efficient operation. Below that? Consider load scheduling."
+  - text: "💡 Best Practice: Monitor SEC (Specific Energy Consumption) as your primary metric - it accounts for production changes."
+  - text: "💡 Best Practice: Use weather-normalized data for year-over-year comparisons to see true efficiency gains."
+  - text: "💡 Best Practice: Export weekly KPI reports to track trends and share with management for data-driven decisions."
+  utter_warning_peak_demand:
+  - text: "⚠️ Warning: Peak demand charges can represent 30-50% of your electricity bill. A single spike affects the entire month!"
+  - text: "⚠️ Cost Alert: High peak demand detected. Consider load shifting to off-peak hours to reduce utility charges."
+  utter_warning_baseline_accuracy:
+  - text: "⚠️ Notice: Baseline R² below 0.7 indicates poor model fit. Consider adding more drivers or extending training period."
+  - text: "⚠️ Alert: Baseline accuracy declining. Retrain models with recent data to maintain reliable predictions."
+  utter_encourage_improvement:
+  - text: "🚀 Keep going! Every efficiency improvement, no matter how small, contributes to your sustainability goals."
+  - text: "🌱 Remember: Continuous small improvements often outperform occasional big changes in energy management."
+  - text: "💪 You're on the right track! Consistent monitoring and adjustment lead to significant long-term savings."
 actions:
 - action_retrieve_answer
+- action_give_advice
 session_config:
   session_expiration_time: 60
   carry_over_slots_to_new_session: true

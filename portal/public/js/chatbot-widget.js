@@ -65,6 +65,15 @@
                         <div class="enms-chat-message enms-chat-bot">
                             <div class="enms-chat-bubble">${CONFIG.welcomeMessage}</div>
                         </div>
+                        <!-- Quick Reply Buttons -->
+                        <div id="enms-quick-replies" class="enms-quick-replies">
+                            <div class="enms-quick-replies-title">💡 Quick suggestions:</div>
+                            <button class="enms-quick-reply-btn" data-query="How do I get started with HumanEnerDIA?">How do I get started?</button>
+                            <button class="enms-quick-reply-btn" data-query="What is ISO 50001?">What is ISO 50001?</button>
+                            <button class="enms-quick-reply-btn" data-query="How many Grafana dashboards are there?">Grafana dashboards</button>
+                            <button class="enms-quick-reply-btn" data-query="Why is my Grafana dashboard not showing data?">Troubleshooting</button>
+                            <button class="enms-quick-reply-btn" data-query="What is an energy baseline?">Energy baseline</button>
+                        </div>
                     </div>
 
                     <!-- Input -->
@@ -348,6 +357,42 @@
                     right: -10px;
                 }
             }
+
+            /* Quick Reply Buttons */
+            .enms-quick-replies {
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                border-top: 1px solid #e5e7eb;
+                background: #f9fafb;
+            }
+
+            .enms-quick-replies-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: #6b7280;
+                margin-bottom: 4px;
+            }
+
+            .enms-quick-reply-btn {
+                padding: 10px 14px;
+                background: white;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                color: #374151;
+                font-size: 14px;
+                cursor: pointer;
+                text-align: left;
+                transition: all 0.2s;
+            }
+
+            .enms-quick-reply-btn:hover {
+                background: #3b82f6;
+                color: white;
+                border-color: #3b82f6;
+                transform: translateX(2px);
+            }
         `;
 
         const styleSheet = document.createElement('style');
@@ -484,6 +529,19 @@
         document.getElementById('enms-chat-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendMessage(e.target.value);
+            }
+        });
+
+        // Quick reply button listeners
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('enms-quick-reply-btn')) {
+                const query = e.target.getAttribute('data-query');
+                sendMessage(query);
+                // Hide quick replies after first use
+                const quickReplies = document.getElementById('enms-quick-replies');
+                if (quickReplies) {
+                    quickReplies.style.display = 'none';
+                }
             }
         });
 
