@@ -1,7 +1,6 @@
-/*
+/* 
   -  Information Pages - Background Design
   -  Shared across all public pages (About, Contact, ISO 50001, Pilot Factory, Auth)
-*/
 
 body::before {
   content: "";
@@ -177,4 +176,5 @@ header,
 footer {
   position: relative;
   z-index: 10;
-}
+} 
+*/
