@@ -31,7 +31,7 @@ class TrainRequest(BaseModel):
     """Request model for training forecast models."""
     machine_id: UUID = Field(..., description="Machine UUID to train for")
     lookback_days: int = Field(
-        7,
+        14,
         ge=7,
         le=90,
         description="Days of historical data to use for training"

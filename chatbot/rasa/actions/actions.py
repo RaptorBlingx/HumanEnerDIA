@@ -56,6 +56,7 @@ class ActionRetrieveAnswer(Action):
         latest_message = tracker.latest_message
         user_message = latest_message.get("text", "")
         user_message_lower = user_message.lower()
+        user_message_original_lower = user_message_lower
         intent = latest_message.get("intent", {}).get("name", "")
         
         # Log query start
@@ -104,6 +105,20 @@ class ActionRetrieveAnswer(Action):
         for abbr, expansion in abbreviation_map.items():
             user_message_lower = re.sub(abbr, expansion, user_message_lower, flags=re.IGNORECASE)
         
+        # Exact match across all categories (avoids misrouting for known questions)
+        exact_category, exact_answer = self._find_exact_answer(user_message_lower)
+        if not exact_answer and user_message_lower != user_message_original_lower:
+            exact_category, exact_answer = self._find_exact_answer(user_message_original_lower)
+        if exact_answer:
+            query_log["matched_category"] = exact_category
+            query_log["answer_preview"] = exact_answer[:100]
+            query_log["status"] = "exact_match"
+            logger.info(json.dumps(query_log))
+
+            dispatcher.utter_message(text=exact_answer)
+            self._give_contextual_advice(dispatcher, tracker, exact_category, user_message_lower)
+            return []
+
         # Anahtar kelime mapping - hangi kelimeler hangi alt konuya ait
         keyword_to_topic = {
             # HumanEnerDIA PLATFORM topics (NEW - longer keywords for specificity)
@@ -1177,6 +1192,16 @@ class ActionRetrieveAnswer(Action):
             bonus += len(common_important) * 0.15  # Artırıldı
         
         return min(bonus, 0.8)  # Maksimum 0.8 bonus (artırıldı)
+
+    def _find_exact_answer(self, user_message: str):
+        """Find an exact question match across all categories."""
+        normalized = user_message.strip().lower()
+        if not normalized:
+            return None, None
+        for category, qa_dict in QA_DATA.items():
+            if normalized in qa_dict:
+                return category, qa_dict[normalized]
+        return None, None
     
     def _find_best_answer(self, user_message: str, qa_dict: Dict[str, str]) -> str:
         """Find the best matching answer using improved similarity matching."""

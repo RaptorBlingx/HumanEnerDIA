@@ -54,6 +54,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     playwright install chromium
 
+# Install CmdStan for Prophet (required binary backend)
+# This downloads and compiles CmdStan - takes a few minutes but only on build
+RUN python -m cmdstanpy.install_cmdstan --cores 2 --progress
+
 # Copy application code
 COPY . .
 

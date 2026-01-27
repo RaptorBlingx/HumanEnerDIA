@@ -16,6 +16,7 @@ const ChatBotUI: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [thinkingEnabled, setThinkingEnabled] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -137,7 +138,7 @@ const ChatBotUI: React.FC = () => {
         timestamp: Date.now()
       }]);
 
-      await sendMessageStream(userMessageText, currentAttachments, (chunkText) => {
+      await sendMessageStream(userMessageText, currentAttachments, thinkingEnabled, (chunkText) => {
         setMessages(prev => prev.map(msg =>
           msg.id === botMsgId
             ? { ...msg, text: msg.text + chunkText }
@@ -283,6 +284,28 @@ const ChatBotUI: React.FC = () => {
               ))}
             </div>
           )}
+
+          {/* Thinking Mode Toggle */}
+          <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-2 tw-border-t tw-border-slate-200">
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <Zap size={16} className={thinkingEnabled ? "tw-text-yellow-500" : "tw-text-slate-400"} />
+              <span className="tw-text-sm tw-text-slate-700">Thinking Mode</span>
+              <span className="tw-text-xs tw-text-slate-500">
+                {thinkingEnabled ? "(Slower, deeper reasoning)" : "(Fast responses)"}
+              </span>
+            </div>
+            <button
+              onClick={() => setThinkingEnabled(!thinkingEnabled)}
+              className={`tw-relative tw-w-11 tw-h-6 tw-rounded-full tw-transition-colors ${
+                thinkingEnabled ? "tw-bg-yellow-500" : "tw-bg-slate-300"
+              }`}
+              aria-label="Toggle thinking mode"
+            >
+              <div className={`tw-absolute tw-top-1 tw-left-1 tw-w-4 tw-h-4 tw-bg-white tw-rounded-full tw-transition-transform ${
+                thinkingEnabled ? "tw-translate-x-5" : ""
+              }`} />
+            </button>
+          </div>
 
           {/* Input Bar */}
           <div className="tw-flex tw-items-end tw-gap-2">

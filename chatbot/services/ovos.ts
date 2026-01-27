@@ -14,12 +14,14 @@ export const initChat = () => {
  * Sends a message to OVOS and streams the response.
  * @param text User's text message
  * @param attachments Optional images/files (not supported by OVOS REST API)
+ * @param thinkingEnabled Enable LLM reasoning mode (slower, more accurate)
  * @param onChunk Callback for each text chunk received
  * @returns The full final text
  */
 export const sendMessageStream = async (
   text: string,
   attachments: Attachment[] = [],
+  thinkingEnabled: boolean = false,
   onChunk: (text: string) => void
 ): Promise<string> => {
   if (!text.trim()) {
@@ -31,6 +33,7 @@ export const sendMessageStream = async (
   try {
     const payload = {
       text: text.trim(),
+      thinking_enabled: thinkingEnabled,
     };
 
     const response = await fetch(endpoint, {
