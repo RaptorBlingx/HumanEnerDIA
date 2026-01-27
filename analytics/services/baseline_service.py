@@ -26,6 +26,67 @@ from config import settings
 logger = logging.getLogger(__name__)
 
 
+async def insert_performance_metric(
+    model_id: UUID,
+    model_type: str,
+    machine_id: UUID,
+    model_version: int,
+    evaluation_start: datetime,
+    evaluation_end: datetime,
+    sample_count: int,
+    r_squared: float,
+    rmse: float,
+    mae: float,
+    mape: Optional[float] = None,
+    data_completeness: float = 1.0
+) -> UUID:
+    """
+    Insert performance metrics into model_performance_metrics table.
+    
+    Args:
+        model_id: Model UUID
+        model_type: Type of model ('baseline', 'forecast', 'anomaly')
+        machine_id: Machine UUID
+        model_version: Model version number
+        evaluation_start: Start of evaluation period
+        evaluation_end: End of evaluation period
+        sample_count: Number of samples used
+        r_squared: R-squared score
+        rmse: Root Mean Squared Error
+        mae: Mean Absolute Error
+        mape: Mean Absolute Percentage Error (optional)
+        data_completeness: Data completeness score (0.0-1.0)
+        
+    Returns:
+        UUID of inserted metric record
+    """
+    query = """
+        INSERT INTO model_performance_metrics (
+            model_id, model_type, machine_id, model_version,
+            evaluation_date, evaluation_start, evaluation_end, sample_count,
+            r_squared, rmse, mae, mape, data_completeness,
+            drift_detected, drift_score
+        ) VALUES (
+            $1, $2, $3, $4,
+            NOW(), $5, $6, $7,
+            $8, $9, $10, $11, $12,
+            FALSE, 0.0
+        )
+        RETURNING id
+    """
+    
+    async with db.pool.acquire() as conn:
+        metric_id = await conn.fetchval(
+            query,
+            model_id, model_type, machine_id, model_version,
+            evaluation_start, evaluation_end, sample_count,
+            r_squared, rmse, mae, mape, data_completeness
+        )
+    
+    logger.info(f"✓ Performance metric inserted: {metric_id} (R²={r_squared:.4f})")
+    return metric_id
+
+
 class BaselineService:
     """Service for managing energy baseline models."""
     
@@ -152,6 +213,28 @@ class BaselineService:
             f"✓ Baseline model trained and saved: {model_id} "
             f"(R²={model.r_squared:.4f})"
         )
+        
+        # NEW: Insert performance metrics for model tracking
+        logger.info(f"[TRAIN-SVC] Step 6: Inserting performance metrics")
+        try:
+            metric_id = await insert_performance_metric(
+                model_id=UUID(str(model_id)),
+                model_type='baseline',
+                machine_id=machine_id,
+                model_version=next_version,
+                evaluation_start=start_date,
+                evaluation_end=end_date,
+                sample_count=len(data),
+                r_squared=model.r_squared,
+                rmse=model.rmse,
+                mae=model.mae,
+                mape=None,  # Not calculated for baseline
+                data_completeness=1.0  # Full training dataset
+            )
+            logger.info(f"✓ Performance metric recorded: {metric_id}")
+        except Exception as e:
+            logger.error(f"Failed to insert performance metric: {e}", exc_info=True)
+            # Don't fail training if metrics insertion fails
         
         # Return comprehensive results
         return {
@@ -383,20 +466,20 @@ class BaselineService:
         if energy_source_id:
             query = """
                 SELECT 
-                    id, machine_id, energy_source_id, model_name, model_version,
+                    id, machine_id, model_name, model_version,
                     training_samples, r_squared, rmse, mae,
                     is_active, created_at
                 FROM energy_baselines
-                WHERE machine_id = $1 AND energy_source_id = $2
+                WHERE machine_id = $1
                 ORDER BY model_version DESC
             """
             async with db.pool.acquire() as conn:
-                rows = await conn.fetch(query, machine_id, energy_source_id)
+                rows = await conn.fetch(query, machine_id)
                 return [dict(row) for row in rows]
         else:
             query = """
                 SELECT 
-                    id, machine_id, energy_source_id, model_name, model_version,
+                    id, machine_id, model_name, model_version,
                     training_samples, r_squared, rmse, mae,
                     is_active, created_at
                 FROM energy_baselines

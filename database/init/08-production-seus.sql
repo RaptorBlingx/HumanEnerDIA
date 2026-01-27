@@ -10,7 +10,7 @@
 \echo ''
 \echo '╔══════════════════════════════════════════════════════════════════════════╗'
 \echo '║  Migration 004: Production SEU Structure (Per-Equipment)                ║'
-\echo '║  Phase 1: Electricity SEUs (7 equipment)                                ║'
+\echo '║  Phase 1: Electricity SEUs (8 equipment)                                ║'
 \echo '║  Phase 2 Ready: Multi-energy support built-in                           ║'
 \echo '╚══════════════════════════════════════════════════════════════════════════╝'
 \echo ''
@@ -22,7 +22,7 @@ BEGIN;
 -- ============================================================================
 -- Real-world ISO 50001 practice: ONE SEU per equipment per energy type
 -- 
--- These 7 SEUs track ELECTRICITY CONSUMPTION of production equipment.
+-- These 8 SEUs track ELECTRICITY CONSUMPTION of production equipment.
 -- Data source: energy_readings table (kWh consumed by each machine)
 --
 -- Real-world example:
@@ -30,7 +30,7 @@ BEGIN;
 --   - Future: "Compressor-1 Air Production" SEU → tracks Nm³ produced per kWh
 -- ============================================================================
 
-\echo '→ Creating 7 electricity SEUs (per-equipment structure)...'
+\echo '→ Creating 8 electricity SEUs (per-equipment structure)...'
 
 -- Get electricity energy_source_id (needed for all SEUs)
 DO $$
@@ -210,9 +210,31 @@ BEGIN
     ) ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE '✓ Created SEU: Injection-Molding-1 (Electricity)';
     
+    -- ========================================================================
+    -- SEU 8: Boiler-1 (ELECTRICITY)
+    -- ========================================================================
+    INSERT INTO seus (
+        id,
+        name,
+        description,
+        energy_source_id,
+        machine_ids,
+        is_active,
+        created_at
+    ) VALUES (
+        'aaaaaaaa-8888-8888-8888-888888888888'::uuid,
+        'Boiler-1',
+        'Industrial steam boiler - 250kW rated. Baseline variables: steam_pressure (bar), outdoor temperature (°C), operating hours. Primary energy: natural gas (Phase 2). Current tracking: ELECTRICITY for control systems, pumps, and fans.',
+        v_electricity_id,
+        ARRAY['c0000000-0000-0000-0000-000000000008'::uuid],
+        true,
+        NOW()
+    ) ON CONFLICT (id) DO NOTHING;
+    RAISE NOTICE '✓ Created SEU: Boiler-1 (Electricity - controls/pumps/fans)';
+    
 END $$;
 
-\echo '✓ 7 electricity SEUs created successfully'
+\echo '✓ 8 electricity SEUs created successfully'
 \echo ''
 
 -- ============================================================================

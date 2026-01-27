@@ -116,9 +116,209 @@ class ModelAlert(BaseModel):
     auto_action_taken: bool
 
 
+class ModelSummary(BaseModel):
+    """Summary of actual trained model from energy_baselines"""
+    model_id: str
+    machine_id: str
+    machine_name: str
+    model_type: str
+    model_version: int
+    is_active: bool
+    r_squared: Optional[float] = None
+    rmse: Optional[float] = None
+    mae: Optional[float] = None
+    training_samples: Optional[int] = None
+    feature_names: Optional[List[str]] = None
+    created_at: datetime
+    has_model: bool = True
+
+
 # ============================================================================
-# PERFORMANCE METRICS ENDPOINTS
+# MODEL SUMMARY ENDPOINT (Queries REAL baseline data)
 # ============================================================================
+
+@router.get("/summary")
+async def get_model_summary(
+    machine_id: str = Query(..., description="Machine UUID"),
+    model_type: str = Query("baseline", description="Model type: baseline, anomaly, forecast_arima, forecast_prophet")
+):
+    """
+    Get summary of actual trained models from energy_baselines table.
+    
+    This endpoint queries REAL model data, not the model_performance_metrics table.
+    Use this for displaying current model status.
+    """
+    try:
+        pool = db.pool
+        machine_uuid = UUID(machine_id)
+        
+        async with pool.acquire() as conn:
+            # Get machine info
+            machine_row = await conn.fetchrow("""
+                SELECT id, name, type FROM machines WHERE id = $1
+            """, machine_uuid)
+            
+            if not machine_row:
+                raise HTTPException(status_code=404, detail="Machine not found")
+            
+            if model_type == "baseline":
+                # Query energy_baselines table for real baseline models
+                model_row = await conn.fetchrow("""
+                    SELECT 
+                        id, machine_id, model_version, model_name,
+                        r_squared, rmse, mae, training_samples,
+                        feature_names, is_active, created_at
+                    FROM energy_baselines
+                    WHERE machine_id = $1 AND is_active = true
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                """, machine_uuid)
+                
+                if not model_row:
+                    # No model trained yet
+                    return {
+                        "has_model": False,
+                        "model_id": None,
+                        "machine_id": str(machine_uuid),
+                        "machine_name": machine_row['name'],
+                        "model_type": model_type,
+                        "model_version": 0,
+                        "is_active": False,
+                        "r_squared": None,
+                        "rmse": None,
+                        "mae": None,
+                        "training_samples": None,
+                        "feature_names": None,
+                        "created_at": None,
+                        "message": "No baseline model trained for this machine. Train one in the Baseline page."
+                    }
+                
+                # Get all versions for history
+                all_versions = await conn.fetch("""
+                    SELECT 
+                        id, model_version, r_squared, rmse, mae, 
+                        training_samples, is_active, created_at
+                    FROM energy_baselines
+                    WHERE machine_id = $1
+                    ORDER BY model_version DESC
+                    LIMIT 10
+                """, machine_uuid)
+                
+                return {
+                    "has_model": True,
+                    "model_id": str(model_row['id']),
+                    "machine_id": str(machine_uuid),
+                    "machine_name": machine_row['name'],
+                    "model_type": model_type,
+                    "model_version": model_row['model_version'],
+                    "is_active": model_row['is_active'],
+                    "r_squared": float(model_row['r_squared']) if model_row['r_squared'] else None,
+                    "rmse": float(model_row['rmse']) if model_row['rmse'] else None,
+                    "mae": float(model_row['mae']) if model_row['mae'] else None,
+                    "training_samples": model_row['training_samples'],
+                    "feature_names": model_row['feature_names'],
+                    "created_at": model_row['created_at'].isoformat() if model_row['created_at'] else None,
+                    "versions": [
+                        {
+                            "id": str(v['id']),
+                            "version": v['model_version'],
+                            "r_squared": float(v['r_squared']) if v['r_squared'] else None,
+                            "rmse": float(v['rmse']) if v['rmse'] else None,
+                            "is_active": v['is_active'],
+                            "created_at": v['created_at'].isoformat() if v['created_at'] else None
+                        }
+                        for v in all_versions
+                    ]
+                }
+            
+            elif model_type in ["forecast_arima", "forecast_prophet"]:
+                # Check filesystem for forecast models
+                import os
+                model_subtype = "arima" if model_type == "forecast_arima" else "prophet"
+                model_path = f"/app/models/{model_subtype}_{machine_id}.pkl"
+                
+                if os.path.exists(model_path):
+                    import pickle
+                    from datetime import datetime as dt
+                    
+                    stat = os.stat(model_path)
+                    modified = dt.fromtimestamp(stat.st_mtime)
+                    
+                    return {
+                        "has_model": True,
+                        "model_id": f"{model_subtype}_{machine_id}",
+                        "machine_id": str(machine_uuid),
+                        "machine_name": machine_row['name'],
+                        "model_type": model_type,
+                        "model_version": 1,
+                        "is_active": True,
+                        "r_squared": None,  # Forecast models don't store R²
+                        "rmse": None,
+                        "mae": None,
+                        "training_samples": None,
+                        "feature_names": None,
+                        "created_at": modified.isoformat(),
+                        "versions": []
+                    }
+                else:
+                    return {
+                        "has_model": False,
+                        "model_id": None,
+                        "machine_id": str(machine_uuid),
+                        "machine_name": machine_row['name'],
+                        "model_type": model_type,
+                        "model_version": 0,
+                        "is_active": False,
+                        "message": f"No {model_subtype.upper()} model trained. Train one in the Forecast page."
+                    }
+            
+            elif model_type == "anomaly":
+                # Query anomalies table to check if anomaly detection is configured
+                # Count recent anomalies to verify detection is working
+                anomaly_stats = await conn.fetchrow("""
+                    SELECT 
+                        COUNT(*) as total_anomalies,
+                        COUNT(CASE WHEN detected_at > NOW() - INTERVAL '30 days' THEN 1 END) as recent_anomalies,
+                        MAX(detected_at) as last_detected,
+                        COUNT(DISTINCT detection_method) as detection_methods
+                    FROM anomalies
+                    WHERE machine_id = $1
+                """, machine_uuid)
+                
+                if not anomaly_stats or anomaly_stats['total_anomalies'] == 0:
+                    return {
+                        "has_model": False,
+                        "model_id": None,
+                        "machine_id": str(machine_uuid),
+                        "machine_name": machine_row['name'],
+                        "model_type": model_type,
+                        "message": "No anomaly detection history found. Configure in the Anomaly page."
+                    }
+                
+                return {
+                    "has_model": True,
+                    "model_id": str(machine_uuid),  # Use machine_id as identifier
+                    "machine_id": str(machine_uuid),
+                    "machine_name": machine_row['name'],
+                    "model_type": model_type,
+                    "model_version": 1,
+                    "is_active": True,
+                    "total_anomalies": int(anomaly_stats['total_anomalies']),
+                    "recent_anomalies": int(anomaly_stats['recent_anomalies']),
+                    "last_detected": anomaly_stats['last_detected'].isoformat() if anomaly_stats['last_detected'] else None,
+                    "detection_methods": int(anomaly_stats['detection_methods']),
+                    "created_at": anomaly_stats['last_detected'].isoformat() if anomaly_stats['last_detected'] else None,
+                    "versions": []
+                }
+            
+            else:
+                raise HTTPException(status_code=400, detail=f"Unknown model type: {model_type}")
+                
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting model summary: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/metrics/record")
 async def record_performance_metric(

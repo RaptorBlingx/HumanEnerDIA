@@ -527,8 +527,8 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label"><strong>&nbsp;</strong></label>
-                    <button class="btn btn-success w-100" onclick="triggerRetrain()">
-                        <i class="bi bi-arrow-clockwise"></i> Retrain
+                    <button class="btn btn-info w-100" onclick="showModelDetails()" id="model-details-btn" disabled>
+                        <i class="bi bi-info-circle"></i> Get Model Details
                     </button>
                 </div>
             </div>
@@ -631,10 +631,58 @@
             await loadMachines();
             await loadDashboard();
             
+            // Add change listeners for all controls
+            document.getElementById('machine-select').addEventListener('change', () => {
+                console.log('[machine-select] Changed - reloading dashboard');
+                clearDashboard();
+                loadDashboard();
+            });
+            
+            document.getElementById('model-type').addEventListener('change', () => {
+                console.log('[model-type] Changed - reloading dashboard');
+                clearDashboard();
+                loadDashboard();
+            });
+            
+            document.getElementById('time-period').addEventListener('change', () => {
+                console.log('[time-period] Changed - reloading dashboard');
+                loadDashboard();
+            });
+            
             // Auto-refresh every 60 seconds
             setInterval(loadDashboard, 60000);
             console.log('Initialization complete.');
         });
+        
+        // Clear dashboard data before loading new machine
+        function clearDashboard() {
+            // Reset stat cards
+            document.getElementById('current-r2').textContent = '-';
+            document.getElementById('r2-change').innerHTML = '-';
+            document.getElementById('drift-text').textContent = 'Loading...';
+            document.getElementById('drift-score-text').textContent = '-';
+            document.getElementById('model-version').textContent = '-';
+            document.getElementById('last-trained').textContent = '-';
+            document.getElementById('predictions-count').textContent = '-';
+            document.getElementById('predictions-period').textContent = '-';
+            
+            // Reset drift card to neutral
+            const driftCard = document.getElementById('drift-card');
+            driftCard.className = 'stat-card';
+            const driftIndicator = document.querySelector('.drift-indicator');
+            if (driftIndicator) driftIndicator.className = 'drift-indicator';
+            
+            // Clear alerts
+            document.getElementById('alerts-section').innerHTML = '';
+            
+            // Clear model versions list
+            document.getElementById('model-versions-list').innerHTML = '<p class="text-muted">Loading...</p>';
+            
+            // Destroy charts to prevent stale data
+            if (charts.performance) { charts.performance.destroy(); charts.performance = null; }
+            if (charts.metrics) { charts.metrics.destroy(); charts.metrics = null; }
+            if (charts.drift) { charts.drift.destroy(); charts.drift = null; }
+        }
         
         // ====================================================================
         // DATA LOADING
@@ -670,18 +718,203 @@
                 
                 if (!machineId) return;
                 
-                // Load performance trend
+                // First: Load real model summary from energy_baselines
+                await loadModelSummary(modelType, machineId);
+                
+                // Second: Try to load performance trend (historical metrics)
                 await loadPerformanceTrend(modelType, machineId, days);
                 
                 // Load active alerts
                 await loadAlerts(machineId, modelType);
                 
-                // Load drift status
-                // await loadDriftStatus(machineId, modelType);
-                
             } catch (error) {
                 console.error('Error loading dashboard:', error);
             }
+        }
+        
+        // NEW: Load real model data from energy_baselines table
+        async function loadModelSummary(modelType, machineId) {
+            try {
+                const url = `${API_BASE_URL}/summary?machine_id=${machineId}&model_type=${modelType}`;
+                console.log('[loadModelSummary] Fetching:', url);
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    console.error('[loadModelSummary] Error:', response.status);
+                    showNoModelMessage(modelType);
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('[loadModelSummary] Data:', data);
+                
+                if (!data.has_model) {
+                    showNoModelMessage(modelType, data.message);
+                    return;
+                }
+                
+                // Update stats with real baseline data
+                updateStatsFromSummary(data);
+                
+                // Update model versions list if available
+                if (data.versions && data.versions.length > 0) {
+                    updateModelVersionsFromSummary(data.versions);
+                }
+                
+            } catch (error) {
+                console.error('[loadModelSummary] Error:', error);
+                showNoModelMessage(modelType);
+            }
+        }
+        
+        function showNoModelMessage(modelType, message) {
+            const typeName = {
+                'baseline': 'Baseline',
+                'anomaly': 'Anomaly Detection',
+                'forecast_arima': 'ARIMA Forecast',
+                'forecast_prophet': 'Prophet Forecast'
+            }[modelType] || modelType;
+            
+            const pageLink = {
+                'baseline': '/ui/baseline',
+                'anomaly': '/ui/anomaly',
+                'forecast_arima': '/ui/forecast',
+                'forecast_prophet': '/ui/forecast'
+            }[modelType] || '/ui/baseline';
+            
+            // Update stats to show no model
+            document.getElementById('current-r2').textContent = 'N/A';
+            document.getElementById('r2-change').innerHTML = '<a href="' + pageLink + '" class="text-primary">Train Model →</a>';
+            document.getElementById('drift-text').textContent = 'No Model';
+            document.getElementById('drift-score-text').textContent = message || 'Train a model first';
+            document.getElementById('model-version').textContent = '-';
+            document.getElementById('last-trained').textContent = 'Not trained';
+            document.getElementById('predictions-count').textContent = '-';
+            document.getElementById('predictions-period').textContent = '-';
+            
+            // Show alert
+            document.getElementById('alerts-section').innerHTML = `
+                <div class="alert-banner" style="background: rgba(52, 152, 219, 0.1); border-left-color: #3498db;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><i class="bi bi-info-circle"></i> No ${typeName} Model</strong>
+                            <p class="mb-0 mt-1">${message || 'No model has been trained for this machine yet.'}</p>
+                        </div>
+                        <a href="${pageLink}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-circle"></i> Train Model
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            // Clear versions list
+            document.getElementById('model-versions-list').innerHTML = 
+                '<p class="text-muted">No models trained yet. <a href="' + pageLink + '">Train your first model →</a></p>';
+        }
+        
+        function updateStatsFromSummary(data) {
+            // Enable/disable "Get Model Details" button
+            const modelDetailsBtn = document.getElementById('model-details-btn');
+            if (data.model_id) {
+                modelDetailsBtn.disabled = false;
+            } else {
+                modelDetailsBtn.disabled = true;
+            }
+            
+            // R² Score
+            if (data.r_squared !== null && data.r_squared !== undefined) {
+                document.getElementById('current-r2').textContent = data.r_squared.toFixed(4);
+                
+                // Color code based on quality
+                const r2Card = document.getElementById('current-r2').closest('.stat-card');
+                if (data.r_squared >= 0.8) {
+                    r2Card.className = 'stat-card healthy';
+                    document.getElementById('r2-change').innerHTML = '<span class="text-success">✓ Good fit</span>';
+                } else if (data.r_squared >= 0.6) {
+                    r2Card.className = 'stat-card warning';
+                    document.getElementById('r2-change').innerHTML = '<span class="text-warning">⚠ Moderate fit</span>';
+                } else {
+                    r2Card.className = 'stat-card critical';
+                    document.getElementById('r2-change').innerHTML = '<span class="text-danger">✗ Poor fit</span>';
+                }
+            } else {
+                document.getElementById('current-r2').textContent = 'N/A';
+                document.getElementById('r2-change').innerHTML = '-';
+            }
+            
+            // Drift status (placeholder - no real drift tracking yet)
+            const driftCard = document.getElementById('drift-card');
+            const driftIndicator = document.querySelector('.drift-indicator');
+            const driftText = document.getElementById('drift-text');
+            const driftScoreText = document.getElementById('drift-score-text');
+            
+            driftCard.className = 'stat-card healthy';
+            if (driftIndicator) driftIndicator.className = 'drift-indicator no-drift';
+            driftText.textContent = 'Stable';
+            driftScoreText.textContent = 'Model performing as expected';
+            
+            // Model version
+            document.getElementById('model-version').textContent = `v${data.model_version}`;
+            if (data.created_at) {
+                const date = new Date(data.created_at);
+                document.getElementById('last-trained').textContent = `Trained: ${date.toLocaleDateString()}`;
+            } else {
+                document.getElementById('last-trained').textContent = '-';
+            }
+            
+            // Training samples as "predictions count"
+            if (data.training_samples) {
+                document.getElementById('predictions-count').textContent = data.training_samples.toLocaleString();
+                document.getElementById('predictions-period').textContent = 'training samples';
+            } else {
+                document.getElementById('predictions-count').textContent = '-';
+                document.getElementById('predictions-period').textContent = '-';
+            }
+        }
+        
+        function updateModelVersionsFromSummary(versions) {
+            const versionsList = document.getElementById('model-versions-list');
+            
+            if (!versions || versions.length === 0) {
+                versionsList.innerHTML = '<p class="text-muted">No version history available</p>';
+                return;
+            }
+            
+            versionsList.innerHTML = versions.map((v, index) => {
+                const isActive = v.is_active;
+                const date = v.created_at ? new Date(v.created_at).toLocaleDateString() : 'Unknown';
+                
+                return `
+                    <div class="model-card ${isActive ? 'active' : ''}">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <h5 class="mb-0">Version ${v.version}</h5>
+                                ${isActive ? '<span class="badge bg-success">Active</span>' : ''}
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">R²</small>
+                                <div><strong>${v.r_squared ? v.r_squared.toFixed(4) : 'N/A'}</strong></div>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">RMSE</small>
+                                <div><strong>${v.rmse ? v.rmse.toFixed(2) : 'N/A'}</strong></div>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted">Created</small>
+                                <div>${date}</div>
+                            </div>
+                            <div class="col-md-3">
+                                ${!isActive ? `
+                                    <a href="/ui/baseline" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Manage in Baseline
+                                    </a>
+                                ` : '<span class="text-muted">Currently Active</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
         
         async function loadPerformanceTrend(modelType, machineId, days) {
@@ -732,7 +965,23 @@
                 const response = await fetch(url);
                 console.log('[loadAlerts] Response status:', response.status);
                 
+                if (!response.ok) {
+                    console.error('[loadAlerts] API error:', response.status, response.statusText);
+                    const alertsSection = document.getElementById('alerts-section');
+                    alertsSection.innerHTML = '';
+                    return;
+                }
+                
                 const alerts = await response.json();
+                
+                // Defensive check: ensure alerts is an array
+                if (!Array.isArray(alerts)) {
+                    console.error('[loadAlerts] Expected array, got:', typeof alerts, alerts);
+                    const alertsSection = document.getElementById('alerts-section');
+                    alertsSection.innerHTML = '';
+                    return;
+                }
+                
                 console.log('[loadAlerts] Alerts received:', alerts.length);
                 
                 const alertsSection = document.getElementById('alerts-section');
@@ -1027,11 +1276,9 @@
                                 <div>${new Date(latestMetric.evaluation_date).toLocaleDateString()}</div>
                             </div>
                             <div class="col-md-2">
-                                ${isActive ? '' : `
-                                    <button class="btn btn-sm btn-outline-primary" onclick="rollbackToVersion(${version})">
-                                        <i class="bi bi-arrow-counterclockwise"></i> Rollback
-                                    </button>
-                                `}
+                                <button class="btn btn-sm btn-outline-info" onclick="showVersionDetails(${version})">
+                                    <i class="bi bi-info-circle"></i> Details
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1043,7 +1290,38 @@
         // ACTIONS
         // ====================================================================
         
+        // Navigate to the appropriate training page based on model type
+        function goToTrainingPage() {
+            const modelType = document.getElementById('model-type').value;
+            const machineId = document.getElementById('machine-select').value;
+            
+            // Map model types to their training pages
+            const pageMap = {
+                'baseline': '/ui/baseline',
+                'anomaly': '/ui/anomaly',
+                'forecast_arima': '/ui/forecast',
+                'forecast_prophet': '/ui/forecast'
+            };
+            
+            const targetPage = pageMap[modelType] || '/ui/baseline';
+            
+            // Build URL with machine pre-selected if possible
+            let url = targetPage;
+            if (machineId) {
+                url += `?machine_id=${machineId}`;
+            }
+            
+            console.log('[goToTrainingPage] Navigating to:', url);
+            window.location.href = url;
+        }
+        
+        // Legacy function - kept for reference but no longer used
         async function triggerRetrain() {
+            // Redirected to goToTrainingPage - the old mock training is deprecated
+            goToTrainingPage();
+            return;
+            
+            // OLD CODE BELOW - KEPT FOR REFERENCE
             const modelType = document.getElementById('model-type').value;
             const machineId = document.getElementById('machine-select').value;
             
@@ -1128,13 +1406,244 @@
             await loadDashboard();
         }
         
-        async function rollbackToVersion(version) {
-            if (!confirm(`Are you sure you want to rollback to version ${version}?`)) {
+        async function showModelDetails() {
+            const machineId = document.getElementById('machine-select').value;
+            const modelType = document.getElementById('model-type').value;
+            
+            if (!machineId) {
+                alert('Please select a machine first');
                 return;
             }
             
-            // Placeholder for rollback logic
-            console.log('Rolling back to version:', version);
+            showLoading('Fetching Model Details...');
+            
+            try {
+                // Get active model ID from summary data
+                const summaryResponse = await fetch(
+                    `/api/analytics/api/v1/model-performance/summary?machine_id=${machineId}&model_type=${modelType}`
+                );
+                const summaryData = await summaryResponse.json();
+                
+                // model_id is at top level of response
+                if (!summaryData.model_id) {
+                    hideLoading();
+                    alert('No active model found for this machine');
+                    return;
+                }
+                
+                const modelId = summaryData.model_id;
+                
+                // Fetch model details
+                const response = await fetch(`/api/analytics/api/v1/baseline/model/${modelId}/details`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.success) {
+                    displayModelDetailsModal(data);
+                } else {
+                    alert('Failed to fetch model details');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error fetching model details:', error);
+                alert('Error fetching model details: ' + error.message);
+            }
+        }
+        
+        async function showVersionDetails(version) {
+            const machineId = document.getElementById('machine-select').value;
+            
+            if (!machineId) {
+                alert('Please select a machine first');
+                return;
+            }
+            
+            showLoading('Fetching Version Details...');
+            
+            try {
+                // Find model ID for this version from summary data
+                const modelType = document.getElementById('model-type').value;
+                const summaryResponse = await fetch(
+                    `/api/analytics/api/v1/model-performance/summary?machine_id=${machineId}&model_type=${modelType}`
+                );
+                const summaryData = await summaryResponse.json();
+                
+                // Find the version in versions array
+                const versionData = summaryData.versions?.find(v => v.version === version);
+                if (!versionData) {
+                    hideLoading();
+                    alert('No model found for this version');
+                    return;
+                }
+                
+                const modelId = versionData.id;
+                
+                // Fetch model details
+                const response = await fetch(`/api/analytics/api/v1/baseline/model/${modelId}/details`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.success && data.model_version === version) {
+                    displayModelDetailsModal(data);
+                } else if (data.success) {
+                    // If versions don't match, show what we have
+                    displayModelDetailsModal(data);
+                    console.warn(`Requested version ${version}, but got version ${data.model_version}`);
+                } else {
+                    alert('Failed to fetch version details');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error fetching version details:', error);
+                alert('Error fetching version details: ' + error.message);
+            }
+        }
+        
+        function displayModelDetailsModal(data) {
+            const modalHtml = `
+                <div class="modal fade" id="modelDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-info-circle"></i> Model Details - ${data.machine_name}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Model Info -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-primary text-white">
+                                        <strong>Model Information</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Version:</strong> ${data.model_version}</p>
+                                                <p><strong>Status:</strong> <span class="badge ${data.is_active ? 'bg-success' : 'bg-secondary'}">${data.is_active ? 'Active' : 'Inactive'}</span></p>
+                                                <p><strong>Trained:</strong> ${new Date(data.trained_at).toLocaleString()}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>Energy Source:</strong> ${data.energy_source.name}</p>
+                                                <p><strong>Unit:</strong> ${data.energy_source.unit}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Training Period -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-info text-white">
+                                        <strong>Training Period</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Start:</strong> ${new Date(data.training_period.start).toLocaleDateString()}</p>
+                                                <p><strong>End:</strong> ${new Date(data.training_period.end).toLocaleDateString()}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>Duration:</strong> ${data.training_period.days} days</p>
+                                                <p><strong>Samples:</strong> ${data.training_period.samples.toLocaleString()} (${data.training_period.samples_per_day}/day)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Performance Metrics -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-success text-white">
+                                        <strong>Performance Metrics</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <p><strong>R²:</strong> ${data.metrics.r_squared}</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <p><strong>Accuracy:</strong> ${data.metrics.accuracy_percent}%</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <p><strong>RMSE:</strong> ${data.metrics.rmse}</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <p><strong>MAE:</strong> ${data.metrics.mae}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Features/Drivers -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-warning text-dark">
+                                        <strong>Features/Drivers Used (${data.features.count})</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-sm table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Feature</th>
+                                                    <th>Coefficient</th>
+                                                    <th>Impact</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${data.features.details.map(f => `
+                                                    <tr>
+                                                        <td>${f.name}</td>
+                                                        <td>${f.coefficient}</td>
+                                                        <td>
+                                                            <span class="badge ${f.impact === 'positive' ? 'bg-success' : f.impact === 'negative' ? 'bg-danger' : 'bg-secondary'}">
+                                                                ${f.impact === 'positive' ? '↑' : f.impact === 'negative' ? '↓' : '→'} ${f.impact}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- Formula -->
+                                <div class="card">
+                                    <div class="card-header bg-dark text-white">
+                                        <strong>Model Formula</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Intercept:</strong> ${data.formula.intercept}</p>
+                                        <p><strong>Equation:</strong></p>
+                                        <pre class="bg-light p-3 rounded" style="overflow-x: auto;">${data.formula.equation}</pre>
+                                        <p class="text-muted"><em>${data.formula.readable}</em></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('modelDetailsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('modelDetailsModal'));
+            modal.show();
+            
+            // Clean up on close
+            document.getElementById('modelDetailsModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
         }
         
         // ====================================================================

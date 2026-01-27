@@ -461,6 +461,7 @@ async def list_baseline_models(
         # Resolve machine_id from SEU name if needed
         resolved_machine_id = machine_id
         seu_display_name = None
+        energy_source_id_for_list = None  # Initialize to prevent NameError
         
         if machine_id is None:
             # Look up SEU
@@ -1001,3 +1002,137 @@ async def train_baseline_for_seu(request: SEUTrainingRequest):
             energy_source=request.energy_source,
             error_details=str(e)
         )
+
+
+# ============================================================================
+# Model Details Endpoint
+# ============================================================================
+
+@router.get("/baseline/model/{model_id}/details", tags=["Baseline"])
+async def get_model_details(
+    model_id: UUID = Path(..., description="Model UUID")
+) -> Dict[str, Any]:
+    """
+    Get detailed information about a baseline model.
+    
+    Returns:
+        - Model metadata (version, training date, metrics)
+        - Features/drivers used
+        - Training data period
+        - Hyperparameters
+        - Data completeness
+    """
+    try:
+        query = """
+            SELECT 
+                eb.id, eb.machine_id, eb.model_version, eb.created_at,
+                eb.is_active, eb.training_start_date, eb.training_end_date,
+                eb.training_samples, eb.r_squared, eb.rmse, eb.mae,
+                eb.feature_names, eb.intercept, eb.coefficients,
+                eb.energy_source_id,
+                m.name as machine_name,
+                es.name as energy_source_name, es.unit as energy_unit
+            FROM energy_baselines eb
+            JOIN machines m ON eb.machine_id = m.id
+            LEFT JOIN energy_sources es ON eb.energy_source_id = es.id
+            WHERE eb.id = $1
+        """
+        
+        async with db.pool.acquire() as conn:
+            row = await conn.fetchrow(query, model_id)
+        
+        if not row:
+            raise HTTPException(status_code=404, detail=f"Model not found: {model_id}")
+        
+        # Build feature details with coefficients
+        features = row['feature_names'] or []
+        coefficients_raw = row['coefficients']
+        
+        # Handle JSONB - might be string or dict
+        import json
+        if isinstance(coefficients_raw, str):
+            coefficients_dict = json.loads(coefficients_raw)
+        elif isinstance(coefficients_raw, dict):
+            coefficients_dict = coefficients_raw
+        else:
+            coefficients_dict = {}
+            
+        intercept = float(row['intercept']) if row['intercept'] is not None else 0.0
+        
+        feature_details = []
+        for feature in features:
+            coef = float(coefficients_dict.get(feature, 0.0))
+            feature_details.append({
+                "name": feature,
+                "coefficient": round(coef, 4),
+                "impact": "positive" if coef > 0 else "negative" if coef < 0 else "neutral"
+            })
+        
+        # Sort by absolute coefficient value (most important first)
+        feature_details.sort(key=lambda x: abs(x['coefficient']), reverse=True)
+        
+        # Build formula
+        formula_parts = [f"{intercept:.2f}"]
+        for fd in feature_details:
+            sign = "+" if fd['coefficient'] > 0 else ""
+            formula_parts.append(f"{sign}{fd['coefficient']:.4f}*{fd['name']}")
+        formula = " ".join(formula_parts)
+        
+        # Calculate data quality metrics
+        training_days = (row['training_end_date'] - row['training_start_date']).days if row['training_end_date'] and row['training_start_date'] else 0
+        samples_per_day = row['training_samples'] / training_days if training_days > 0 else 0
+        
+        return {
+            "success": True,
+            "model_id": str(row['id']),
+            "machine_id": str(row['machine_id']),
+            "machine_name": row['machine_name'],
+            "model_version": row['model_version'],
+            "is_active": row['is_active'],
+            "trained_at": row['created_at'].isoformat(),
+            
+            # Training period
+            "training_period": {
+                    "start": row['training_start_date'].isoformat() if row['training_start_date'] else None,
+                    "end": row['training_end_date'].isoformat() if row['training_end_date'] else None,
+                "samples": row['training_samples'],
+                "samples_per_day": round(samples_per_day, 1)
+            },
+            
+            # Performance metrics
+            "metrics": {
+                "r_squared": round(row['r_squared'], 4),
+                "rmse": round(row['rmse'], 2),
+                "mae": round(row['mae'], 2),
+                "accuracy_percent": round(row['r_squared'] * 100, 1)
+            },
+            
+            # Energy source
+            "energy_source": {
+                "name": row['energy_source_name'] or "Electricity",
+                "unit": row['energy_unit'] or "kWh"
+            },
+            
+            # Features/drivers
+            "features": {
+                "count": len(features),
+                "names": features,
+                "details": feature_details
+            },
+            
+            # Model formula
+            "formula": {
+                "intercept": round(intercept, 4),
+                "equation": formula,
+                "readable": "Energy = {:.2f} + {}...".format(
+                    intercept,
+                    " + ".join(["{:.2f}*{}".format(fd['coefficient'], fd['name']) for fd in feature_details[:3]])
+                )
+            }
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get model details: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))

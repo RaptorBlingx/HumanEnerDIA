@@ -62,39 +62,73 @@ class BoilerSimulator(BaseMachineSimulator):
         
     def _generate_sensor_data(self) -> dict:
         """
-        Generate multi-energy sensor readings.
+        Generate multi-energy sensor readings with PHYSICS-BASED correlations.
+        
+        ISO 50006 Heating Degree Day model:
+        - Colder outdoor temp → higher heating load → more energy
+        - Energy = base_load + heating_coefficient × (setpoint - outdoor_temp)
         
         Returns:
             Dict with electricity, natural gas, and steam measurements
         """
-        # Get base load factor (0.0 to 1.0) based on time of day
+        # 1. OUTDOOR TEMPERATURE - Realistic seasonal/daily variation
         hour = datetime.now().hour
-        if 6 <= hour < 22:  # Daytime: higher load
-            base_load = 0.70 + np.random.uniform(-0.15, 0.15)
-        else:  # Nighttime: lower load
-            base_load = 0.40 + np.random.uniform(-0.10, 0.10)
+        day_of_year = datetime.now().timetuple().tm_yday
         
-        base_load = np.clip(base_load, 0.05, 1.0)
+        # Seasonal variation: coldest in Jan (day ~15), warmest in July (day ~196)
+        # Range: -5°C (winter) to +25°C (summer) with 15°C baseline
+        seasonal_temp = 10.0 + 15.0 * np.sin(2 * np.pi * (day_of_year - 15) / 365)
         
-        # Operating mode affects all energy streams
+        # Daily variation: coldest at 6am, warmest at 3pm (±5°C)
+        daily_temp_swing = 5.0 * np.sin(2 * np.pi * (hour - 6) / 24)
+        
+        # Add noise (±2°C)
+        outdoor_temp = seasonal_temp + daily_temp_swing + np.random.uniform(-2, 2)
+        outdoor_temp = np.clip(outdoor_temp, -10, 35)  # Physical limits
+        
+        # 2. HEATING LOAD - ISO 50006 Heating Degree model
+        # Heating setpoint: 18°C (below this, heating is needed)
+        heating_setpoint = 18.0
+        
+        # Heating Degree Hours (HDH) - only count when outdoor < setpoint
+        if outdoor_temp < heating_setpoint:
+            # More heating needed when colder
+            heating_factor = (heating_setpoint - outdoor_temp) / heating_setpoint
+        else:
+            # No heating needed when warm
+            heating_factor = 0.05  # Minimum standby load
+        
+        # Clamp to realistic range
+        heating_factor = np.clip(heating_factor, 0.05, 1.0)
+        
+        # 3. TIME-OF-DAY ADJUSTMENT (occupancy pattern)
+        if 6 <= hour < 22:  # Daytime: process heating + space heating
+            occupancy_factor = 1.0
+        else:  # Nighttime: reduced load
+            occupancy_factor = 0.6
+        
+        # 4. COMBINED LOAD FACTOR
+        # base_load = heating_factor × occupancy × mode
         mode_multiplier = self._get_mode_multiplier()
-        effective_load = base_load * mode_multiplier
+        effective_load = heating_factor * occupancy_factor * mode_multiplier
+        effective_load = np.clip(effective_load, 0.05, 1.0)
         
-        # Electricity: Auxiliary systems (pumps, fans, controls)
-        # Scales with thermal load but not linearly (pump efficiency curves)
-        electricity_kw = self.rated_power_kw * effective_load * random.uniform(0.85, 1.15)
+        # Add small random noise (±10%) - real systems have variability
+        effective_load *= np.random.uniform(0.90, 1.10)
+        effective_load = np.clip(effective_load, 0.05, 1.0)
+        
+        # 5. ELECTRICITY: Auxiliary systems (pumps, fans, controls)
+        # Scales with thermal load
+        electricity_kw = self.rated_power_kw * effective_load * random.uniform(0.90, 1.10)
         electricity_kwh = electricity_kw * (self.data_interval_seconds / 3600)
         
-        # 2. NATURAL GAS: Fuel consumption
-        # Thermal power needed = thermal_capacity × effective_load
+        # 6. NATURAL GAS: Fuel consumption (ISO 50006 energy driver)
         thermal_power_kw = self.thermal_capacity_kw * effective_load
-        # Account for efficiency: need more gas input than thermal output
         gas_input_kw = thermal_power_kw / self.boiler_efficiency
         gas_flow_m3h = gas_input_kw / self.gas_energy_kwh_per_m3
         gas_consumption_m3 = gas_flow_m3h * (self.data_interval_seconds / 3600)
         
-        # 3. STEAM: Output product
-        # Steam produced = thermal power × efficiency
+        # 7. STEAM: Output product
         steam_output_kw = thermal_power_kw * self.boiler_efficiency
         steam_production_kgh = steam_output_kw / self.steam_energy_kwh_per_kg
         steam_production_kg = steam_production_kgh * (self.data_interval_seconds / 3600)
@@ -103,7 +137,7 @@ class BoilerSimulator(BaseMachineSimulator):
         boiler_efficiency_actual = self.boiler_efficiency + random.uniform(-0.03, 0.03)
         steam_pressure = self.steam_pressure_bar + random.uniform(-0.5, 0.5)
         flue_gas_temp = 180 + random.uniform(-15, 15)  # Stack temperature
-        outdoor_temp = self.outdoor_temp_base_c + random.uniform(-5, 5)
+        # outdoor_temp already calculated above with physics-based seasonal/daily variation
         
         return {
             # Electricity readings (for energy_readings table)
@@ -181,16 +215,28 @@ class BoilerSimulator(BaseMachineSimulator):
         
         Returns:
             Production data dict with output counts/rates
+            Field names MUST match Node-RED/database schema!
         """
         sensor_data = self._generate_sensor_data()
+        
+        # Steam production: kg/h → convert to units appropriate for 30-second interval
+        # Use flow rate (kg/h) as throughput, and accumulated kg as production count
+        steam_kg_per_interval = sensor_data["consumption_kg"]
+        steam_kg_per_hour = sensor_data["flow_rate_kg_h"]
+        
+        # Production count: cumulative kg (multiply by factor for visibility)
+        # Since each interval produces ~1-5 kg, multiply by 10 for meaningful counts
+        production_count = max(1, int(steam_kg_per_interval * 10))
+        
         return {
             "time": timestamp.isoformat(),
             "machine_id": self.machine_id,
-            "production_count": int(sensor_data["consumption_kg"]),  # kg of steam produced
-            "production_rate": sensor_data["flow_rate_kg_h"],  # kg/h
-            "quality_rating": 0.98,  # Steam quality
-            "defect_count": 0,
-            "efficiency": sensor_data["boiler_efficiency"]
+            "production_count": production_count,
+            "production_count_good": production_count,  # Steam quality is typically high
+            "production_count_bad": 0,
+            "throughput_units_per_hour": round(steam_kg_per_hour, 2),  # kg/h steam
+            "operating_mode": sensor_data.get("operating_mode", "running"),
+            "speed_percent": round(sensor_data.get("boiler_efficiency", 0.85) * 100, 1)
         }
     
     def generate_environmental_data(self, timestamp: datetime) -> dict:
@@ -199,14 +245,29 @@ class BoilerSimulator(BaseMachineSimulator):
         This implements the abstract method from BaseMachineSimulator.
         
         Returns:
-            Environmental data dict with temperatures, humidity
+            Environmental data dict with temperatures, humidity, pressure
+            Field names MUST match Node-RED/database schema for baseline training!
         """
         sensor_data = self._generate_sensor_data()
+        outdoor_temp = sensor_data.get("outdoor_temp_c", 15.0)
+        
+        # Machine temperature: flue gas / boiler shell temperature
+        # Higher than outdoor due to combustion heat
+        machine_temp = sensor_data.get("flue_gas_temp_c", 180.0)
+        
+        # Indoor temperature: boiler room temperature
+        indoor_temp = outdoor_temp + random.uniform(5, 15)  # Warmer due to heat radiation
+        
         return {
             "time": timestamp.isoformat(),
             "machine_id": self.machine_id,
-            "temperature_c": sensor_data.get("outdoor_temp_c", 15.0),
-            "humidity_percent": 60.0 + random.uniform(-10, 10),
-            "co2_ppm": 400 + random.uniform(-50, 50),
-            "pressure_mbar": 1013 + random.uniform(-5, 5)
+            # Standard environmental fields (matching Node-RED/database schema)
+            "outdoor_temp_c": round(outdoor_temp, 2),
+            "indoor_temp_c": round(indoor_temp, 2),
+            "machine_temp_c": round(machine_temp, 2),
+            "outdoor_humidity_percent": round(60.0 + random.uniform(-10, 10), 2),
+            "indoor_humidity_percent": round(50.0 + random.uniform(-10, 10), 2),
+            "pressure_bar": round(sensor_data.get("steam_pressure_bar", 10.0), 2),
+            "flow_rate_m3h": round(sensor_data.get("flow_rate_m3h", 0.0), 3),
+            "vibration_mm_s": round(random.uniform(0.5, 2.0), 3)
         }

@@ -493,7 +493,13 @@
     
     <!-- Existing Models - Full Width Bottom Section -->
     <div class="existing-models-section" style="padding: var(--space-8);">
-        <h4>Training History</h4>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+            <h4 style="margin: 0;">Training History</h4>
+            <a href="/api/analytics/ui/model-performance" class="btn btn-outline-primary" style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="bi bi-graph-up"></i>
+                View Model Performance
+            </a>
+        </div>
         <div class="industrial-card card-bordered">
             <div class="card-body" id="existing-models-container" style="padding: var(--space-5);">
                 <p class="text-muted" style="margin: 0; font-size: var(--text-sm);">Select a machine to view historical models</p>
@@ -645,11 +651,13 @@
                 secondary: ['total_production', 'production_count', 'operating_hours'],
                 optional: ['machine_temp_c', 'outdoor_humidity_percent']
             },
-            // HVAC: Temperature differential drives energy (Q=mc∆T)
+            // HVAC: Occupancy-driven load (production proxy) + temperature differential
+            // Note: In simulated/building HVAC, occupancy (shift factor) drives internal heat gains
+            // which correlates strongly with production/throughput metrics
             hvac: {
-                primary: ['outdoor_temp_c', 'heating_degree_days', 'cooling_degree_days'],  // ISO 50006 metrics
-                secondary: ['indoor_temp_c', 'outdoor_humidity_percent', 'operating_hours'],
-                optional: ['machine_temp_c']
+                primary: ['production_count', 'throughput', 'speed_percent'],  // Occupancy proxy - highest correlation
+                secondary: ['outdoor_temp_c', 'indoor_temp_c', 'operating_hours'],  // Temperature factors
+                optional: ['cooling_degree_days', 'heating_degree_days', 'outdoor_humidity_percent']  // ISO 50006 when available
             },
             // Motor/Conveyor: Mechanical work (torque × speed), production load
             motor: {

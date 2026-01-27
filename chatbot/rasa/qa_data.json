@@ -435,6 +435,18 @@
     [
       "In the context of documented procedures (3.24), how are action plans categorized?",
       "Action plans are documents required by the standard\n"
+    ],
+    [
+      "What is an action plan?",
+      "The action plans established to achieve the objectives and targets must be documented and include four essential elements: designation of responsibility, the means and time frame by which individual targets are to be achieved, a statement of the method by which an improvement in energy performance shall be verified, and a statement of the method of verifying the results."
+    ],
+    [
+      "How do I create an energy action plan?",
+      "The action plans established to achieve the objectives and targets must be documented and include four essential elements: designation of responsibility, the means and time frame by which individual targets are to be achieved, a statement of the method by which an improvement in energy performance shall be verified, and a statement of the method of verifying the results."
+    ],
+    [
+      "Show me action plan examples",
+      "The action plans established to achieve the objectives and targets must be documented and include four essential elements: designation of responsibility, the means and time frame by which individual targets are to be achieved, a statement of the method by which an improvement in energy performance shall be verified, and a statement of the method of verifying the results."
     ]
   ],
   "ask_checking": [
@@ -881,6 +893,18 @@
     [
       "If a record is difficult to read, which control requirement is violated?",
       "The requirement that records shall remain legible\n"
+    ],
+    [
+      "What is monitoring and measurement?",
+      "At a minimum, the key characteristics that must be monitored, measured, and analyzed are: the significant energy uses and other outputs of the energy review, the relevant variables related to significant energy uses, the Energy Performance Indicators (EnPIs), the effectiveness of the action plans in achieving objectives and targets, and the evaluation of actual versus expected energy consumption."
+    ],
+    [
+      "How to verify EnMS compliance?",
+      "At a minimum, the key characteristics that must be monitored, measured, and analyzed are: the significant energy uses and other outputs of the energy review, the relevant variables related to significant energy uses, the Energy Performance Indicators (EnPIs), the effectiveness of the action plans in achieving objectives and targets, and the evaluation of actual versus expected energy consumption."
+    ],
+    [
+      "Checking procedures?",
+      "At a minimum, the key characteristics that must be monitored, measured, and analyzed are: the significant energy uses and other outputs of the energy review, the relevant variables related to significant energy uses, the Energy Performance Indicators (EnPIs), the effectiveness of the action plans in achieving objectives and targets, and the evaluation of actual versus expected energy consumption."
     ]
   ],
   "ask_energy_baseline": [
@@ -1355,6 +1379,18 @@
     [
       "If the organization uses a predetermined method for baseline adjustment, what must be true about that method?",
       "The method must be documented\n"
+    ],
+    [
+      "What is an energy baseline?",
+      "The energy baseline serves as a quantitative reference or set of references that provides a basis for comparing and measuring energy performance. This baseline reflects a specified period of time and may be adjusted or normalized using variables that affect energy consumption, such as the production level or outdoor temperature (degree days)."
+    ],
+    [
+      "How to establish baseline?",
+      "The energy baseline serves as a quantitative reference or set of references that provides a basis for comparing and measuring energy performance. This baseline reflects a specified period of time and may be adjusted or normalized using variables that affect energy consumption, such as the production level or outdoor temperature (degree days)."
+    ],
+    [
+      "Baseline calculation methods?",
+      "The energy baseline serves as a quantitative reference or set of references that provides a basis for comparing and measuring energy performance. This baseline reflects a specified period of time and may be adjusted or normalized using variables that affect energy consumption, such as the production level or outdoor temperature (degree days)."
     ]
   ],
   "ask_energy_planning": [
@@ -1921,6 +1957,18 @@
     [
       "What is the requirement for the organization regarding its review of the action plans?",
       "The action plans shall be updated at defined intervals\n"
+    ],
+    [
+      "What is energy planning?",
+      "The organization must conduct and document an energy planning process that is consistent with its energy policy. The overall goal is that this process shall lead to activities that continually improve energy performance. This planning process results in the creation of key outputs, including the Energy Baseline, EnPIs, Objectives, Targets, and Action Plans."
+    ],
+    [
+      "How to set energy objectives?",
+      "The organization must conduct and document an energy planning process that is consistent with its energy policy. The overall goal is that this process shall lead to activities that continually improve energy performance. This planning process results in the creation of key outputs, including the Energy Baseline, EnPIs, Objectives, Targets, and Action Plans."
+    ],
+    [
+      "Energy review process?",
+      "The organization must conduct and document an energy planning process that is consistent with its energy policy. The overall goal is that this process shall lead to activities that continually improve energy performance. This planning process results in the creation of key outputs, including the Energy Baseline, EnPIs, Objectives, Targets, and Action Plans."
     ]
   ],
   "ask_energy_policy": [
@@ -2387,6 +2435,18 @@
     [
       "What specific energy-related metric must the policy commit to improving?",
       "It must commit to continual improvement in energy performance\n"
+    ],
+    [
+      "What should be in energy policy?",
+      "The energy policy must state the organization's commitment to achieving continual improvement in energy performance. It must include a commitment to ensure the availability of necessary resources and information needed to achieve established objectives and targets. Finally, it must include a commitment to comply with applicable legal requirements and any other requirements related to energy use, consumption, and efficiency. The policy must be documented and communicated at all levels within the organization."
+    ],
+    [
+      "How to write energy policy?",
+      "The energy policy must state the organization's commitment to achieving continual improvement in energy performance. It must include a commitment to ensure the availability of necessary resources and information needed to achieve established objectives and targets. Finally, it must include a commitment to comply with applicable legal requirements and any other requirements related to energy use, consumption, and efficiency. The policy must be documented and communicated at all levels within the organization."
+    ],
+    [
+      "Policy requirements?",
+      "The energy policy must state the organization's commitment to achieving continual improvement in energy performance. It must include a commitment to ensure the availability of necessary resources and information needed to achieve established objectives and targets. Finally, it must include a commitment to comply with applicable legal requirements and any other requirements related to energy use, consumption, and efficiency. The policy must be documented and communicated at all levels within the organization."
     ]
   ],
   "ask_enpi": [
@@ -2861,6 +2921,18 @@
     [
       "What specific energy performance concept (besides use and consumption) do EnPIs help measure?",
       "Energy efficiency\n"
+    ],
+    [
+      "What is EnPI?",
+      "EnPIs (Energy Performance Indicators) are identified to be appropriate for monitoring and measuring the organization's energy performance. They can range from a simple parameter or ratio to a complex model, such as energy consumption per unit of production. The organization must record and regularly review the methodology used for determining and updating the EnPIs."
+    ],
+    [
+      "How to calculate energy performance indicators?",
+      "EnPIs (Energy Performance Indicators) are identified to be appropriate for monitoring and measuring the organization's energy performance. They can range from a simple parameter or ratio to a complex model, such as energy consumption per unit of production. The organization must record and regularly review the methodology used for determining and updating the EnPIs."
+    ],
+    [
+      "EnPI examples?",
+      "EnPIs (Energy Performance Indicators) are identified to be appropriate for monitoring and measuring the organization's energy performance. They can range from a simple parameter or ratio to a complex model, such as energy consumption per unit of production. The organization must record and regularly review the methodology used for determining and updating the EnPIs."
     ]
   ],
   "ask_implementation": [
@@ -3331,6 +3403,18 @@
     [
       "What energy characteristic, in addition to energy quality, may be included in purchasing specifications?",
       "Availability\n"
+    ],
+    [
+      "How to implement ISO 50001?",
+      "The organization must ensure that any person working for or on its behalf, especially concerning significant energy uses, is competent based on an appropriate combination of education, training, skills, or experience. Personnel must be aware of the importance of conformity with the energy policy, procedures, and the requirements of the EnMS. The organization must establish and implement a process that allows any person working for or on its behalf to make comments or suggest improvements to the EnMS."
+    ],
+    [
+      "Implementation steps?",
+      "The organization must ensure that any person working for or on its behalf, especially concerning significant energy uses, is competent based on an appropriate combination of education, training, skills, or experience. Personnel must be aware of the importance of conformity with the energy policy, procedures, and the requirements of the EnMS. The organization must establish and implement a process that allows any person working for or on its behalf to make comments or suggest improvements to the EnMS."
+    ],
+    [
+      "Getting started with ISO 50001?",
+      "The organization must ensure that any person working for or on its behalf, especially concerning significant energy uses, is competent based on an appropriate combination of education, training, skills, or experience. Personnel must be aware of the importance of conformity with the energy policy, procedures, and the requirements of the EnMS. The organization must establish and implement a process that allows any person working for or on its behalf to make comments or suggest improvements to the EnMS."
     ]
   ],
   "ask_internal_audit": [
@@ -4033,6 +4117,18 @@
     [
       "What information about the management review process must be maintained?",
       "Records of the management review shall be maintained "
+    ],
+    [
+      "What is an internal audit?",
+      "The internal audit, conducted at planned intervals, must ensure that the EnMS conforms to the planned arrangements for energy management, including the requirements of this International Standard. It must also confirm that the system conforms with the established energy objectives and targets, and that it is effectively implemented and maintained, leading to improved energy performance."
+    ],
+    [
+      "How to audit EnMS?",
+      "The internal audit, conducted at planned intervals, must ensure that the EnMS conforms to the planned arrangements for energy management, including the requirements of this International Standard. It must also confirm that the system conforms with the established energy objectives and targets, and that it is effectively implemented and maintained, leading to improved energy performance."
+    ],
+    [
+      "Audit checklist?",
+      "The internal audit, conducted at planned intervals, must ensure that the EnMS conforms to the planned arrangements for energy management, including the requirements of this International Standard. It must also confirm that the system conforms with the established energy objectives and targets, and that it is effectively implemented and maintained, leading to improved energy performance."
     ]
   ],
   "ask_management_responsibility": [
@@ -4343,6 +4439,18 @@
     [
       "What must top management ensure regarding the communication of energy management's importance?",
       "It must be communicating the importance of energy management to those in the organization "
+    ],
+    [
+      "What are management responsibilities?",
+      "Top management must demonstrate its commitment to support the EnMS and to continually improve its effectiveness. This involves defining, establishing, implementing, and maintaining an energy policy, and ensuring that appropriate energy objectives and targets are established. Top management must provide necessary resources including human resources, specialized skills, technology, and financial resources."
+    ],
+    [
+      "Role of top management?",
+      "Top management must demonstrate its commitment to support the EnMS and to continually improve its effectiveness. This involves defining, establishing, implementing, and maintaining an energy policy, and ensuring that appropriate energy objectives and targets are established. Top management must provide necessary resources including human resources, specialized skills, technology, and financial resources."
+    ],
+    [
+      "Management commitment?",
+      "Top management must demonstrate its commitment to support the EnMS and to continually improve its effectiveness. This involves defining, establishing, implementing, and maintaining an energy policy, and ensuring that appropriate energy objectives and targets are established. Top management must provide necessary resources including human resources, specialized skills, technology, and financial resources."
     ]
   ],
   "ask_management_review": [
@@ -5125,6 +5233,18 @@
     [
       "If the review determines that a new technology is required to meet future goals, what output covers the decision to acquire it?",
       "Decisions or actions related to changes to allocation of resources "
+    ],
+    [
+      "What is management review?",
+      "Top management shall review the organization's EnMS at planned intervals. The primary purpose is to ensure the system's continuing suitability, adequacy, and effectiveness. The inputs must include: follow-up actions from previous management reviews, the status of corrective actions and preventive actions, EnMS audit results, a review of energy performance and related EnPIs, the extent to which energy objectives and targets have been met, and projected energy performance for the following period."
+    ],
+    [
+      "What to include in review?",
+      "Top management shall review the organization's EnMS at planned intervals. The primary purpose is to ensure the system's continuing suitability, adequacy, and effectiveness. The inputs must include: follow-up actions from previous management reviews, the status of corrective actions and preventive actions, EnMS audit results, a review of energy performance and related EnPIs, the extent to which energy objectives and targets have been met, and projected energy performance for the following period."
+    ],
+    [
+      "Review frequency?",
+      "Top management shall review the organization's EnMS at planned intervals. The primary purpose is to ensure the system's continuing suitability, adequacy, and effectiveness. The inputs must include: follow-up actions from previous management reviews, the status of corrective actions and preventive actions, EnMS audit results, a review of energy performance and related EnPIs, the extent to which energy objectives and targets have been met, and projected energy performance for the following period."
     ]
   ],
   "ask_general_info": [
@@ -5523,6 +5643,18 @@
     [
       "What are the four actions an organization must undertake concerning the Energy Management System according to the General Requirements?",
       "The organization shall undertake four key actions: it must establish, document, implement, maintain, and continually improve an EnMS in accordance with the requirements of this International Standard "
+    ],
+    [
+      "What is ISO 50001?",
+      "The concept of energy performance includes three key aspects: energy use, energy efficiency, and energy consumption. This allows the organization a wide range of activities through which to demonstrate performance improvement. For instance, an organization could focus on reducing peak demand, utilizing surplus or waste energy, or improving the operations of its systems, processes, or equipment."
+    ],
+    [
+      "What is energy management?",
+      "The concept of energy performance includes three key aspects: energy use, energy efficiency, and energy consumption. This allows the organization a wide range of activities through which to demonstrate performance improvement. For instance, an organization could focus on reducing peak demand, utilizing surplus or waste energy, or improving the operations of its systems, processes, or equipment."
+    ],
+    [
+      "Benefits of ISO 50001?",
+      "The concept of energy performance includes three key aspects: energy use, energy efficiency, and energy consumption. This allows the organization a wide range of activities through which to demonstrate performance improvement. For instance, an organization could focus on reducing peak demand, utilizing surplus or waste energy, or improving the operations of its systems, processes, or equipment."
     ]
   ],
   "ask_iso_standards": [
@@ -5637,6 +5769,18 @@
     [
       "How is the Plan-Do-Check-Act (PDCA) model applied to energy management within the context of this International Standard?",
       "The International Standard is fundamentally based on the Plan - Do - Check - Act (PDCA) framework for continual improvement . Plan involves conducting the energy review, establishing the energy baseline, EnPIs, objectives, targets, and action plans necessary to achieve results consistent with the energy policy. Do involves implementing the energy management action plans. Check requires monitoring and measuring processes and key operational characteristics against the policy and objectives, and reporting the results. Act requires taking actions to continually improve both energy performance and the EnMS "
+    ],
+    [
+      "What is ISO 50001 standard?",
+      "This International Standard is based on the common elements of ISO management system standards. This foundational approach ensures a high level of compatibility, notably with standards such as ISO 9001 and ISO 14001. It can also be aligned or integrated with other management systems, including those related to quality, the environment, and occupational health and safety."
+    ],
+    [
+      "ISO 50001 requirements?",
+      "This International Standard is based on the common elements of ISO management system standards. This foundational approach ensures a high level of compatibility, notably with standards such as ISO 9001 and ISO 14001. It can also be aligned or integrated with other management systems, including those related to quality, the environment, and occupational health and safety."
+    ],
+    [
+      "Difference between ISO 14001 and 50001?",
+      "This International Standard is based on the common elements of ISO management system standards. This foundational approach ensures a high level of compatibility, notably with standards such as ISO 9001 and ISO 14001. It can also be aligned or integrated with other management systems, including those related to quality, the environment, and occupational health and safety."
     ]
   ],
   "ask_scope": [
@@ -6175,6 +6319,18 @@
     [
       "The scope is related to requirements applicable to energy use and consumption, including what three administrative actions?",
       "Measurement, documentation and reporting"
+    ],
+    [
+      "How to define scope?",
+      "The primary objective of this International Standard is to specify the requirements for establishing, implementing, maintaining, and improving an energy management system, which is intended to enable an organization to follow a systematic approach in achieving continual improvement of energy performance. This International Standard is applicable to all variables affecting energy performance that the organization can monitor and influence."
+    ],
+    [
+      "What is system boundary?",
+      "The primary objective of this International Standard is to specify the requirements for establishing, implementing, maintaining, and improving an energy management system, which is intended to enable an organization to follow a systematic approach in achieving continual improvement of energy performance. This International Standard is applicable to all variables affecting energy performance that the organization can monitor and influence."
+    ],
+    [
+      "Scope examples?",
+      "The primary objective of this International Standard is to specify the requirements for establishing, implementing, maintaining, and improving an energy management system, which is intended to enable an organization to follow a systematic approach in achieving continual improvement of energy performance. This International Standard is applicable to all variables affecting energy performance that the organization can monitor and influence."
     ]
   ],
   "ask_terms_definitions": [
@@ -6317,6 +6473,18 @@
     [
       "Who is responsible for determining the significance criteria for energy use?",
       "The significance criteria are determined by the organization itself "
+    ],
+    [
+      "What is SEU?",
+      "SEU (Significant Energy Use) is equipment, system, or process with substantial energy consumption or significant potential for improvement, per ISO 50001."
+    ],
+    [
+      "Define energy baseline",
+      "Boundaries are the physical or site limits and/or organizational limits as defined by the organization. Continual improvement is a recurring process which results in enhancement of energy performance and the energy management system. Correction is the action to eliminate a detected nonconformity. Corrective action is taken to eliminate the cause of a detected nonconformity, whereas preventive action is taken to eliminate the cause of a potential nonconformity."
+    ],
+    [
+      "What does EnPI mean?",
+      "Boundaries are the physical or site limits and/or organizational limits as defined by the organization. Continual improvement is a recurring process which results in enhancement of energy performance and the energy management system. Correction is the action to eliminate a detected nonconformity. Corrective action is taken to eliminate the cause of a detected nonconformity, whereas preventive action is taken to eliminate the cause of a potential nonconformity."
     ]
   ],
   "ask_definitions": [
@@ -10289,6 +10457,14 @@
     [
       "What data does HumanEnerDIA collect?",
       "HumanEnerDIA collects manufacturing data (raw materials, production volume, water consumption, working hours, waste amount), climate-related data (HDD, CDD, humidity, precipitation), operational data (maintenance, training activities), and energy consumption data from various sources to determine significant energy users, energy drivers, KPIs, and energy baselines."
+    ],
+    [
+      "What can the platform do?",
+      "HumanEnerDIA is an intelligent energy management platform combining real-time monitoring, ML analytics, and ISO 50001 compliance. It features dashboards for baseline prediction, anomaly detection, forecasting, KPIs, plus Grafana visualizations and OVOS voice assistant."
+    ],
+    [
+      "Platform features?",
+      "HumanEnerDIA is an intelligent energy management platform combining real-time monitoring, ML analytics, and ISO 50001 compliance. It features dashboards for baseline prediction, anomaly detection, forecasting, KPIs, plus Grafana visualizations and OVOS voice assistant."
     ]
   ],
   "ask_portal_dashboard": [
@@ -10331,6 +10507,18 @@
     [
       "Where can I see real-time data?",
       "Real-time data is shown on the Dashboard, Grafana dashboards (especially SOTA Factory Overview and Real-Time Production), and the KPI page with live-updating charts."
+    ],
+    [
+      "How to use dashboard?",
+      "The main dashboard is your command center showing real-time energy metrics, alerts, machine status, and quick navigation to all HumanEnerDIA features via the sidebar menu."
+    ],
+    [
+      "What's on the main dashboard?",
+      "The main dashboard is your command center showing real-time energy metrics, alerts, machine status, and quick navigation to all HumanEnerDIA features via the sidebar menu."
+    ],
+    [
+      "Dashboard widgets?",
+      "The main dashboard is your command center showing real-time energy metrics, alerts, machine status, and quick navigation to all HumanEnerDIA features via the sidebar menu."
     ]
   ],
   "ask_portal_baseline": [
@@ -10393,6 +10581,18 @@
     [
       "What are the coefficient bars?",
       "Coefficient bars show the impact of each driver on energy consumption. Positive bars mean the driver increases consumption; negative means it reduces consumption."
+    ],
+    [
+      "How to use baseline feature?",
+      "The Baseline page trains ML models to predict expected energy consumption based on drivers (temperature, pressure, load, production). View R², RMSE, MAE metrics and coefficient impact charts."
+    ],
+    [
+      "Baseline predictions?",
+      "The Baseline page trains ML models to predict expected energy consumption based on drivers (temperature, pressure, load, production). View R², RMSE, MAE metrics and coefficient impact charts."
+    ],
+    [
+      "Training models?",
+      "The Baseline page trains ML models to predict expected energy consumption based on drivers (temperature, pressure, load, production). View R², RMSE, MAE metrics and coefficient impact charts."
     ]
   ],
   "ask_portal_anomaly": [
@@ -10519,6 +10719,18 @@
     [
       "Can I compare anomaly rates across machines?",
       "Yes! Anomaly page → Comparison View shows: anomaly frequency, average severity, mean time to resolution, and top root causes per machine. Helps identify problematic equipment."
+    ],
+    [
+      "How to view anomalies?",
+      "The Anomaly Detection page identifies unusual consumption patterns using statistical analysis. View alerts by severity (Critical, Warning, Info), filter by machine and time period."
+    ],
+    [
+      "Anomaly detection settings?",
+      "The Anomaly Detection page identifies unusual consumption patterns using statistical analysis. View alerts by severity (Critical, Warning, Info), filter by machine and time period."
+    ],
+    [
+      "Configure alerts?",
+      "The Anomaly Detection page identifies unusual consumption patterns using statistical analysis. View alerts by severity (Critical, Warning, Info), filter by machine and time period."
     ]
   ],
   "ask_portal_kpi": [
@@ -10569,6 +10781,14 @@
     [
       "What is SEC in KPI?",
       "SEC (Specific Energy Consumption) measures energy per production unit (kWh/unit). It's key for ISO 50001 compliance and efficiency benchmarking."
+    ],
+    [
+      "How to view KPIs?",
+      "The KPI Dashboard displays key metrics including Energy Efficiency, Load Factor, Peak Demand, Cost Efficiency, and SEC (Specific Energy Consumption) with trend charts."
+    ],
+    [
+      "KPI calculations?",
+      "The KPI Dashboard displays key metrics including Energy Efficiency, Load Factor, Peak Demand, Cost Efficiency, and SEC (Specific Energy Consumption) with trend charts."
     ]
   ],
   "ask_portal_forecast": [
@@ -10635,6 +10855,18 @@
     [
       "How often should I retrain forecast models?",
       "Retrain weekly for ARIMA (short-term patterns change). Retrain monthly for Prophet, or after significant operational changes."
+    ],
+    [
+      "How to forecast energy?",
+      "The Forecast page predicts future demand using ARIMA (1-4h) and Prophet (24h-7d) models. Features include Optimal Load Scheduling to find best times to run equipment."
+    ],
+    [
+      "Forecast accuracy?",
+      "The Forecast page predicts future demand using ARIMA (1-4h) and Prophet (24h-7d) models. Features include Optimal Load Scheduling to find best times to run equipment."
+    ],
+    [
+      "Forecast periods?",
+      "The Forecast page predicts future demand using ARIMA (1-4h) and Prophet (24h-7d) models. Features include Optimal Load Scheduling to find best times to run equipment."
     ]
   ],
   "ask_portal_reports": [
@@ -10661,6 +10893,18 @@
     [
       "What format are reports?",
       "Reports are generated as PDF documents with charts, tables, and KPI summaries. Data can also be exported as CSV for further analysis."
+    ],
+    [
+      "How to generate reports?",
+      "Generate PDF reports for consumption summaries, KPI performance, anomaly analysis, and efficiency metrics. Export data as CSV for further analysis."
+    ],
+    [
+      "Report types?",
+      "Generate PDF reports for consumption summaries, KPI performance, anomaly analysis, and efficiency metrics. Export data as CSV for further analysis."
+    ],
+    [
+      "Export reports?",
+      "Generate PDF reports for consumption summaries, KPI performance, anomaly analysis, and efficiency metrics. Export data as CSV for further analysis."
     ]
   ],
   "ask_viz_sankey": [
@@ -10777,6 +11021,18 @@
     [
       "What is the command center dashboard?",
       "The Command Center is the SOTA Factory Overview dashboard - your main operational view with real-time metrics, anomalies, power charts, and machine status."
+    ],
+    [
+      "How to use factory dashboard?",
+      "SOTA Factory Overview is the Command Center showing real-time status - Active Machines, Energy Today, Cost, Anomalies, Live Power chart, and Machine Status & Health."
+    ],
+    [
+      "Factory overview?",
+      "SOTA Factory Overview is the Command Center showing real-time status - Active Machines, Energy Today, Cost, Anomalies, Live Power chart, and Machine Status & Health."
+    ],
+    [
+      "Real-time monitoring?",
+      "SOTA Factory Overview is the Command Center showing real-time status - Active Machines, Energy Today, Cost, Anomalies, Live Power chart, and Machine Status & Health."
     ]
   ],
   "ask_grafana_iso50001": [
@@ -10811,6 +11067,18 @@
     [
       "What is baseline vs actual chart?",
       "The Monthly Baseline vs Actual chart compares expected energy consumption (baseline) against actual usage, highlighting over/under consumption periods."
+    ],
+    [
+      "ISO 50001 dashboard?",
+      "SOTA ISO 50001 EnPI tracks compliance with EnPI Score, Energy Savings, CUSUM Control Chart, Baseline vs Actual, Weather Normalization, and SEU Performance panels."
+    ],
+    [
+      "Compliance tracking?",
+      "SOTA ISO 50001 EnPI tracks compliance with EnPI Score, Energy Savings, CUSUM Control Chart, Baseline vs Actual, Weather Normalization, and SEU Performance panels."
+    ],
+    [
+      "EnPI visualization?",
+      "SOTA ISO 50001 EnPI tracks compliance with EnPI Score, Energy Savings, CUSUM Control Chart, Baseline vs Actual, Weather Normalization, and SEU Performance panels."
     ]
   ],
   "ask_grafana_anomaly": [
@@ -10845,6 +11113,18 @@
     [
       "Where can I see unresolved anomalies?",
       "The 'Unresolved Anomalies' panel lists all active anomalies that haven't been marked as resolved, with details and severity."
+    ],
+    [
+      "Anomaly dashboard?",
+      "SOTA Anomaly Detection shows Active/Critical Anomalies, MTTR, Severity Distribution, Timeline, Machine ranking by anomaly count, Heatmap, and Unresolved list."
+    ],
+    [
+      "View detected anomalies?",
+      "SOTA Anomaly Detection shows Active/Critical Anomalies, MTTR, Severity Distribution, Timeline, Machine ranking by anomaly count, Heatmap, and Unresolved list."
+    ],
+    [
+      "Anomaly history?",
+      "SOTA Anomaly Detection shows Active/Critical Anomalies, MTTR, Severity Distribution, Timeline, Machine ranking by anomaly count, Heatmap, and Unresolved list."
     ]
   ],
   "ask_grafana_cost": [
@@ -10879,6 +11159,22 @@
     [
       "What is average energy rate?",
       "Average Energy Rate shows the blended cost per kWh across all time-of-use periods, useful for quick cost calculations."
+    ],
+    [
+      "Cost analysis dashboard?",
+      "SOTA Cost Analytics tracks Current Month Cost, Variance, Average Rate, Potential Savings, 12-month Trend, Time-of-Use breakdown, and Savings Opportunities."
+    ],
+    [
+      "Energy costs?",
+      "SOTA Cost Analytics tracks Current Month Cost, Variance, Average Rate, Potential Savings, 12-month Trend, Time-of-Use breakdown, and Savings Opportunities."
+    ],
+    [
+      "Cost breakdown?",
+      "SOTA Cost Analytics tracks Current Month Cost, Variance, Average Rate, Potential Savings, 12-month Trend, Time-of-Use breakdown, and Savings Opportunities."
+    ],
+    [
+      "What is the cost breakdown dashboard?",
+      "SOTA Cost Analytics tracks Current Month Cost, Variance, Average Rate, Potential Savings, 12-month Trend, Time-of-Use breakdown, and Savings Opportunities."
     ]
   ],
   "ask_grafana_executive": [
@@ -10905,6 +11201,18 @@
     [
       "Which dashboard is best for managers?",
       "SOTA Executive Summary is designed for managers and executives, showing high-level KPIs, trends, and concerns without technical complexity."
+    ],
+    [
+      "Executive summary dashboard?",
+      "SOTA Executive Summary provides management-level KPIs including Top Operational Concerns, 12-Month Energy Trend, and Energy Intensity (kWh per unit produced)."
+    ],
+    [
+      "High-level metrics?",
+      "SOTA Executive Summary provides management-level KPIs including Top Operational Concerns, 12-Month Energy Trend, and Energy Intensity (kWh per unit produced)."
+    ],
+    [
+      "Management view?",
+      "SOTA Executive Summary provides management-level KPIs including Top Operational Concerns, 12-Month Energy Trend, and Energy Intensity (kWh per unit produced)."
     ]
   ],
   "ask_grafana_machine_health": [
@@ -10935,6 +11243,18 @@
     [
       "What is adaptive time range?",
       "The Power Consumption (Adaptive Time Range) panel automatically adjusts its time window based on data availability and selected filters."
+    ],
+    [
+      "Machine health dashboard?",
+      "SOTA Machine Health provides deep-dive analysis with Health Score, Energy, Power, Anomalies, ML Model Performance, Baseline Variance, and Power Consumption charts."
+    ],
+    [
+      "Equipment status?",
+      "SOTA Machine Health provides deep-dive analysis with Health Score, Energy, Power, Anomalies, ML Model Performance, Baseline Variance, and Power Consumption charts."
+    ],
+    [
+      "Health indicators?",
+      "SOTA Machine Health provides deep-dive analysis with Health Score, Energy, Power, Anomalies, ML Model Performance, Baseline Variance, and Power Consumption charts."
     ]
   ],
   "ask_grafana_ml": [
@@ -10965,6 +11285,18 @@
     [
       "What is latest model performance?",
       "Latest Model Performance by Machine panel shows current R², RMSE for each machine's most recent model, helping identify underperforming models."
+    ],
+    [
+      "Machine learning dashboard?",
+      "SOTA ML Performance tracks Active Models, Average R²/RMSE, score trends over time, model performance by machine, and recent training history (30d)."
+    ],
+    [
+      "Model performance?",
+      "SOTA ML Performance tracks Active Models, Average R²/RMSE, score trends over time, model performance by machine, and recent training history (30d)."
+    ],
+    [
+      "ML predictions?",
+      "SOTA ML Performance tracks Active Models, Average R²/RMSE, score trends over time, model performance by machine, and recent training history (30d)."
     ]
   ],
   "ask_grafana_operational": [
@@ -10995,6 +11327,18 @@
     [
       "How do I see production over time?",
       "Production Output Over Time chart shows manufacturing output trends, useful for correlating with energy consumption patterns."
+    ],
+    [
+      "Operational dashboard?",
+      "SOTA Operational Efficiency shows OEE (Overall Equipment Effectiveness), Availability Rate, Performance Rate, Production vs Energy correlation, and Machine Status."
+    ],
+    [
+      "Production metrics?",
+      "SOTA Operational Efficiency shows OEE (Overall Equipment Effectiveness), Availability Rate, Performance Rate, Production vs Energy correlation, and Machine Status."
+    ],
+    [
+      "Efficiency tracking?",
+      "SOTA Operational Efficiency shows OEE (Overall Equipment Effectiveness), Availability Rate, Performance Rate, Production vs Energy correlation, and Machine Status."
     ]
   ],
   "ask_grafana_predictive": [
@@ -11025,6 +11369,22 @@
     [
       "What is recent 24 hour forecasts?",
       "Recent 24-Hour Forecasts (Historical) panel shows past forecast predictions alongside actual values for validation and pattern analysis."
+    ],
+    [
+      "Predictive analytics dashboard?",
+      "SOTA Predictive Analytics shows RMSE/MAPE/R² metrics, Forecast vs Actual comparisons, Model Performance comparisons, and accuracy trends over time."
+    ],
+    [
+      "Forecast visualization?",
+      "SOTA Predictive Analytics shows RMSE/MAPE/R² metrics, Forecast vs Actual comparisons, Model Performance comparisons, and accuracy trends over time."
+    ],
+    [
+      "Trends?",
+      "SOTA Predictive Analytics shows RMSE/MAPE/R² metrics, Forecast vs Actual comparisons, Model Performance comparisons, and accuracy trends over time."
+    ],
+    [
+      "Forecast accuracy trends?",
+      "SOTA Predictive Analytics shows RMSE/MAPE/R² metrics, Forecast vs Actual comparisons, Model Performance comparisons, and accuracy trends over time."
     ]
   ],
   "ask_grafana_realtime": [
@@ -11051,6 +11411,18 @@
     [
       "What is realtime monitoring?",
       "Real-time monitoring in Grafana uses the SOTA Real-Time Production dashboard with sub-minute refresh rates for live operational awareness."
+    ],
+    [
+      "Real-time dashboard?",
+      "SOTA Real-Time Production shows Factory Status, Active Machines, Current Power, and Live Power chart (last 15 minutes) with fastest refresh rate."
+    ],
+    [
+      "Live data?",
+      "SOTA Real-Time Production shows Factory Status, Active Machines, Current Power, and Live Power chart (last 15 minutes) with fastest refresh rate."
+    ],
+    [
+      "Current consumption?",
+      "SOTA Real-Time Production shows Factory Status, Active Machines, Current Power, and Live Power chart (last 15 minutes) with fastest refresh rate."
     ]
   ],
   "ask_grafana_environmental": [
@@ -11141,6 +11513,18 @@
     [
       "What is carbon payback period for efficiency projects?",
       "Carbon payback = CO2 reduction (kg/year) to offset project's embodied carbon. Environmental dashboard → Projects tab calculates payback for upgrades (e.g., LED lighting, VFDs). Helps prioritize green investments."
+    ],
+    [
+      "Environmental dashboard?",
+      "SOTA Environmental Impact tracks Monthly Carbon Footprint, CO2 Emissions Trend, Emission Intensity (kg CO2/unit), CO2 by Machine, and Reduction Progress."
+    ],
+    [
+      "Temperature effects?",
+      "SOTA Environmental Impact tracks Monthly Carbon Footprint, CO2 Emissions Trend, Emission Intensity (kg CO2/unit), CO2 by Machine, and Reduction Progress."
+    ],
+    [
+      "Weather data?",
+      "SOTA Environmental Impact tracks Monthly Carbon Footprint, CO2 Emissions Trend, Emission Intensity (kg CO2/unit), CO2 by Machine, and Reduction Progress."
     ]
   ],
   "ask_grafana_general": [
@@ -11179,6 +11563,22 @@
     [
       "Can I create custom dashboards?",
       "Yes, Grafana supports custom dashboards. However, SOTA dashboards cover most use cases. Contact admin for custom dashboard requests."
+    ],
+    [
+      "How to use Grafana?",
+      "HumanEnerDIA includes 11 SOTA (State Of The Art) Grafana dashboards covering Factory Overview, ISO 50001 EnPI, Anomaly Detection, Cost Analytics, and more. Access via sidebar menu."
+    ],
+    [
+      "Create custom dashboard?",
+      "HumanEnerDIA includes 11 SOTA (State Of The Art) Grafana dashboards covering Factory Overview, ISO 50001 EnPI, Anomaly Detection, Cost Analytics, and more. Access via sidebar menu."
+    ],
+    [
+      "Grafana tips?",
+      "HumanEnerDIA includes 11 SOTA (State Of The Art) Grafana dashboards covering Factory Overview, ISO 50001 EnPI, Anomaly Detection, Cost Analytics, and more. Access via sidebar menu."
+    ],
+    [
+      "Grafana dashboard tips?",
+      "HumanEnerDIA includes 11 SOTA (State Of The Art) Grafana dashboards covering Factory Overview, ISO 50001 EnPI, Anomaly Detection, Cost Analytics, and more. Access via sidebar menu."
     ]
   ],
   "ask_ovos_capabilities": [
@@ -11217,6 +11617,14 @@
     [
       "What energy metrics can OVOS provide?",
       "OVOS provides: energy consumption (kWh), power draw (kW), peak demand, load factor, SEC (Specific Energy Consumption), costs, forecasts, baselines, and efficiency metrics."
+    ],
+    [
+      "Voice commands list?",
+      "OVOS voice assistant can query energy data, check machine status, show KPIs, generate forecasts, detect anomalies, analyze costs, and generate PDF reports using natural voice commands."
+    ],
+    [
+      "How to use voice assistant?",
+      "OVOS voice assistant can query energy data, check machine status, show KPIs, generate forecasts, detect anomalies, analyze costs, and generate PDF reports using natural voice commands."
     ]
   ],
   "ask_ovos_energy": [
@@ -11247,6 +11655,18 @@
     [
       "Can I see total factory energy?",
       "Yes! 'What's the total factory energy consumption?', 'How much energy did the factory use today?', 'Give me a factory overview', 'What's the total consumption this month?'."
+    ],
+    [
+      "How to ask about energy?",
+      "Ask OVOS about energy by saying 'What's the energy consumption of [machine]?' or 'How much energy did [machine] use [time period]?'. OVOS understands machine names and time phrases."
+    ],
+    [
+      "Energy voice queries?",
+      "Ask OVOS about energy by saying 'What's the energy consumption of [machine]?' or 'How much energy did [machine] use [time period]?'. OVOS understands machine names and time phrases."
+    ],
+    [
+      "OVOS energy examples?",
+      "Ask OVOS about energy by saying 'What's the energy consumption of [machine]?' or 'How much energy did [machine] use [time period]?'. OVOS understands machine names and time phrases."
     ]
   ],
   "ask_ovos_status": [
@@ -11273,6 +11693,18 @@
     [
       "Can I ask about specific machine details?",
       "Yes! 'Tell me about Compressor-1', 'Information about HVAC-Main', 'Details about Boiler-1', 'How is Injection-Molding-1 performing?'."
+    ],
+    [
+      "How to check machine status with voice?",
+      "Check machine status by voice with 'Is [machine] running?', 'Which machines are active?', 'Any machines offline?', or 'Give me a factory overview'."
+    ],
+    [
+      "Status commands?",
+      "Check machine status by voice with 'Is [machine] running?', 'Which machines are active?', 'Any machines offline?', or 'Give me a factory overview'."
+    ],
+    [
+      "OVOS status queries?",
+      "Check machine status by voice with 'Is [machine] running?', 'Which machines are active?', 'Any machines offline?', or 'Give me a factory overview'."
     ]
   ],
   "ask_ovos_kpi": [
@@ -11299,6 +11731,18 @@
     [
       "Can I ask about carbon footprint?",
       "Yes! 'What is the carbon footprint?', 'Carbon emissions today', 'Total emissions', 'How much carbon did we emit yesterday?', 'What's our carbon footprint?'."
+    ],
+    [
+      "How to ask for KPIs?",
+      "Get KPIs by saying 'Show me the KPIs for Compressor-1', 'What's the load factor?', 'Calculate SEC', or 'What's the peak demand?'."
+    ],
+    [
+      "Voice KPI queries?",
+      "Get KPIs by saying 'Show me the KPIs for Compressor-1', 'What's the load factor?', 'Calculate SEC', or 'What's the peak demand?'."
+    ],
+    [
+      "OVOS KPI commands?",
+      "Get KPIs by saying 'Show me the KPIs for Compressor-1', 'What's the load factor?', 'Calculate SEC', or 'What's the peak demand?'."
     ]
   ],
   "ask_ovos_forecast": [
@@ -11325,6 +11769,18 @@
     [
       "How do I train a baseline?",
       "Say 'Train baseline for Compressor-1', 'Create baseline for Boiler-1', 'Build baseline model for HVAC-Main'. This initiates model training with current data."
+    ],
+    [
+      "How to get forecast with voice?",
+      "Ask for forecasts with 'Forecast energy for tomorrow', 'What's the expected energy for Compressor-1?', or 'Show me the medium-term forecast'."
+    ],
+    [
+      "Forecast commands?",
+      "Ask for forecasts with 'Forecast energy for tomorrow', 'What's the expected energy for Compressor-1?', or 'Show me the medium-term forecast'."
+    ],
+    [
+      "OVOS predictions?",
+      "Ask for forecasts with 'Forecast energy for tomorrow', 'What's the expected energy for Compressor-1?', or 'Show me the medium-term forecast'."
     ]
   ],
   "ask_ovos_anomaly": [
@@ -11347,6 +11803,18 @@
     [
       "Can I run anomaly detection?",
       "Yes! 'Run anomaly detection', 'Check for unusual patterns', 'Detect anomalies in the factory', 'Find issues between yesterday and today'."
+    ],
+    [
+      "How to ask about anomalies?",
+      "Check anomalies by saying 'Are there any anomalies?', 'Any active alerts?', 'What's wrong?', or 'Find issues in Compressor-1'."
+    ],
+    [
+      "Voice anomaly queries?",
+      "Check anomalies by saying 'Are there any anomalies?', 'Any active alerts?', 'What's wrong?', or 'Find issues in Compressor-1'."
+    ],
+    [
+      "OVOS anomaly detection?",
+      "Check anomalies by saying 'Are there any anomalies?', 'Any active alerts?', 'What's wrong?', or 'Find issues in Compressor-1'."
     ]
   ],
   "ask_ovos_cost": [
@@ -11365,6 +11833,18 @@
     [
       "How do I track spending?",
       "Ask 'How much have we spent on energy this month?', 'Money spent today', 'Energy spending', 'Budget usage', 'Spending on electricity'."
+    ],
+    [
+      "How to ask about costs?",
+      "Query costs by saying 'How much have we spent on energy?', 'Energy cost today', 'Which machine costs the most?', or 'Cost breakdown'."
+    ],
+    [
+      "Voice cost queries?",
+      "Query costs by saying 'How much have we spent on energy?', 'Energy cost today', 'Which machine costs the most?', or 'Cost breakdown'."
+    ],
+    [
+      "OVOS cost analysis?",
+      "Query costs by saying 'How much have we spent on energy?', 'Energy cost today', 'Which machine costs the most?', or 'Cost breakdown'."
     ]
   ],
   "ask_ovos_reports": [
@@ -11383,6 +11863,18 @@
     [
       "How do I get ISO 50001 reports?",
       "Say 'Generate an ISO 50001 report', 'Create compliance report', 'ISO report', 'I need an ISO 50001 compliance report'."
+    ],
+    [
+      "How to generate report with voice?",
+      "Generate reports by saying 'Create a monthly report', 'Generate ISO 50001 report', 'I need a PDF report', or 'Download the report'."
+    ],
+    [
+      "Voice report commands?",
+      "Generate reports by saying 'Create a monthly report', 'Generate ISO 50001 report', 'I need a PDF report', or 'Download the report'."
+    ],
+    [
+      "OVOS PDF reports?",
+      "Generate reports by saying 'Create a monthly report', 'Generate ISO 50001 report', 'I need a PDF report', or 'Download the report'."
     ]
   ],
   "ask_concept_baseline": [
@@ -11461,6 +11953,18 @@
     [
       "What is baseline uncertainty and how is it calculated?",
       "Baseline uncertainty = 95% confidence interval around prediction. Shows prediction range, not exact value. Calculated from model RMSE: ±1.96×RMSE. Wider uncertainty means less reliable prediction. Aim for <10% uncertainty."
+    ],
+    [
+      "What is baseline in energy?",
+      "Energy baseline is an ML model predicting expected consumption based on drivers (temperature, load, production). Used for anomaly detection and EnPI calculation."
+    ],
+    [
+      "How baseline works?",
+      "Energy baseline is an ML model predicting expected consumption based on drivers (temperature, load, production). Used for anomaly detection and EnPI calculation."
+    ],
+    [
+      "Baseline model explanation?",
+      "Energy baseline is an ML model predicting expected consumption based on drivers (temperature, load, production). Used for anomaly detection and EnPI calculation."
     ]
   ],
   "ask_concept_enpi": [
@@ -11491,6 +11995,18 @@
     [
       "What is CUSUM in EnPI tracking?",
       "CUSUM (Cumulative Sum) chart tracks cumulative deviation from baseline over time. It detects systematic shifts in performance that individual measurements might miss."
+    ],
+    [
+      "What is EnPI concept?",
+      "EnPI (Energy Performance Indicator) = Actual/Baseline × 100. Values <100 indicate improvement. Required by ISO 50001 for tracking energy performance."
+    ],
+    [
+      "Energy performance index?",
+      "EnPI (Energy Performance Indicator) = Actual/Baseline × 100. Values <100 indicate improvement. Required by ISO 50001 for tracking energy performance."
+    ],
+    [
+      "EnPI calculation?",
+      "EnPI (Energy Performance Indicator) = Actual/Baseline × 100. Values <100 indicate improvement. Required by ISO 50001 for tracking energy performance."
     ]
   ],
   "ask_concept_sec": [
@@ -11517,6 +12033,14 @@
     [
       "How do I reduce SEC?",
       "Reduce SEC by: minimizing idle time, optimizing batch sizes, maintaining equipment, reducing scrap/rework, improving process parameters, and scheduling during optimal conditions."
+    ],
+    [
+      "Specific energy consumption?",
+      "SEC (Specific Energy Consumption) = kWh / units produced. Normalizes consumption for production volume. Lower SEC = more efficient production."
+    ],
+    [
+      "How to calculate SEC?",
+      "SEC (Specific Energy Consumption) = kWh / units produced. Normalizes consumption for production volume. Lower SEC = more efficient production."
     ]
   ],
   "ask_concept_loadfactor": [
@@ -11539,6 +12063,14 @@
     [
       "How do I improve load factor?",
       "Improve by: leveling production schedules, staggering equipment startups, reducing peak demand spikes, shifting loads to off-peak, and rightsizing equipment."
+    ],
+    [
+      "How to improve load factor?",
+      "Load Factor = Average Power / Peak Power × 100. High load factor (70-90%) indicates efficient equipment utilization and reduces demand charges."
+    ],
+    [
+      "Load factor formula?",
+      "Load Factor = Average Power / Peak Power × 100. High load factor (70-90%) indicates efficient equipment utilization and reduces demand charges."
     ]
   ],
   "ask_concept_peakdemand": [
@@ -11561,6 +12093,14 @@
     [
       "What is peak shaving?",
       "Peak shaving is reducing power consumption during peak periods using storage, load shifting, or temporary shutdown of non-critical equipment."
+    ],
+    [
+      "How to reduce peaks?",
+      "Peak demand is maximum power (kW) during a billing period. Utilities charge separately for peaks - a single spike affects the entire month's bill."
+    ],
+    [
+      "Peak demand charges?",
+      "Peak demand is maximum power (kW) during a billing period. Utilities charge separately for peaks - a single spike affects the entire month's bill."
     ]
   ],
   "ask_concept_seu": [
@@ -11583,6 +12123,14 @@
     [
       "How do I manage SEUs?",
       "Manage SEUs by: establishing baselines, setting EnPI targets, monitoring deviations, investigating anomalies, and implementing action plans for improvement."
+    ],
+    [
+      "Significant energy use?",
+      "SEU (Significant Energy Use) is equipment with high consumption or improvement potential. ISO 50001 requires identifying and managing SEUs."
+    ],
+    [
+      "How to identify SEU?",
+      "SEU (Significant Energy Use) is equipment with high consumption or improvement potential. ISO 50001 requires identifying and managing SEUs."
     ]
   ],
   "ask_concept_arima": [
@@ -11605,6 +12153,14 @@
     [
       "What are ARIMA limitations?",
       "ARIMA struggles with: strong seasonality, external factors (weather), sudden changes, and long-term forecasts. Use Prophet for longer horizons."
+    ],
+    [
+      "ARIMA forecasting?",
+      "ARIMA is a time-series forecasting method for short-term predictions (1-4 hours). Uses past values and patterns to predict future consumption."
+    ],
+    [
+      "Time series analysis?",
+      "ARIMA is a time-series forecasting method for short-term predictions (1-4 hours). Uses past values and patterns to predict future consumption."
     ]
   ],
   "ask_concept_prophet": [
@@ -11627,6 +12183,10 @@
     [
       "What is Prophet accuracy?",
       "Prophet typically achieves 10-20% MAPE for energy forecasting. Accuracy improves with more historical data and stable patterns."
+    ],
+    [
+      "Prophet forecasting?",
+      "Prophet is Facebook's forecasting model for medium-term predictions (24h-7d). Handles seasonality, holidays, and missing data automatically."
     ]
   ],
   "ask_concept_anomaly_ml": [
@@ -11653,6 +12213,14 @@
     [
       "What should I do when anomaly detected?",
       "Investigate root cause, check equipment status, verify sensor data, compare with similar periods, and take corrective action if real issue confirmed."
+    ],
+    [
+      "ML anomaly methods?",
+      "HumanEnerDIA uses Z-score (statistical outliers), Isolation Forest (ML), and baseline deviation to detect anomalies. Severity based on magnitude and impact."
+    ],
+    [
+      "Z-score detection?",
+      "HumanEnerDIA uses Z-score (statistical outliers), Isolation Forest (ML), and baseline deviation to detect anomalies. Severity based on magnitude and impact."
     ]
   ],
   "ask_concept_oee": [
@@ -11671,6 +12239,14 @@
     [
       "How does OEE relate to energy?",
       "Low OEE often correlates with poor energy efficiency - idle machines still consume power, rework wastes energy. Improving OEE typically improves SEC."
+    ],
+    [
+      "Overall equipment effectiveness?",
+      "OEE = Availability × Performance × Quality. World-class is 85%+. Low OEE correlates with poor energy efficiency due to idle time and rework."
+    ],
+    [
+      "OEE calculation?",
+      "OEE = Availability × Performance × Quality. World-class is 85%+. Low OEE correlates with poor energy efficiency due to idle time and rework."
     ]
   ],
   "ask_concept_cusum": [
@@ -11689,6 +12265,22 @@
     [
       "How to read CUSUM chart?",
       "Flat line = on target. Upward trend = cumulative waste (using more than baseline). Downward trend = cumulative savings. Slope change = performance shift."
+    ],
+    [
+      "What is CUSUM?",
+      "CUSUM chart tracks cumulative deviation from baseline. Detects gradual efficiency degradation or sustained improvement that period-by-period analysis misses."
+    ],
+    [
+      "Cumulative sum?",
+      "CUSUM chart tracks cumulative deviation from baseline. Detects gradual efficiency degradation or sustained improvement that period-by-period analysis misses."
+    ],
+    [
+      "CUSUM charts?",
+      "CUSUM chart tracks cumulative deviation from baseline. Detects gradual efficiency degradation or sustained improvement that period-by-period analysis misses."
+    ],
+    [
+      "What are CUSUM charts?",
+      "CUSUM chart tracks cumulative deviation from baseline. Detects gradual efficiency degradation or sustained improvement that period-by-period analysis misses."
     ]
   ],
   "ask_nodered": [
@@ -11719,6 +12311,14 @@
     [
       "How does data flow through Node-RED?",
       "Sensor → MQTT broker (172.18.0.1:1883) → Node-RED MQTT-in → Transform/Validate → Batch (100 records) → PostgreSQL insert → TimescaleDB hypertables."
+    ],
+    [
+      "Node-RED in HumanEnerDIA?",
+      "Node-RED is the ETL pipeline - receives MQTT sensor data, transforms/validates it, and batch-inserts to TimescaleDB. Access at port 1880."
+    ],
+    [
+      "Data flow configuration?",
+      "Node-RED is the ETL pipeline - receives MQTT sensor data, transforms/validates it, and batch-inserts to TimescaleDB. Access at port 1880."
     ]
   ],
   "ask_mqtt": [
@@ -11745,6 +12345,14 @@
     [
       "What is publish-subscribe?",
       "Publish-subscribe (pub/sub) decouples senders from receivers. Sensors publish to topics; Node-RED subscribes. Multiple subscribers can receive same data without affecting publishers."
+    ],
+    [
+      "MQTT broker?",
+      "MQTT is the lightweight pub/sub messaging protocol transporting real-time sensor data. Broker at 172.18.0.1:1883. Topics follow factory/{id}/{machine}/{type} pattern."
+    ],
+    [
+      "Message topics?",
+      "MQTT is the lightweight pub/sub messaging protocol transporting real-time sensor data. Broker at 172.18.0.1:1883. Topics follow factory/{id}/{machine}/{type} pattern."
     ]
   ],
   "ask_timescaledb": [
@@ -11775,6 +12383,14 @@
     [
       "How do I access the database?",
       "Connect via: docker exec -it enms-postgres psql -U $POSTGRES_USER -d enms. Use \\dt for tables, \\d+ table_name for schema details."
+    ],
+    [
+      "Time-series database?",
+      "TimescaleDB is PostgreSQL optimized for time-series. Uses hypertables (auto-partitioned) and continuous aggregates (_1min, _1hour, _1day) for fast queries."
+    ],
+    [
+      "Query performance?",
+      "TimescaleDB is PostgreSQL optimized for time-series. Uses hypertables (auto-partitioned) and continuous aggregates (_1min, _1hour, _1day) for fast queries."
     ]
   ],
   "ask_analytics_api": [
@@ -11801,6 +12417,18 @@
     [
       "What ML models does Analytics use?",
       "Linear regression for baselines, ARIMA for short-term forecasts, Prophet for medium-term, Isolation Forest for anomaly detection. Models saved to analytics/models/saved/."
+    ],
+    [
+      "What is analytics API?",
+      "Analytics API (FastAPI, port 8001) provides ML/KPI endpoints - baseline training, anomaly detection, forecasting, KPIs, reports. Swagger docs at /docs."
+    ],
+    [
+      "API endpoints?",
+      "Analytics API (FastAPI, port 8001) provides ML/KPI endpoints - baseline training, anomaly detection, forecasting, KPIs, reports. Swagger docs at /docs."
+    ],
+    [
+      "How to use API?",
+      "Analytics API (FastAPI, port 8001) provides ML/KPI endpoints - baseline training, anomaly detection, forecasting, KPIs, reports. Swagger docs at /docs."
     ]
   ],
   "ask_simulator": [
@@ -11831,6 +12459,18 @@
     [
       "How do I verify Simulator data?",
       "Check database: SELECT COUNT(*), MAX(time) FROM energy_readings WHERE time > NOW() - INTERVAL '5 minutes'. Should show recent timestamps if Simulator is running."
+    ],
+    [
+      "What is simulator?",
+      "Simulator (port 8003) generates realistic factory sensor data - energy, production, environmental. Simulates 5 machine types with variable intervals."
+    ],
+    [
+      "Test data generation?",
+      "Simulator (port 8003) generates realistic factory sensor data - energy, production, environmental. Simulates 5 machine types with variable intervals."
+    ],
+    [
+      "Simulator configuration?",
+      "Simulator (port 8003) generates realistic factory sensor data - energy, production, environmental. Simulates 5 machine types with variable intervals."
     ]
   ],
   "ask_docker": [
@@ -11861,6 +12501,18 @@
     [
       "How does nginx route requests?",
       "nginx at port 8080 routes: /api/analytics/ → analytics:8001, /api/simulator/ → simulator:8003, /grafana/* → grafana:3000. Central API gateway."
+    ],
+    [
+      "How to use Docker?",
+      "Services via docker-compose: postgres (5432), analytics (8001), simulator (8003), nodered (1880), grafana (3000), nginx (8080 gateway), redis."
+    ],
+    [
+      "Docker containers?",
+      "Services via docker-compose: postgres (5432), analytics (8001), simulator (8003), nodered (1880), grafana (3000), nginx (8080 gateway), redis."
+    ],
+    [
+      "Container management?",
+      "Services via docker-compose: postgres (5432), analytics (8001), simulator (8003), nodered (1880), grafana (3000), nginx (8080 gateway), redis."
     ]
   ],
   "ask_redis": [
@@ -11879,6 +12531,18 @@
     [
       "Can I disable Redis features?",
       "Yes, set REDIS_PUBSUB_ENABLED=false in .env to disable WebSocket events. Caching can be bypassed by not using redis_manager in code."
+    ],
+    [
+      "What is Redis?",
+      "Redis provides caching (300s TTL for expensive queries) and pub/sub for real-time WebSocket events like anomaly.detected, baseline.trained."
+    ],
+    [
+      "Caching system?",
+      "Redis provides caching (300s TTL for expensive queries) and pub/sub for real-time WebSocket events like anomaly.detected, baseline.trained."
+    ],
+    [
+      "Redis pub/sub?",
+      "Redis provides caching (300s TTL for expensive queries) and pub/sub for real-time WebSocket events like anomaly.detected, baseline.trained."
     ]
   ],
   "ask_scheduler": [
@@ -11969,6 +12633,18 @@
     [
       "How are jobs prevented from overlapping?",
       "max_instances=1 setting prevents concurrent execution. If a job is still running when next trigger fires, APScheduler skips the run (coalesce=True combines missed runs)."
+    ],
+    [
+      "What is scheduler?",
+      "Automated job scheduling using APScheduler. Runs background tasks like baseline retraining, anomaly detection, and KPI calculations on cron schedules. Ensures EnMS stays accurate without manual intervention."
+    ],
+    [
+      "Scheduled jobs?",
+      "Automated job scheduling using APScheduler. Runs background tasks like baseline retraining, anomaly detection, and KPI calculations on cron schedules. Ensures EnMS stays accurate without manual intervention."
+    ],
+    [
+      "Cron configuration?",
+      "Automated job scheduling using APScheduler. Runs background tasks like baseline retraining, anomaly detection, and KPI calculations on cron schedules. Ensures EnMS stays accurate without manual intervention."
     ]
   ],
   "ask_getting_started": [
@@ -12091,6 +12767,18 @@
     [
       "What does 'human-centric' mean in this platform?",
       "Human-centric design in HumanEnerDIA:\n\nPrinciples:\n- Natural interaction: Voice + text, not just code/SQL\n- Guidance: Proactive tips and advice\n- Appreciation: Positive reinforcement for good actions\n- Accessibility: Multi-level (operator to executive)\n- Transparency: Explain AI decisions\n\nExamples:\n- Ask questions in plain language\n- Get 'why' explanations for anomalies\n- Suggested next actions\n- Warning before problems\n- Celebrate efficiency wins\n\nGoal: Technology serves people, not the other way around. No expert needed!"
+    ],
+    [
+      "How to get started?",
+      "Welcome! Here's your quick start guide:\n\n1. Dashboard: Start at the main dashboard to see factory overview\n2. Grafana: Explore 11 pre-built dashboards (Factory Overview, ISO 50001 EnPI, etc.)\n3. Anomaly Detection: Check the Anomaly page for energy pattern alerts\n4. Baseline: View your energy baseline model for efficiency tracking\n5. KPIs: Monitor key performance indicators (SEC, OEE, etc.)\n\nNew to energy management? Ask me about 'ISO 50001 basics' to learn the fundamentals!"
+    ],
+    [
+      "First steps?",
+      "Welcome! Here's your quick start guide:\n\n1. Dashboard: Start at the main dashboard to see factory overview\n2. Grafana: Explore 11 pre-built dashboards (Factory Overview, ISO 50001 EnPI, etc.)\n3. Anomaly Detection: Check the Anomaly page for energy pattern alerts\n4. Baseline: View your energy baseline model for efficiency tracking\n5. KPIs: Monitor key performance indicators (SEC, OEE, etc.)\n\nNew to energy management? Ask me about 'ISO 50001 basics' to learn the fundamentals!"
+    ],
+    [
+      "Quick start guide?",
+      "Welcome! Here's your quick start guide:\n\n1. Dashboard: Start at the main dashboard to see factory overview\n2. Grafana: Explore 11 pre-built dashboards (Factory Overview, ISO 50001 EnPI, etc.)\n3. Anomaly Detection: Check the Anomaly page for energy pattern alerts\n4. Baseline: View your energy baseline model for efficiency tracking\n5. KPIs: Monitor key performance indicators (SEC, OEE, etc.)\n\nNew to energy management? Ask me about 'ISO 50001 basics' to learn the fundamentals!"
     ]
   ],
   "ask_troubleshooting": [
@@ -12237,6 +12925,18 @@
     [
       "System is completely down / unavailable",
       "Complete outage troubleshooting:\n\nCheck:\n1. Your connection: Other websites work?\n2. VPN: Connected if required?\n3. Scheduled maintenance: Check announcements\n4. Server reachable: Ping server IP\n\nTry:\n- Different device (phone, tablet)\n- Different network (mobile vs Wi-Fi)\n- Direct IP vs hostname\n\nContact:\n- System administrator\n- IT helpdesk\n- Check status page (if exists)\n\nDuring outage: Data collection continues, you just can't view. No data loss."
+    ],
+    [
+      "System not working?",
+      "If your Grafana dashboard is empty, try these steps:\n\n1. Check time range: Click the time picker (top-right) - default is 'Last 6 hours'. Try 'Last 7 days'\n2. Verify machine: Ensure you selected a machine in the 'machine' variable dropdown\n3. Check simulator: The data simulator must be running (ask me 'is simulator running?')\n4. Data freshness: Look at the 'Last Updated' timestamp - if old, simulator may be stopped\n\nStill no data? Contact your administrator to check the TimescaleDB connection."
+    ],
+    [
+      "Error messages?",
+      "If your Grafana dashboard is empty, try these steps:\n\n1. Check time range: Click the time picker (top-right) - default is 'Last 6 hours'. Try 'Last 7 days'\n2. Verify machine: Ensure you selected a machine in the 'machine' variable dropdown\n3. Check simulator: The data simulator must be running (ask me 'is simulator running?')\n4. Data freshness: Look at the 'Last Updated' timestamp - if old, simulator may be stopped\n\nStill no data? Contact your administrator to check the TimescaleDB connection."
+    ],
+    [
+      "Common issues?",
+      "If your Grafana dashboard is empty, try these steps:\n\n1. Check time range: Click the time picker (top-right) - default is 'Last 6 hours'. Try 'Last 7 days'\n2. Verify machine: Ensure you selected a machine in the 'machine' variable dropdown\n3. Check simulator: The data simulator must be running (ask me 'is simulator running?')\n4. Data freshness: Look at the 'Last Updated' timestamp - if old, simulator may be stopped\n\nStill no data? Contact your administrator to check the TimescaleDB connection."
     ]
   ],
   "ask_multi_energy": [
@@ -12319,6 +13019,18 @@
     [
       "Can baseline models account for fuel switching?",
       "Baseline modeling with fuel switching:\n\nChallenge: Fuel mix varies, energy total changes\n\nModel features:\n- Includes: Total energy (kWh equivalent)\n- Features: Production, weather, fuel prices\n- Learns: Typical fuel switching patterns\n\nAccuracy:\n- Good if switching is systematic (e.g., always gas in winter)\n- Fair if switching is ad-hoc\n\nImprove accuracy:\n- Add feature: 'Primary fuel flag'\n- Separate models per fuel mode\n- Retrain when switching strategy changes\n\nPrediction:\n- Forecasts assume historical fuel mix pattern\n- Manual override: Specify expected fuel mix\n\nView: Model Performance page shows feature importance for each energy type"
+    ],
+    [
+      "How to track multiple energy types?",
+      "Multi-energy machines consume multiple energy types:\n\nExample: A furnace might use:\n- Electricity for controls and fans (kWh)\n- Natural gas for heating (m³ or therms)\n- Steam from central boiler (kg or tons)\n\nHumanEnerDIA tracks:\n- Each energy source separately\n- Total energy (converted to common unit like MWh)\n- Cost per energy type\n- Carbon emissions per source\n\nBenefits:\n- Accurate efficiency calculations\n- Identify best fuel switching opportunities\n- Track multi-fuel tariffs\n- ISO 50001 boundary completeness"
+    ],
+    [
+      "Natural gas monitoring?",
+      "Multi-energy machines consume multiple energy types:\n\nExample: A furnace might use:\n- Electricity for controls and fans (kWh)\n- Natural gas for heating (m³ or therms)\n- Steam from central boiler (kg or tons)\n\nHumanEnerDIA tracks:\n- Each energy source separately\n- Total energy (converted to common unit like MWh)\n- Cost per energy type\n- Carbon emissions per source\n\nBenefits:\n- Accurate efficiency calculations\n- Identify best fuel switching opportunities\n- Track multi-fuel tariffs\n- ISO 50001 boundary completeness"
+    ],
+    [
+      "Steam measurement?",
+      "Multi-energy machines consume multiple energy types:\n\nExample: A furnace might use:\n- Electricity for controls and fans (kWh)\n- Natural gas for heating (m³ or therms)\n- Steam from central boiler (kg or tons)\n\nHumanEnerDIA tracks:\n- Each energy source separately\n- Total energy (converted to common unit like MWh)\n- Cost per energy type\n- Carbon emissions per source\n\nBenefits:\n- Accurate efficiency calculations\n- Identify best fuel switching opportunities\n- Track multi-fuel tariffs\n- ISO 50001 boundary completeness"
     ]
   ],
   "ask_alerts_config": [
@@ -12381,6 +13093,18 @@
     [
       "What is the difference between anomaly alerts and KPI alerts?",
       "Two alert types explained:\n\nAnomaly Alerts:\n- Trigger: Unexpected deviation from ML baseline\n- Focus: Real-time, immediate issues\n- Example: Compressor suddenly using 30% more energy now\n- Frequency: As they occur (could be multiple per day)\n- Action: Investigate and fix quickly\n- Use case: Operational monitoring\n\nKPI Alerts:\n- Trigger: Performance metric crosses threshold\n- Focus: Trend-based, cumulative performance\n- Example: Weekly SEC increased by 10% vs last month\n- Frequency: Periodic (daily, weekly, monthly)\n- Action: Strategic improvement planning\n- Use case: Management review, ISO 50001 compliance\n\nBoth can be active:\n- Anomaly: \"HVAC-1 high now\"\n- KPI: \"Average facility efficiency down this week\"\n\nConfigure separately: Different recipients, different urgency"
+    ],
+    [
+      "How to configure alerts?",
+      "Anomaly threshold configuration (admin task):\n\nAccess:\n1. Navigate to Anomaly page\n2. Click 'Settings' or 'Configure Alerts'\n3. Select machine\n4. Adjust thresholds\n\nThreshold types:\n- Percentage deviation: ±5%, ±10%, ±15%, ±20%\n- Z-score: How many std deviations (e.g., 2σ, 3σ)\n- Absolute value: kW or kWh limit\n- Custom rule: Based on multiple conditions\n\nRecommendation:\n- Start conservative: ±15% (fewer false positives)\n- Tighten over time: ±10% → ±5% as baseline improves\n- Critical machines: Lower threshold\n\nTest: Adjust → Wait 24 hours → Review alerts"
+    ],
+    [
+      "Alert thresholds?",
+      "Anomaly threshold configuration (admin task):\n\nAccess:\n1. Navigate to Anomaly page\n2. Click 'Settings' or 'Configure Alerts'\n3. Select machine\n4. Adjust thresholds\n\nThreshold types:\n- Percentage deviation: ±5%, ±10%, ±15%, ±20%\n- Z-score: How many std deviations (e.g., 2σ, 3σ)\n- Absolute value: kW or kWh limit\n- Custom rule: Based on multiple conditions\n\nRecommendation:\n- Start conservative: ±15% (fewer false positives)\n- Tighten over time: ±10% → ±5% as baseline improves\n- Critical machines: Lower threshold\n\nTest: Adjust → Wait 24 hours → Review alerts"
+    ],
+    [
+      "Notification settings?",
+      "Anomaly threshold configuration (admin task):\n\nAccess:\n1. Navigate to Anomaly page\n2. Click 'Settings' or 'Configure Alerts'\n3. Select machine\n4. Adjust thresholds\n\nThreshold types:\n- Percentage deviation: ±5%, ±10%, ±15%, ±20%\n- Z-score: How many std deviations (e.g., 2σ, 3σ)\n- Absolute value: kW or kWh limit\n- Custom rule: Based on multiple conditions\n\nRecommendation:\n- Start conservative: ±15% (fewer false positives)\n- Tighten over time: ±10% → ±5% as baseline improves\n- Critical machines: Lower threshold\n\nTest: Adjust → Wait 24 hours → Review alerts"
     ]
   ],
   "ask_data_export": [
@@ -12443,6 +13167,18 @@
     [
       "How do I import external data into HumanEnerDIA?",
       "Data import (admin task):\n\nScenarios:\n- Historical utility bill data\n- Production records from MES\n- Weather data from external source\n- Energy data from old system\n\nImport Process:\n\n1. Prepare CSV:\n```csv\ntimestamp,machine_id,power_kw,energy_kwh\n2026-01-01 00:00:00,compressor-1,45.2,45.2\n2026-01-01 00:01:00,compressor-1,46.1,46.1\n```\n\n2. Admin Upload:\n- Settings → Data Import\n- Select table: energy_readings, production_data, etc.\n- Upload CSV\n- Map columns\n- Validate (checks for errors)\n- Import (inserts to database)\n\n3. Verify:\n- Check Grafana dashboards for imported data\n- Verify no gaps\n- Confirm timestamps correct\n\nAPI Import:\n```\nPOST /api/v1/import/energy\nContent-Type: multipart/form-data\n\nfile: energy_data.csv\nmachine_id: compressor-1\n```\n\nBulk Import (SQL):\n```sql\nCOPY energy_readings FROM '/tmp/data.csv' CSV HEADER;\n```\n\nBest practices:\n- Use ISO 8601 timestamps\n- No duplicate timestamps\n- Validate data quality first\n- Test with small sample\n\nRequest: Contact admin with data file and import requirements"
+    ],
+    [
+      "How to export data?",
+      "CSV export methods:\n\nFrom Grafana:\n1. Click panel menu (⋮ three dots)\n2. Select 'Inspect' → 'Data' tab\n3. Click 'Download CSV'\n4. File saved to Downloads folder\n\nFrom KPI Page:\n1. Navigate to KPI page\n2. Select time range and machine\n3. Click 'Export to CSV' button\n4. Choose columns to include\n5. Download file\n\nFrom Reports Page:\n1. Reports → Generate Report\n2. Select 'Data Export' type\n3. Choose format: CSV or Excel\n4. Select date range\n5. Click 'Generate' → Download\n\nCSV contains:\n- Timestamp (ISO 8601 format)\n- Machine ID and name\n- Metric (power_kw, energy_kwh, etc.)\n- Value\n- Units\n\nOpen in: Excel, Google Sheets, Python pandas"
+    ],
+    [
+      "Download reports?",
+      "CSV export methods:\n\nFrom Grafana:\n1. Click panel menu (⋮ three dots)\n2. Select 'Inspect' → 'Data' tab\n3. Click 'Download CSV'\n4. File saved to Downloads folder\n\nFrom KPI Page:\n1. Navigate to KPI page\n2. Select time range and machine\n3. Click 'Export to CSV' button\n4. Choose columns to include\n5. Download file\n\nFrom Reports Page:\n1. Reports → Generate Report\n2. Select 'Data Export' type\n3. Choose format: CSV or Excel\n4. Select date range\n5. Click 'Generate' → Download\n\nCSV contains:\n- Timestamp (ISO 8601 format)\n- Machine ID and name\n- Metric (power_kw, energy_kwh, etc.)\n- Value\n- Units\n\nOpen in: Excel, Google Sheets, Python pandas"
+    ],
+    [
+      "Data formats?",
+      "CSV export methods:\n\nFrom Grafana:\n1. Click panel menu (⋮ three dots)\n2. Select 'Inspect' → 'Data' tab\n3. Click 'Download CSV'\n4. File saved to Downloads folder\n\nFrom KPI Page:\n1. Navigate to KPI page\n2. Select time range and machine\n3. Click 'Export to CSV' button\n4. Choose columns to include\n5. Download file\n\nFrom Reports Page:\n1. Reports → Generate Report\n2. Select 'Data Export' type\n3. Choose format: CSV or Excel\n4. Select date range\n5. Click 'Generate' → Download\n\nCSV contains:\n- Timestamp (ISO 8601 format)\n- Machine ID and name\n- Metric (power_kw, energy_kwh, etc.)\n- Value\n- Units\n\nOpen in: Excel, Google Sheets, Python pandas"
     ]
   ],
   "ask_wasabi_project": [
@@ -12485,6 +13221,18 @@
     [
       "Can I contribute to HumanEnerDIA development?",
       "Contributing to HumanEnerDIA:\n\nAs End User (Now):\n- Use the system: More usage = better ML models\n- Provide feedback: Report bugs, suggest features\n- Test features: Participate in beta testing\n- Share insights: What works, what doesn't\n- Case studies: Allow your success story to be shared\n\nAs Developer (After Open-Source Release):\n- Code contributions: GitHub pull requests\n- Bug fixes: Report and fix issues\n- New features: Develop integrations, skills\n- Documentation: Improve guides, tutorials\n- Translations: Localize to your language\n\nRepositories (Coming):\n- `humanerdia-core`: Base EnMS\n- `humanerdia-ovos-skills`: Voice assistant skills\n- `humanerdia-rasa-chatbot`: Text chatbot\n- `humanerdia-docs`: Documentation\n\nCommunity:\n- Join WASABI community forums\n- Attend workshops and webinars\n- Connect with other factories\n\nRecognition:\n- Contributors list\n- Case study features\n- Conference presentations\n\nContact: Reach out to A Plus Engineering or Green eDIH to express interest"
+    ],
+    [
+      "What is WASABI project?",
+      "WASABI Project Overview:\n\nFull Name: White-label Shop for Digital Intelligent Assistance and Human-AI Collaboration in Manufacturing\n\nType: EU-funded research project (Horizon Europe)\n\nGoal: Help manufacturing SMEs adopt AI-powered digital assistants for improved productivity and worker well-being\n\nKey Technologies:\n- OpenVoiceOS (OVOS) - Voice assistant platform\n- Natural Language Processing (NLP)\n- Human-AI collaboration frameworks\n- Modular, open-source components\n\nHumanEnerDIA Role:\n- One of the pilot experiments\n- Energy management use case\n- Demonstrates voice + text assistants\n- Validates human-centric AI design\n\nDuration: 2024-2026 (HumanEnerDIA: 12 months)\n\nPartners: Technology providers, DIHs, manufacturing SMEs across Europe\n\nWebsite: Visit WASABI consortium website for more info"
+    ],
+    [
+      "HumanEnerDIA and WASABI?",
+      "WASABI Project Overview:\n\nFull Name: White-label Shop for Digital Intelligent Assistance and Human-AI Collaboration in Manufacturing\n\nType: EU-funded research project (Horizon Europe)\n\nGoal: Help manufacturing SMEs adopt AI-powered digital assistants for improved productivity and worker well-being\n\nKey Technologies:\n- OpenVoiceOS (OVOS) - Voice assistant platform\n- Natural Language Processing (NLP)\n- Human-AI collaboration frameworks\n- Modular, open-source components\n\nHumanEnerDIA Role:\n- One of the pilot experiments\n- Energy management use case\n- Demonstrates voice + text assistants\n- Validates human-centric AI design\n\nDuration: 2024-2026 (HumanEnerDIA: 12 months)\n\nPartners: Technology providers, DIHs, manufacturing SMEs across Europe\n\nWebsite: Visit WASABI consortium website for more info"
+    ],
+    [
+      "Project objectives?",
+      "WASABI Project Overview:\n\nFull Name: White-label Shop for Digital Intelligent Assistance and Human-AI Collaboration in Manufacturing\n\nType: EU-funded research project (Horizon Europe)\n\nGoal: Help manufacturing SMEs adopt AI-powered digital assistants for improved productivity and worker well-being\n\nKey Technologies:\n- OpenVoiceOS (OVOS) - Voice assistant platform\n- Natural Language Processing (NLP)\n- Human-AI collaboration frameworks\n- Modular, open-source components\n\nHumanEnerDIA Role:\n- One of the pilot experiments\n- Energy management use case\n- Demonstrates voice + text assistants\n- Validates human-centric AI design\n\nDuration: 2024-2026 (HumanEnerDIA: 12 months)\n\nPartners: Technology providers, DIHs, manufacturing SMEs across Europe\n\nWebsite: Visit WASABI consortium website for more info"
     ]
   ]
 }

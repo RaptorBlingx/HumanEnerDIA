@@ -112,7 +112,7 @@ class ForecastService:
     async def train_arima(
         self,
         machine_id: UUID,
-        lookback_days: int = 7,
+        lookback_days: int = 14,
         auto_order: bool = True
     ) -> Dict:
         """
@@ -166,7 +166,7 @@ class ForecastService:
     async def train_prophet(
         self,
         machine_id: UUID,
-        lookback_days: int = 30,
+        lookback_days: int = 60,
         use_regressors: bool = True
     ) -> Dict:
         """
