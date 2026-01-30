@@ -137,7 +137,7 @@ async def forecast_ui(request: Request):
     - Optimal load scheduling
     - Model status tracking
     """
-    return templates.TemplateResponse("forecast2.html", {"request": request})
+    return templates.TemplateResponse("forecast.html", {"request": request})
 
 
 @router.get("/sankey", response_class=HTMLResponse, name="ui_sankey")
