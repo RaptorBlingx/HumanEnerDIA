@@ -9,6 +9,64 @@ interface MessageBubbleProps {
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === Role.USER;
+  const linkClassName = isUser
+    ? 'tw-underline tw-text-blue-100 hover:tw-text-white'
+    : 'tw-underline tw-text-blue-600 hover:tw-text-blue-800';
+
+  const renderInlineText = (text: string, keyPrefix: string) => {
+    const parts: React.ReactNode[] = [];
+    const inlinePattern = /(\*\*.*?\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<]+))/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    let tokenIndex = 0;
+
+    while ((match = inlinePattern.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+
+      if (match[2] && match[3]) {
+        parts.push(
+          <a
+            key={`${keyPrefix}-link-${tokenIndex}`}
+            href={match[3]}
+            target="_blank"
+            rel="noreferrer"
+            className={linkClassName}
+          >
+            {match[2]}
+          </a>
+        );
+      } else if (match[4]) {
+        parts.push(
+          <a
+            key={`${keyPrefix}-url-${tokenIndex}`}
+            href={match[4]}
+            target="_blank"
+            rel="noreferrer"
+            className={linkClassName}
+          >
+            {match[4]}
+          </a>
+        );
+      } else if (match[0].startsWith('**') && match[0].endsWith('**')) {
+        parts.push(
+          <strong key={`${keyPrefix}-bold-${tokenIndex}`}>
+            {match[0].slice(2, -2)}
+          </strong>
+        );
+      }
+
+      lastIndex = inlinePattern.lastIndex;
+      tokenIndex += 1;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+
+    return parts;
+  };
 
   // Simple formatter to handle code blocks and bold text
   const renderText = (text: string) => {
@@ -29,16 +87,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           </div>
         );
       }
-      // Handle bold text **text**
-      const subParts = part.split(/(\*\*.*?\*\*)/g);
       return (
         <span key={index} className="tw-whitespace-pre-wrap tw-leading-relaxed">
-          {subParts.map((sub, subIndex) => {
-            if (sub.startsWith('**') && sub.endsWith('**')) {
-              return <strong key={subIndex}>{sub.slice(2, -2)}</strong>;
-            }
-            return sub;
-          })}
+          {renderInlineText(part, `inline-${index}`)}
         </span>
       );
     });
