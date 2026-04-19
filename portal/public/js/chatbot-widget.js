@@ -10,7 +10,7 @@
     // Configuration
     const CONFIG = {
         backendUrl: '/api/chatbot',  // Proxied through nginx
-        welcomeMessage: 'Hello! How can I help you with your Energy Management questions?',
+        welcomeMessage: 'Hello! I can help with ISO 50001, HumanEnerDIA how-to guidance, reports, and troubleshooting.',
         placeholder: 'Type your message...',
         title: 'HumanEnerDIA Assistant',
         sessionPrefix: 'enms_chat_'
@@ -497,7 +497,7 @@
                 }
             } else {
                 // Rasa returned empty - provide helpful fallback
-                addMessage("I can help you with ISO 50001 Energy Management topics. Try asking about: energy baseline, EnPI, energy policy, energy planning, or say 'hello' to start.", false, false);
+                addMessage("I can help with ISO 50001, HumanEnerDIA pages, reports, energy-management concepts, and troubleshooting. For live machine status or current energy values, use OVOS or the live dashboards.", false, false);
             }
 
         } catch (error) {

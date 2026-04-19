@@ -1,4 +1,4 @@
-from typing import Any, Text, Dict, List
+from typing import Any, Text, Dict, List, Optional, Tuple
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
@@ -117,6 +117,16 @@ class ActionRetrieveAnswer(Action):
 
             dispatcher.utter_message(text=exact_answer)
             self._give_contextual_advice(dispatcher, tracker, exact_category, user_message_lower)
+            return []
+
+        special_category, special_answer, special_status = self._resolve_special_case(user_message_lower)
+        if special_answer:
+            query_log["matched_category"] = special_category
+            query_log["answer_preview"] = special_answer[:100]
+            query_log["status"] = special_status
+            logger.info(json.dumps(query_log))
+
+            dispatcher.utter_message(text=special_answer)
             return []
 
         # Anahtar kelime mapping - hangi kelimeler hangi alt konuya ait
@@ -804,7 +814,7 @@ class ActionRetrieveAnswer(Action):
         # PRIORITY 1: Topic-specific categories (e.g., ask_humenerdia_platform) take precedence
         # This ensures keyword-matched topics are checked BEFORE generic process/definition lookups
         if topic and topic not in ["ask_scope"] and topic in QA_DATA and QA_DATA[topic]:
-            best_answer = self._find_best_answer(user_message_lower, QA_DATA[topic])
+            best_answer = self._find_best_answer(user_message_lower, QA_DATA[topic], topic)
             if best_answer:
                 # Log successful match
                 query_log["matched_category"] = topic
@@ -819,7 +829,7 @@ class ActionRetrieveAnswer(Action):
         
         # PRIORITY 2: Process intent için QA_DATA["process"]'e bak
         if intent == "process" and "process" in QA_DATA and QA_DATA["process"]:
-            best_answer = self._find_best_answer(user_message_lower, QA_DATA["process"])
+            best_answer = self._find_best_answer(user_message_lower, QA_DATA["process"], "process")
             if best_answer:
                 # Log successful match
                 query_log["matched_category"] = "process"
@@ -832,7 +842,7 @@ class ActionRetrieveAnswer(Action):
         
         # Scope soruları için özel kontrol: Intent definition olsa bile process'te ara
         if user_has_scope and "process" in QA_DATA and QA_DATA["process"]:
-            best_answer = self._find_best_answer(user_message_lower, QA_DATA["process"])
+            best_answer = self._find_best_answer(user_message_lower, QA_DATA["process"], "process")
             if best_answer:
                 # Log successful match
                 query_log["matched_category"] = "process (scope)"
@@ -845,7 +855,7 @@ class ActionRetrieveAnswer(Action):
         
         # PRIORITY 3: Scope topic'ine bak (process intent'inden sonra)
         if topic == "ask_scope" and topic in QA_DATA and QA_DATA[topic]:
-            best_answer = self._find_best_answer(user_message_lower, QA_DATA[topic])
+            best_answer = self._find_best_answer(user_message_lower, QA_DATA[topic], topic)
             if best_answer:
                 # Log successful match
                 query_log["matched_category"] = topic
@@ -1202,8 +1212,133 @@ class ActionRetrieveAnswer(Action):
             if normalized in qa_dict:
                 return category, qa_dict[normalized]
         return None, None
+
+    def _resolve_special_case(self, user_message: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+        """Handle queries that need explicit scope or live-data routing."""
+        redirect_response = self._build_operational_redirect(user_message)
+        if redirect_response:
+            return "ovos_redirect", redirect_response, "redirect"
+
+        capability_response = self._build_capability_response(user_message)
+        if capability_response:
+            return "ask_chatbot_scope", capability_response, "special_case"
+
+        return None, None, None
+
+    def _build_capability_response(self, user_message: str) -> Optional[str]:
+        """Explain the chatbot's role when the user asks about its scope."""
+        if any(term in user_message for term in ["humanenerdia", "platform"]):
+            return None
+
+        capability_phrases = [
+            "what can you help me with",
+            "how can you help",
+            "what can i ask you",
+            "what can i ask",
+            "what do you do",
+            "what is this chatbot",
+            "what are you for",
+        ]
+
+        if any(phrase in user_message for phrase in capability_phrases):
+            return (
+                "I can help with ISO 50001 explanations, HumanEnerDIA page guidance, reports, "
+                "baseline and anomaly concepts, and common troubleshooting. For live machine status, "
+                "current energy values, top consumers, or active alerts, use the OVOS assistant or the live dashboards."
+            )
+
+        return None
+
+    def _build_operational_redirect(self, user_message: str) -> Optional[str]:
+        """Redirect live operational questions to OVOS instead of guessing."""
+        ranking_phrases = [
+            "top consumer",
+            "most electricity",
+            "most energy",
+            "highest consumption",
+            "which machine is using the most",
+            "which machine uses the most",
+            "which machine consumed the most",
+            "any active alerts",
+            "any alerts right now",
+            "active anomalies right now",
+        ]
+        time_markers = ["right now", "currently", "current", "today", "live", "at the moment"]
+        operational_markers = [
+            "status",
+            "running",
+            "offline",
+            "online",
+            "consumption",
+            "power",
+            "energy",
+            "cost",
+            "alert",
+            "alerts",
+            "anomaly",
+            "anomalies",
+            "using",
+        ]
+        machine_pattern = re.search(
+            r"\b(compressor|hvac|boiler|conveyor|pump|cnc|furnace|dryer|packaging|machine|factory)([-_ ]?[a-z0-9]+)?\b",
+            user_message,
+        )
+
+        has_ranking_phrase = any(phrase in user_message for phrase in ranking_phrases)
+        has_time_marker = any(marker in user_message for marker in time_markers)
+        has_operational_marker = any(marker in user_message for marker in operational_markers)
+        has_machine_reference = bool(machine_pattern)
+
+        if has_ranking_phrase or (has_machine_reference and has_time_marker and has_operational_marker):
+            return (
+                "That sounds like a live operational query. This text assistant focuses on ISO 50001, "
+                "HumanEnerDIA how-to guidance, reports, and troubleshooting. For current machine status, "
+                "live energy values, top consumers, or active alerts, use the OVOS assistant or the live dashboards."
+            )
+
+        return None
+
+    def _should_merge_answers(self, user_message: str, category: Optional[str] = None) -> bool:
+        """Keep portal help and troubleshooting answers focused instead of stitching multiple replies."""
+        if category and (
+            category.startswith("ask_portal_")
+            or category in {"ask_humenerdia_platform", "ask_getting_started", "ask_troubleshooting"}
+        ):
+            return False
+
+        no_merge_phrases = [
+            "how do i",
+            "how to",
+            "what can you help",
+            "what can i ask",
+            "what do you do",
+            "what is this chatbot",
+            "why is my",
+            "not showing data",
+            "current ",
+            "right now",
+            "today",
+            "status of",
+            "which machine",
+            "show me",
+            "open",
+            "navigate",
+        ]
+        if any(phrase in user_message for phrase in no_merge_phrases):
+            return False
+
+        merge_phrases = [
+            "what is",
+            "define",
+            "explain",
+            "difference between",
+            "how does",
+            "what does",
+            "purpose of",
+        ]
+        return any(phrase in user_message for phrase in merge_phrases)
     
-    def _find_best_answer(self, user_message: str, qa_dict: Dict[str, str]) -> str:
+    def _find_best_answer(self, user_message: str, qa_dict: Dict[str, str], category: Optional[str] = None) -> str:
         """Find the best matching answer using improved similarity matching."""
         if not qa_dict:
             return None
@@ -1377,6 +1512,9 @@ class ActionRetrieveAnswer(Action):
                 threshold = min(threshold, 0.20)
             
             if best_score >= threshold:
+                if not self._should_merge_answers(user_message, category):
+                    return best_answer
+
                 # Daha kapsamlı cevap için: yüksek skorlu birden fazla sorunun cevabını birleştir
                 # Ana cevabın sonunda nokta olduğundan emin ol
                 comprehensive_answer = best_answer.strip()

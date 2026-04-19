@@ -52,6 +52,11 @@
     let audioEnabled = true;  // TTS audio playback enabled by default
     let currentAudio = null;  // Track currently playing audio
     let abortController = null;  // Track current request for cancellation
+    let activeMessageAnimation = null;
+
+    const STREAMING_MIN_DELAY_MS = 22;
+    const STREAMING_MAX_DELAY_MS = 70;
+    const STREAMING_TARGET_TOTAL_MS = 2200;
     
     // Wake word state
     let wakeWordEnabled = false;
@@ -1026,6 +1031,7 @@
                 line-height: 1.5;
                 word-wrap: break-word;
                 white-space: pre-wrap;
+                position: relative;
             }
 
             .ovos-user .ovos-bubble {
@@ -1039,6 +1045,22 @@
                 color: #1f2937;
                 border-bottom-left-radius: 4px;
                 box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            }
+
+            .ovos-bubble.ovos-streaming::after {
+                content: '';
+                display: inline-block;
+                width: 2px;
+                height: 1em;
+                margin-left: 3px;
+                vertical-align: text-bottom;
+                background: #10b981;
+                animation: ovos-stream-caret 0.85s steps(1) infinite;
+            }
+
+            @keyframes ovos-stream-caret {
+                0%, 49% { opacity: 1; }
+                50%, 100% { opacity: 0; }
             }
 
             /* Quick Reply Buttons inside Chat */
@@ -1269,15 +1291,23 @@
         }
     }
 
-    function addMessage(text, isUser = false, isError = false, latencyMs = null, ttsLatencyMs = null) {
+    async function addMessage(text, isUser = false, isError = false, latencyMs = null, ttsLatencyMs = null, options = {}) {
+        const { stream = false } = options;
         const container = document.getElementById('ovos-messages');
         const msgDiv = document.createElement('div');
         msgDiv.className = `ovos-message ${isUser ? 'ovos-user' : 'ovos-bot'}`;
         
         const bubble = document.createElement('div');
         bubble.className = `ovos-bubble ${isError ? 'ovos-error' : ''}`;
-        bubble.textContent = text;
         msgDiv.appendChild(bubble);
+        container.appendChild(msgDiv);
+
+        if (stream) {
+            await streamMessageText(bubble, text, container);
+        } else {
+            bubble.textContent = text;
+            container.scrollTop = container.scrollHeight;
+        }
         
         if (!isUser && latencyMs !== null) {
             const latency = document.createElement('div');
@@ -1290,8 +1320,94 @@
             msgDiv.appendChild(latency);
         }
         
-        container.appendChild(msgDiv);
         container.scrollTop = container.scrollHeight;
+    }
+
+    function finishActiveMessageAnimation() {
+        if (!activeMessageAnimation) {
+            return;
+        }
+
+        const animation = activeMessageAnimation;
+        animation.finished = true;
+        animation.bubble.textContent = animation.fullText;
+        animation.bubble.classList.remove('ovos-streaming');
+        animation.container.scrollTop = animation.container.scrollHeight;
+
+        if (animation.timeoutId) {
+            window.clearTimeout(animation.timeoutId);
+            animation.timeoutId = null;
+        }
+
+        if (animation.resume) {
+            const resume = animation.resume;
+            animation.resume = null;
+            resume();
+        }
+
+        activeMessageAnimation = null;
+    }
+
+    function getStreamingDelay(wordCount) {
+        if (wordCount <= 1) {
+            return STREAMING_MIN_DELAY_MS;
+        }
+
+        return Math.min(
+            STREAMING_MAX_DELAY_MS,
+            Math.max(STREAMING_MIN_DELAY_MS, Math.round(STREAMING_TARGET_TOTAL_MS / wordCount))
+        );
+    }
+
+    async function streamMessageText(bubble, text, container) {
+        const tokens = text.match(/\S+\s*/g) || [text];
+        if (tokens.length <= 1) {
+            bubble.textContent = text;
+            return;
+        }
+
+        finishActiveMessageAnimation();
+
+        const animation = {
+            bubble,
+            container,
+            fullText: text,
+            finished: false,
+            timeoutId: null,
+            resume: null
+        };
+
+        const delayMs = getStreamingDelay(tokens.length);
+        activeMessageAnimation = animation;
+        bubble.classList.add('ovos-streaming');
+        bubble.textContent = '';
+
+        try {
+            for (const token of tokens) {
+                if (animation.finished) {
+                    return;
+                }
+
+                bubble.textContent += token;
+                container.scrollTop = container.scrollHeight;
+
+                await new Promise(resolve => {
+                    animation.resume = resolve;
+                    animation.timeoutId = window.setTimeout(resolve, delayMs);
+                });
+
+                animation.resume = null;
+                animation.timeoutId = null;
+            }
+        } finally {
+            bubble.textContent = text;
+            bubble.classList.remove('ovos-streaming');
+            container.scrollTop = container.scrollHeight;
+
+            if (activeMessageAnimation === animation) {
+                activeMessageAnimation = null;
+            }
+        }
     }
 
     function showTyping() {
@@ -1335,6 +1451,8 @@
 
     async function sendMessage(text) {
         if (!text.trim()) return;
+
+        finishActiveMessageAnimation();
         
         // Cancel previous request if running
         if (isLoading && abortController) {
@@ -1392,7 +1510,14 @@
             const data = await res.json();
 
             if (data.success && data.response) {
-                addMessage(data.response, false, false, data.latency_ms, data.tts_latency_ms);
+                const responseRender = addMessage(
+                    data.response,
+                    false,
+                    false,
+                    data.latency_ms,
+                    data.tts_latency_ms,
+                    { stream: true }
+                );
                 
                 // Play audio if available and enabled
                 if (audioEnabled) {
@@ -1404,6 +1529,8 @@
                         speakText(data.response);
                     }
                 }
+
+                await responseRender;
                 
                 // Trigger PDF download if present (for report generation queries)
                 // V2: REST bridge returns pdf_download object with URL instead of base64

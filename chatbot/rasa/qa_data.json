@@ -1382,15 +1382,15 @@
     ],
     [
       "What is an energy baseline?",
-      "The energy baseline serves as a quantitative reference or set of references that provides a basis for comparing and measuring energy performance. This baseline reflects a specified period of time and may be adjusted or normalized using variables that affect energy consumption, such as the production level or outdoor temperature (degree days)."
+      "An energy baseline is a reference point built from historical operating data. It represents expected energy performance for a defined period so you can compare current performance against normal conditions and spot improvement or waste."
     ],
     [
       "How to establish baseline?",
-      "The energy baseline serves as a quantitative reference or set of references that provides a basis for comparing and measuring energy performance. This baseline reflects a specified period of time and may be adjusted or normalized using variables that affect energy consumption, such as the production level or outdoor temperature (degree days)."
+      "Build the baseline from a representative period of historical data, then normalize it for important drivers such as production volume, operating conditions, or temperature when needed."
     ],
     [
       "Baseline calculation methods?",
-      "The energy baseline serves as a quantitative reference or set of references that provides a basis for comparing and measuring energy performance. This baseline reflects a specified period of time and may be adjusted or normalized using variables that affect energy consumption, such as the production level or outdoor temperature (degree days)."
+      "Baseline methods usually start with historical energy data for a stable reference period and may adjust for major drivers such as production volume or weather so comparisons stay fair."
     ]
   ],
   "ask_energy_planning": [
@@ -5646,15 +5646,15 @@
     ],
     [
       "What is ISO 50001?",
-      "The concept of energy performance includes three key aspects: energy use, energy efficiency, and energy consumption. This allows the organization a wide range of activities through which to demonstrate performance improvement. For instance, an organization could focus on reducing peak demand, utilizing surplus or waste energy, or improving the operations of its systems, processes, or equipment."
+      "ISO 50001 is the international standard for building and improving an Energy Management System (EnMS). It helps organizations measure energy use, set baselines and EnPIs, identify improvement actions, and demonstrate continual improvement."
     ],
     [
       "What is energy management?",
-      "The concept of energy performance includes three key aspects: energy use, energy efficiency, and energy consumption. This allows the organization a wide range of activities through which to demonstrate performance improvement. For instance, an organization could focus on reducing peak demand, utilizing surplus or waste energy, or improving the operations of its systems, processes, or equipment."
+      "Energy management is the ongoing process of understanding how energy is used, monitoring performance, reducing waste, and improving efficiency over time."
     ],
     [
       "Benefits of ISO 50001?",
-      "The concept of energy performance includes three key aspects: energy use, energy efficiency, and energy consumption. This allows the organization a wide range of activities through which to demonstrate performance improvement. For instance, an organization could focus on reducing peak demand, utilizing surplus or waste energy, or improving the operations of its systems, processes, or equipment."
+      "ISO 50001 helps organizations reduce energy waste, lower costs, build consistent monitoring and review routines, and show structured continual improvement for audits and management decisions."
     ]
   ],
   "ask_iso_standards": [
@@ -10427,6 +10427,18 @@
       "You can monitor energy consumption in real-time, predict baseline usage with ML models, detect anomalies, forecast future demand, track KPIs, generate reports, query data using voice commands, learn about ISO 50001 standards through text-based assistant, get warnings and advice for resource efficiency, and receive appreciation for actions affecting energy performance."
     ],
     [
+      "What can you help me with?",
+      "I can explain ISO 50001 concepts, guide you through HumanEnerDIA pages and reports, explain baseline, anomaly, KPI, and forecast concepts, and help with common troubleshooting. For live machine status, current energy values, top consumers, or active alerts, use OVOS or the live dashboards."
+    ],
+    [
+      "How can you help me?",
+      "I can explain ISO 50001 concepts, guide you through HumanEnerDIA pages and reports, explain baseline, anomaly, KPI, and forecast concepts, and help with common troubleshooting. For live machine status, current energy values, top consumers, or active alerts, use OVOS or the live dashboards."
+    ],
+    [
+      "What can I ask you?",
+      "You can ask me about ISO 50001, HumanEnerDIA page guidance, reports, baseline and anomaly concepts, and troubleshooting. For live operational questions such as current machine status or current energy use, use OVOS."
+    ],
+    [
       "How do I navigate HumanEnerDIA?",
       "Use the sidebar menu to access different sections: Dashboard (overview), Analytics (Baseline, Anomaly, KPI, Forecast), Visualizations (Sankey, Heatmap, Comparison), and Grafana dashboards for detailed metrics. You can also interact with the system using voice commands through OVOS or ask questions through the text-based digital assistant."
     ],
@@ -10642,7 +10654,7 @@
     ],
     [
       "How do I customize anomaly thresholds?",
-      "Go to Settings → Anomaly Detection → Threshold Configuration. Adjust Z-score sensitivity (default 2.0), set severity boundaries (critical >3σ, warning >2σ, info >1σ), and configure per-machine overrides for special cases."
+      "The standard anomaly page is mainly for monitoring and investigation. Threshold tuning is typically handled through backend or admin configuration rather than a routine end-user control in the current portal."
     ],
     [
       "What does Z-score mean in anomaly detection?",
@@ -10650,19 +10662,19 @@
     ],
     [
       "Can I set different thresholds for different machines?",
-      "Yes! Each machine can have custom thresholds. Critical machines (compressors, furnaces) often use lower thresholds (1.5σ) for early detection, while stable machines use standard 2σ."
+      "Machine-specific thresholds can exist, but they are typically configured by an administrator or backend service rather than from the standard anomaly page."
     ],
     [
       "How do I reduce false positive anomalies?",
-      "Strategies: 1) Increase threshold to 2.5-3σ, 2) Exclude known production schedule changes, 3) Train baseline with more historical data, 4) Use IQR method instead of Z-score for non-normal distributions."
+      "Reduce false positives by checking machine and time filters, reviewing recent operational changes, and asking an administrator to retune the detection logic or thresholds if a pattern is consistently benign."
     ],
     [
       "What is IQR method for anomaly detection?",
-      "IQR (Interquartile Range) method flags values outside Q1-1.5×IQR to Q3+1.5×IQR. More robust than Z-score for skewed data or when outliers exist. Enable in Settings → Anomaly Detection → Method."
+      "IQR (Interquartile Range) is a statistical method that flags values far outside the normal spread of the data. Whether it is used in your deployment depends on backend configuration, not a guaranteed UI toggle."
     ],
     [
       "What is Isolation Forest anomaly detection?",
-      "Isolation Forest is a machine learning algorithm that isolates anomalies by randomly partitioning data. Better for complex multivariate patterns. Enable via Settings → Advanced Detection Methods."
+      "Isolation Forest is an ML-based anomaly detection method used for multivariate or less regular patterns. If it is used in your deployment, it is configured on the backend rather than exposed as a standard end-user toggle."
     ],
     [
       "How do I interpret anomaly deviation values?",
@@ -10670,19 +10682,19 @@
     ],
     [
       "Can I suppress anomalies during maintenance windows?",
-      "Yes! Schedule maintenance windows in Settings → Maintenance Calendar. Anomalies during these periods are marked 'Expected (Maintenance)' and don't trigger alerts."
+      "Planned maintenance should be handled operationally by documenting the event and, if needed, asking an administrator to adjust monitoring rules. The standard anomaly page does not guarantee a built-in maintenance suppression workflow."
     ],
     [
       "What is anomaly resolution workflow?",
-      "1) Anomaly detected → 2) Investigation (assign to team member) → 3) Root cause analysis → 4) Corrective action implemented → 5) Mark resolved with notes → 6) Monitor for recurrence → 7) Update baseline if permanent change."
+      "A practical workflow is: review the anomaly, check the affected machine and time, investigate the likely cause, take corrective action, then resolve or document the event once the situation is understood."
     ],
     [
       "How long does anomaly data get stored?",
-      "Anomaly records are stored indefinitely in TimescaleDB. Raw detection events: 90 days. Resolved anomalies: 2 years. Historical statistics: permanent for trend analysis and ISO 50001 audits."
+      "Retention depends on your deployment and database policy. If you need audit or compliance retention details, confirm them with your system administrator."
     ],
     [
       "Can I export anomaly reports for audits?",
-      "Yes! Anomaly page → Export → Select format (PDF for audits, CSV for analysis, JSON for API integration). Reports include timestamps, severity, root cause, corrective actions, and resolution status."
+      "Use the reporting or export options available in your deployment to capture anomaly evidence. The standard anomaly page does not guarantee a dedicated one-click audit export with notes and resolution workflow."
     ],
     [
       "What's the difference between anomaly and baseline deviation?",
@@ -10690,35 +10702,35 @@
     ],
     [
       "How do I set up anomaly alert notifications?",
-      "Settings → Notifications → Anomaly Alerts. Configure: 1) Alert channels (email, SMS, push, webhook), 2) Severity filters, 3) Recipient groups, 4) Quiet hours, 5) Escalation rules (if unresolved in X hours)."
+      "Notification behavior is configured at the system level. In the standard portal, users primarily review anomaly records and alerts; detailed notification routing is typically handled by administrators or backend services."
     ],
     [
       "What is anomaly correlation analysis?",
-      "Correlation analysis finds patterns between anomalies and external factors (temperature, production volume, shift schedules). View via Anomaly page → Analysis → Correlations. Helps identify root causes."
+      "Correlation analysis compares anomalies with factors such as production changes or environmental conditions to support root-cause investigation. Its availability depends on the analytics setup in your deployment rather than a guaranteed anomaly-page menu."
     ],
     [
       "Can I create custom anomaly rules?",
-      "Yes! Settings → Anomaly Detection → Custom Rules. Create rules like: 'Alert if consumption >50kW after 10 PM' or 'Warning if power factor <0.85 during production'. Supports conditional logic."
+      "Custom anomaly rules, if supported, are usually defined in backend logic or by administrators. The standard anomaly page is primarily for reviewing detected events."
     ],
     [
       "How do I review anomaly detection history?",
-      "Anomaly page → History tab shows: detection accuracy (true positives vs false positives), resolution time trends, recurring issues, most common root causes, and system performance metrics."
+      "Review anomaly history by filtering records by machine, time period, severity, and status. The exact history views available depend on your deployment."
     ],
     [
       "What is anomaly severity auto-escalation?",
-      "If anomaly remains unresolved for configured period (e.g., 4 hours for Critical, 24h for Warning), severity auto-escalates and alerts additional stakeholders. Configure in Settings → Escalation Rules."
+      "Auto-escalation means unresolved anomalies can be treated with higher urgency over time. If your deployment uses it, that behavior is managed in alerting logic rather than through a guaranteed end-user control."
     ],
     [
       "How do I integrate anomaly alerts with external systems?",
-      "Settings → Integrations → Webhook Configuration. Send anomaly events to: SCADA systems, ERP, maintenance management (CMMS), or Slack/Teams. Supports JSON payload with full anomaly details."
+      "External integrations depend on your deployment architecture and are usually configured by administrators or backend services, not from the standard anomaly page."
     ],
     [
       "What is time-based anomaly threshold?",
-      "Set different thresholds by time: production hours use stricter thresholds (1.5σ), off-hours use looser (2.5σ). Accounts for expected consumption variations. Configure in Settings → Time-Based Rules."
+      "A time-based threshold changes detection sensitivity depending on when the reading occurs, such as production hours versus off-hours. Whether this is supported depends on backend configuration."
     ],
     [
       "Can I compare anomaly rates across machines?",
-      "Yes! Anomaly page → Comparison View shows: anomaly frequency, average severity, mean time to resolution, and top root causes per machine. Helps identify problematic equipment."
+      "For cross-machine comparison, use the available analytics or comparison views in your deployment. The anomaly page itself is mainly focused on reviewing detected records."
     ],
     [
       "How to view anomalies?",
@@ -10872,39 +10884,39 @@
   "ask_portal_reports": [
     [
       "What reports are available?",
-      "Available reports: Energy Consumption Summary, KPI Performance Report, Anomaly Analysis Report, Machine Efficiency Report, and custom date range reports."
+      "The current portal report workflow centers on generating a monthly PDF report for a selected factory, year, and month. More detailed analysis is typically done in KPI, anomaly, or Grafana views."
     ],
     [
       "How do I generate a report?",
-      "Navigate to the Reports section, select report type, choose machines and date range, then click Generate. Reports can be viewed online or downloaded as PDF."
+      "Open the Reports page, select the factory, year, and month, then click Generate Report. The portal creates a PDF report for that selection."
     ],
     [
       "Can I download PDF reports?",
-      "Yes, all reports can be exported as PDF. After generating a report, click the Download PDF button to save it locally."
+      "Yes. After the report is generated, the portal provides a PDF download for the selected factory and month."
     ],
     [
       "What is in the energy report?",
-      "Energy reports include: consumption totals, peak demand, load profiles, efficiency metrics, comparison to baseline, anomaly summary, and trend analysis."
+      "The generated PDF is a monthly energy-management report for the selected factory and period. The exact sections depend on the report template and the data available for that month."
     ],
     [
       "What report types exist?",
-      "Report types: Summary (quick overview), Detailed (full analysis), Comparative (period comparison), and Compliance (ISO 50001 format)."
+      "In the standard portal UI, the main visible workflow is the monthly PDF report generator. If your deployment includes additional report templates, they are deployment-specific."
     ],
     [
       "What format are reports?",
-      "Reports are generated as PDF documents with charts, tables, and KPI summaries. Data can also be exported as CSV for further analysis."
+      "The standard Reports page generates PDF output. CSV or other data exports, if available, are typically provided from other analytics views."
     ],
     [
       "How to generate reports?",
-      "Generate PDF reports for consumption summaries, KPI performance, anomaly analysis, and efficiency metrics. Export data as CSV for further analysis."
+      "Use the Reports page to choose the factory, year, and month, then generate the PDF report for that reporting period."
     ],
     [
       "Report types?",
-      "Generate PDF reports for consumption summaries, KPI performance, anomaly analysis, and efficiency metrics. Export data as CSV for further analysis."
+      "The standard portal presents one main reporting flow: generate a monthly PDF report for the selected factory and month."
     ],
     [
       "Export reports?",
-      "Generate PDF reports for consumption summaries, KPI performance, anomaly analysis, and efficiency metrics. Export data as CSV for further analysis."
+      "Use the Reports page to generate the monthly PDF. For data-oriented exports, rely on the analytics or Grafana views available in your deployment."
     ]
   ],
   "ask_viz_sankey": [
@@ -12690,7 +12702,7 @@
     ],
     [
       "What is the Anomaly page?",
-      "The Anomaly page detects unusual energy patterns:\n\nFeatures:\n- Active anomalies: Current alerts requiring attention\n- Anomaly history: Past events and resolutions\n- Heatmap: Visual pattern analysis by time/machine\n- Severity levels: Low, Medium, High, Critical\n- Root cause hints: Possible explanations\n\nUse cases:\n- Identify energy waste immediately\n- Track recurring issues\n- Plan maintenance\n\nClick any anomaly for detailed diagnostics."
+      "The Anomaly page helps you review detected unusual energy patterns. Use it to filter anomalies by machine, time, severity, and status, inspect current alerts, and investigate events that may indicate waste or abnormal behavior."
     ],
     [
       "What is the KPI page?",
@@ -12702,7 +12714,7 @@
     ],
     [
       "What is the Reports page?",
-      "The Reports page generates PDF reports:\n\nReport types:\n- Energy Report: Consumption summary by machine/period\n- KPI Report: Performance metrics with trends\n- Anomaly Report: All alerts and resolutions\n- ISO 50001 Audit: Compliance documentation\n- Executive Summary: High-level overview for management\n\nCustomization:\n- Select date range\n- Choose machines\n- Pick report type\n- Click 'Generate'\n\nDownload as PDF or schedule automatic email delivery."
+      "The Reports page lets you generate a monthly PDF report by selecting the factory, year, and month. Use it when you need a structured summary for a specific reporting period."
     ],
     [
       "How often does data update?",
