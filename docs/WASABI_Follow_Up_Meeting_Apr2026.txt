@@ -1,0 +1,180 @@
+HumanEnerDIA - WASABI Follow-Up Meeting Brief
+Prepared: 2026-04-19
+Meeting horizon: next 2 days
+Focus: OVOS performance, accuracy, response time, and fallback quality
+
+1. Purpose
+
+This note focuses only on the OVOS side of HumanEnerDIA during the last 2-3 months, especially:
+- response speed,
+- query accuracy,
+- typo and STT tolerance,
+- fallback behavior for harder or less structured user queries.
+
+This is the part most relevant to end-user experience and to the WASABI follow-up discussion.
+
+
+2. What Improved In The Last 2-3 Months
+
+The main OVOS work in the recent period was not about adding a large new feature set. It was about improving how well the assistant understands users and how quickly it responds.
+
+Main areas of improvement:
+- Tier 3 LLM support was integrated with Qwen3-1.7B to improve tolerance for typo-heavy and STT-imperfect queries.
+- The vocabulary set and intent parsing logic were expanded to improve coverage of energy, monitoring, ranking, and analysis questions.
+- Fuzzy machine-name matching was enabled to better handle spoken variations such as "compressor one" versus "Compressor-1".
+- The fallback path was improved so that more difficult queries can be routed to the LLM layer instead of failing immediately.
+
+Short version:
+- The recent OVOS work focused on making the assistant more usable, more tolerant, and more robust under real spoken or imperfect input.
+
+
+3. Documented OVOS Performance Improvements
+
+Based on the OVOS project documentation and internal reports, the most important numbers are:
+
+Documented capability and quality metrics:
+- Query success rate improved from 60% to 95%.
+- Voice recognition quality improved from 60% to 95%.
+- Time parsing improved from 30% to 95%.
+- 95% of queries no longer require explicit time specification.
+- Implicit factory-wide queries improved from 0% to 100%.
+
+Documented latency and routing metrics:
+- P50 latency target: less than 200ms.
+- Documented actual P50 latency: about 142ms.
+- P90 latency target: less than 500ms.
+- Heuristic tier speed: 1-5ms.
+- Target routing share for fast tiers: about 80% of queries via Tier 1 and Tier 2.
+
+Documented LLM improvement:
+- LLM response time improved from about 33 seconds to about 5-6 seconds.
+- This is approximately 83% faster than the earlier LLM path.
+
+Interpretation for the meeting:
+- The assistant is no longer just functional. It has clearly moved toward a faster multi-tier architecture where simple queries are handled quickly and only harder queries go through the slower LLM path.
+
+
+4. Current End-User Spot Check (Real REST Bridge Testing)
+
+Testing method:
+- Real OVOS testing was done through the REST bridge at localhost:5000/query.
+- This matches the real user path more closely than Python unit-style scripts.
+- The goal was to check current end-user behavior, not only the documented design targets.
+
+Sample queries tested on 2026-04-19:
+
+1. "is the energy system online"
+- Result: correct
+- Response time: 0.60s
+
+2. "what's the power of Compressor-1"
+- Result: correct
+- Response time: 0.61s
+
+3. "how much energy did Boiler-1 use today"
+- Result: correct
+- Response time: 0.61s
+
+4. "show me factory overview"
+- Result: correct
+- Response time: 0.61s
+
+5. "compare this week to last week"
+- Result: partial / not ideal
+- Response time: 7.99s
+- Behavior: the assistant asked which machines to compare, so it did not understand this as a clean period-to-period comparison.
+
+6. "forecast energy for tomorrow"
+- Result: correct
+- Response time: 5.97s
+
+7. "what are the top 3 energy consumers"
+- Result: correct
+- Response time: 0.93s
+
+8. "what is the powre of comprsor one"
+- Result: failed
+- Response time: 0.72s
+- Behavior: clarification fallback triggered, but the response leaked an internal schema-validation message instead of giving a clean user-facing clarification.
+
+9. "is boilar one onlne"
+- Result: failed
+- Response time: 12.00s timeout
+
+10. "which machines are using most electricity"
+- Result: failed in current spot check
+- Response time: 12.00s timeout
+
+
+5. Current Numbers From Live Spot Check
+
+Overall sample result for the 10 tested queries:
+- Clearly correct: 6 out of 10 = 60%
+- Partial but not ideal: 1 out of 10 = 10%
+- Failed or timed out: 3 out of 10 = 30%
+
+Important split:
+- Direct operational queries performed well.
+- Fallback and typo-heavy queries are still the weak area.
+
+Live speed summary:
+- Fastest observed successful response: 0.60s
+- Slowest successful response: 5.97s
+- Slowest observed response overall: 12.00s timeout
+- Average across all 10 tested queries: about 4.20s
+
+Direct-query performance summary:
+- For 5 direct operational queries that should be easy for end users, the assistant was 5 out of 5 correct.
+- Average response time for those 5 direct queries: about 0.67s.
+
+Meaning:
+- The common monitoring and reporting path is already usable.
+- The fallback path still needs more work before it can be presented as consistently robust under noisy or imperfect user input.
+
+
+6. Accuracy And Fallback Assessment
+
+Strengths:
+- Standard health, power, energy, overview, forecast, and top-consumer queries are working.
+- Common operational questions can already be answered in about 0.6 to 0.9 seconds in the tested cases.
+- Forecast queries are slower, but still successful at around 6 seconds.
+- The architecture direction is correct: fast path for common queries, slower path for hard queries.
+
+Current weaknesses:
+- Typo-heavy machine queries are not yet reliable enough.
+- Some open-ended natural-language questions still time out instead of falling back cleanly.
+- The current clarification path can expose internal technical errors instead of clean user-facing messages.
+- Period-to-period comparison understanding is not yet strong enough for natural user phrasing.
+
+Bottom-line accuracy view:
+- OVOS looks strong for structured operational queries.
+- OVOS still looks inconsistent for fallback, typo tolerance, and open natural-language phrasing.
+
+
+7. Recommended Meeting Message For WASABI
+
+Suggested message:
+- In the recent period, the main OVOS effort was focused on quality improvement rather than broad feature expansion.
+- The most important gains were better response speed, better parsing coverage, and better fallback architecture through LLM routing and fuzzy matching.
+- Internal documentation shows strong improvement in success rate and latency.
+- Current live testing confirms that standard operational queries are already fast and reliable.
+- The main area still needing improvement is the fallback path for typo-heavy and loosely phrased user queries.
+
+Good points to highlight:
+- Query success rate documented at 95% after the OVOS sophistication work.
+- Voice recognition documented as improved from 60% to 95%.
+- LLM response time reduced from about 33 seconds to about 5-6 seconds.
+- In live spot checks, standard operational queries were answered correctly in about 0.67 seconds on average.
+
+Honest point to state clearly:
+- The main remaining gap is not basic functionality.
+- The main remaining gap is robustness of fallback behavior under imperfect real-user phrasing.
+
+
+8. Bottom-Line Assessment
+
+Short version:
+- OVOS performance improved meaningfully in the last 2-3 months.
+- The strongest improvement areas were speed, parser coverage, and LLM fallback architecture.
+- The current assistant already performs well on standard monitoring and operational queries.
+- The main next improvement area is fallback quality for typo-heavy, ambiguous, and open-ended spoken input.

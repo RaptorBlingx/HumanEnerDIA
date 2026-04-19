@@ -8,6 +8,7 @@ Phase: 3 - Analytics & ML
 """
 
 import asyncpg
+import json
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 import logging
@@ -290,7 +291,8 @@ async def get_machine_data_combined(
     machine_id: UUID,
     start_time: datetime,
     end_time: datetime,
-    include_machine_status: bool = True
+    include_machine_status: bool = True,
+    aggregate_interval: str = "1hour"
 ) -> List[Dict[str, Any]]:
     """
     Get combined data (energy + production + environmental) for ML training.
@@ -300,11 +302,30 @@ async def get_machine_data_combined(
         start_time: Start of time range
         end_time: End of time range
         include_machine_status: Whether to filter by machine status
+        aggregate_interval: Continuous aggregate interval to query ("15min" or "1hour")
         
     Returns:
         List of combined data records
     """
-    query = """
+    aggregate_views = {
+        "15min": {
+            "energy": "energy_readings_15min",
+            "production": "production_data_15min",
+            "environmental": "environmental_data_15min",
+        },
+        "1hour": {
+            "energy": "energy_readings_1hour",
+            "production": "production_data_1hour",
+            "environmental": "environmental_data_1hour",
+        },
+    }
+
+    if aggregate_interval not in aggregate_views:
+        raise ValueError(f"Unsupported aggregate interval: {aggregate_interval}")
+
+    views = aggregate_views[aggregate_interval]
+
+    query = f"""
         SELECT 
             er.bucket as time,
             er.machine_id,
@@ -334,11 +355,11 @@ async def get_machine_data_combined(
             ed.avg_outdoor_temp_c * er.avg_load_factor as temp_load_interaction,
             POWER(ed.avg_outdoor_temp_c, 2) as outdoor_temp_squared,
             POWER(er.avg_load_factor, 2) as load_factor_squared
-        FROM energy_readings_1hour er
-        LEFT JOIN production_data_1hour pd 
+        FROM {views['energy']} er
+        LEFT JOIN {views['production']} pd 
             ON er.machine_id = pd.machine_id 
             AND er.bucket = pd.bucket
-        LEFT JOIN environmental_data_1hour ed 
+        LEFT JOIN {views['environmental']} ed 
             ON er.machine_id = ed.machine_id 
             AND er.bucket = ed.bucket
     """
@@ -431,12 +452,21 @@ async def save_anomaly(anomaly_data: Dict[str, Any]) -> UUID:
             machine_id, detected_at, anomaly_type, severity,
             metric_name, metric_value, expected_value,
             deviation_percent, deviation_std_dev,
-            detection_method, confidence_score
+            detection_method, confidence_score,
+            is_resolved, resolved_at, resolution_notes, metadata
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15::jsonb
         )
         RETURNING id
     """
+
+    metadata = anomaly_data.get('metadata')
+    if metadata is None:
+        metadata_json = '{}'
+    elif isinstance(metadata, str):
+        metadata_json = metadata
+    else:
+        metadata_json = json.dumps(metadata)
     
     async with db.pool.acquire() as conn:
         anomaly_id = await conn.fetchval(
@@ -451,7 +481,11 @@ async def save_anomaly(anomaly_data: Dict[str, Any]) -> UUID:
             anomaly_data.get('deviation_percent'),
             anomaly_data.get('deviation_std_dev'),
             anomaly_data.get('detection_method', 'isolation_forest'),
-            anomaly_data.get('confidence_score')
+            anomaly_data.get('confidence_score'),
+            anomaly_data.get('is_resolved', False),
+            anomaly_data.get('resolved_at'),
+            anomaly_data.get('resolution_notes'),
+            metadata_json
         )
     
     logger.info(f"✓ Anomaly saved: {anomaly_id} ({anomaly_data['anomaly_type']})")

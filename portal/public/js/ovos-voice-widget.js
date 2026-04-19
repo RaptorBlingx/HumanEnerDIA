@@ -21,6 +21,9 @@
         healthUrl: window.location.port === '8001' 
             ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/health'  // Direct (when testing from :8001)
             : '/api/ovos/voice/health',    // Via nginx proxy (production - relative path)
+        activeAnomaliesUrl: window.location.port === '8001'
+            ? 'http://' + window.location.hostname + ':8001/api/v1/anomaly/active'
+            : '/api/analytics/api/v1/anomaly/active',
         welcomeMessage: 'Hello! I\'m your EnMS voice assistant. Ask me about energy consumption, machine status, anomalies, forecasts, or say "factory overview" for a summary. Say "Jarvis" to activate hands-free!',
         placeholder: 'Ask about energy, machines, anomalies...',
         title: 'OVOS Voice Assistant',
@@ -56,10 +59,19 @@
     let notifications = JSON.parse(localStorage.getItem('ovos_notifications') || '[]');
     let unreadCount = 0;
 
+    function normalizeNotifications(notificationList) {
+        return notificationList
+            .filter(notification => notification.severity !== 'normal')
+            .sort((left, right) => new Date(right.timestamp) - new Date(left.timestamp));
+    }
+
     // Load notifications from localStorage on startup
     function loadNotifications() {
-        notifications = JSON.parse(localStorage.getItem('ovos_notifications') || '[]');
+        notifications = normalizeNotifications(
+            JSON.parse(localStorage.getItem('ovos_notifications') || '[]')
+        );
         unreadCount = notifications.filter(n => !n.read).length;
+        saveNotifications();
         updateNotificationBadge();
         renderNotificationList();
     }
@@ -71,16 +83,33 @@
 
     // Add new notification
     function addNotification(data) {
+        const backendId = data.backend_id || data.anomaly_id || data.id || null;
+        const existingNotification = backendId
+            ? notifications.find(n => n.backend_id === backendId)
+            : null;
+
+        if (existingNotification) {
+            if (data.read === false && existingNotification.read) {
+                existingNotification.read = false;
+                unreadCount++;
+                saveNotifications();
+                updateNotificationBadge();
+                renderNotificationList();
+            }
+            return existingNotification;
+        }
+
         const notification = {
             id: Date.now() + Math.random().toString(36).substring(2, 9),
-            timestamp: new Date().toISOString(),
+            backend_id: backendId,
+            timestamp: data.timestamp || data.detected_at || new Date().toISOString(),
             message: data.message || 'New notification',
             severity: data.severity || 'warning',
             machine_id: data.machine_id || 'Unknown',
             metric: data.metric || '',
             value: data.value || '',
             expected: data.expected || '',
-            read: false
+            read: data.read === true
         };
         
         // Add to beginning of array
@@ -90,13 +119,52 @@
         if (notifications.length > 50) {
             notifications = notifications.slice(0, 50);
         }
+
+        notifications = normalizeNotifications(notifications);
         
-        unreadCount++;
+        if (!notification.read) {
+            unreadCount++;
+        }
         saveNotifications();
         updateNotificationBadge();
         renderNotificationList();
         
         return notification;
+    }
+
+    async function syncNotificationsFromBackend() {
+        try {
+            const response = await fetch(CONFIG.activeAnomaliesUrl, {
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const payload = await response.json();
+            const anomalies = Array.isArray(payload.anomalies) ? payload.anomalies : [];
+
+            anomalies
+                .filter(anomaly => anomaly.severity !== 'normal')
+                .slice()
+                .reverse()
+                .forEach(anomaly => {
+                addNotification({
+                    backend_id: anomaly.id ? `anomaly:${anomaly.id}` : null,
+                    detected_at: anomaly.detected_at,
+                    message: `${anomaly.machine_name || anomaly.machine_id}: ${anomaly.metric_name || anomaly.anomaly_type} anomaly detected`,
+                    severity: anomaly.severity || 'warning',
+                    machine_id: anomaly.machine_name || anomaly.machine_id,
+                    metric: anomaly.metric_name || anomaly.anomaly_type,
+                    value: anomaly.metric_value,
+                    expected: anomaly.expected_value,
+                    read: true
+                });
+                });
+        } catch (error) {
+            console.warn('[OVOS Widget] Failed to load active anomalies:', error);
+        }
     }
 
     // Mark notification as read
@@ -386,7 +454,7 @@
         console.log('[OVOS Widget] Showing proactive warning:', data);
         
         // Create warning message from event data
-        const machine = data.machine_id || data.machine || 'Unknown Machine';
+        const machine = data.machine_name || data.machine || data.machine_id || 'Unknown Machine';
         const metric = data.metric || 'status';
         const value = data.value !== undefined ? data.value : (data.current_value || 'N/A');
         const severity = data.severity || 'warning';
@@ -406,6 +474,8 @@
         
         // Add to notification bell
         addNotification({
+            backend_id: data.id ? `anomaly:${data.id}` : null,
+            timestamp: data.timestamp || data.detected_at,
             message: message,
             severity: severity,
             machine_id: machine,
@@ -1838,6 +1908,7 @@
         
         // Load notifications from localStorage
         loadNotifications();
+        syncNotificationsFromBackend();
         
         // Create floating "Enable Voice" button (for one-time permission)
         createEnableVoiceButton();

@@ -66,14 +66,26 @@ class AnomalyService:
             machine_id=machine_id,
             start_time=start_time,
             end_time=end_time,
-            include_machine_status=True  # Filter by status
+            include_machine_status=True,
+            aggregate_interval='15min'  # Use finer granularity for recent detection
         )
         
         if not data:
             raise ValueError("No data available for anomaly detection")
+
+        # Fit the detector on a broader recent history so the current window
+        # is compared against a meaningful baseline instead of fitting on itself.
+        reference_data = await get_machine_data_combined(
+            machine_id=machine_id,
+            start_time=start_time - timedelta(hours=24),
+            end_time=start_time,
+            include_machine_status=True,
+            aggregate_interval='15min'
+        )
         
         # Get baseline predictions if requested
         baseline_predictions = None
+        reference_baseline_predictions = None
         baseline_model_version = None
         
         if use_baseline:
@@ -87,6 +99,8 @@ class AnomalyService:
                     
                     # Generate predictions
                     baseline_predictions = baseline_model.predict_batch(data)
+                    if reference_data:
+                        reference_baseline_predictions = baseline_model.predict_batch(reference_data)
                     baseline_model_version = model_record['model_version']
                     
                     logger.info(f"Using baseline model v{baseline_model_version}")
@@ -95,6 +109,19 @@ class AnomalyService:
         
         # Create and run detector
         detector = AnomalyDetector(contamination=contamination)
+        if len(reference_data) >= 8:
+            detector.fit(
+                data=reference_data,
+                baseline_predictions=reference_baseline_predictions
+            )
+        else:
+            logger.warning(
+                "Not enough reference data to fit anomaly detector for %s. "
+                "Falling back to unsupervised mode with %d samples.",
+                machine['name'],
+                len(reference_data)
+            )
+
         detected_anomalies = detector.detect(
             data=data,
             baseline_predictions=baseline_predictions
@@ -253,6 +280,8 @@ class AnomalyService:
                     'anomaly_type': anomaly_type,
                     'severity': severity,
                     'metric_name': metric_name,
+                    'metric_value': metric_value,
+                    'expected_value': expected_value,
                     'confidence_score': confidence_score
                 })
                 logger.info(f"Published WebSocket event for manually created anomaly {anomaly_id}")

@@ -42,6 +42,44 @@ class EventPublisher:
         
         await redis_manager.publish(settings.CHANNEL_ANOMALY_DETECTED, message)
         logger.info(f"Published anomaly event: {machine_id} - {metric}")
+
+    @staticmethod
+    async def publish_anomaly(anomaly_data: Dict[str, Any]):
+        """Publish a rich anomaly payload for UI notifications and testing tools."""
+        timestamp = anomaly_data.get("detected_at")
+        if isinstance(timestamp, datetime):
+            timestamp = timestamp.isoformat()
+        elif not timestamp:
+            timestamp = datetime.utcnow().isoformat()
+
+        machine_name = anomaly_data.get("machine_name") or anomaly_data.get("machine_id", "Unknown Machine")
+        metric = anomaly_data.get("metric_name") or anomaly_data.get("anomaly_type", "anomaly")
+        message = anomaly_data.get("message") or f"{metric} anomaly detected"
+
+        event_message = {
+            "event_type": "anomaly_detected",
+            "id": anomaly_data.get("id"),
+            "machine_id": anomaly_data.get("machine_id"),
+            "machine_name": anomaly_data.get("machine_name"),
+            "machine": machine_name,
+            "machine_type": anomaly_data.get("machine_type"),
+            "metric": metric,
+            "value": anomaly_data.get("metric_value"),
+            "expected": anomaly_data.get("expected_value"),
+            "severity": anomaly_data.get("severity", "warning"),
+            "anomaly_type": anomaly_data.get("anomaly_type"),
+            "confidence_score": anomaly_data.get("confidence_score"),
+            "message": message,
+            "timestamp": timestamp,
+            "published_at": datetime.utcnow().isoformat()
+        }
+
+        await redis_manager.publish(settings.CHANNEL_ANOMALY_DETECTED, event_message)
+        logger.info(
+            "Published rich anomaly event: %s - %s",
+            anomaly_data.get("machine_id"),
+            metric
+        )
     
     @staticmethod
     async def publish_metric_updated(

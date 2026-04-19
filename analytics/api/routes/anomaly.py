@@ -318,7 +318,8 @@ async def get_active_anomalies(
         by_severity = {
             'critical': [a for a in anomalies if a['severity'] == 'critical'],
             'warning': [a for a in anomalies if a['severity'] == 'warning'],
-            'info': [a for a in anomalies if a['severity'] == 'info']
+            'normal': [a for a in anomalies if a['severity'] == 'normal'],
+            'info': [a for a in anomalies if a['severity'] in ('info', 'normal')]
         }
         
         return {
@@ -326,7 +327,8 @@ async def get_active_anomalies(
             'by_severity': {
                 'critical': len(by_severity['critical']),
                 'warning': len(by_severity['warning']),
-                'info': len(by_severity['info'])
+                'info': len(by_severity['info']),
+                'normal': len(by_severity['normal'])
             },
             'anomalies': anomalies
         }

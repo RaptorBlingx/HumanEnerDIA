@@ -5,6 +5,7 @@ Simulator Manager - Orchestrates all machine simulators
 
 import asyncio
 import logging
+import random
 from datetime import datetime
 from typing import Dict, List, Optional
 import asyncpg
@@ -153,6 +154,45 @@ class SimulatorManager:
     def get_all_machines_status(self) -> List[Dict]:
         """Get status of all machines"""
         return [machine.get_state() for machine in self.machines.values()]
+
+    def _get_supported_anomaly_types(self, machine) -> List[str]:
+        """Return supported anomaly types for automatic injection."""
+        machine_type = machine.machine_type.value
+        return {
+            "compressor": ["leak", "efficiency_loss", "bearing_fault"],
+            "hvac": ["refrigerant_leak", "dirty_coils", "compressor_fault"],
+            "motor": ["bearing_wear", "belt_slip", "overload"],
+            "pump": ["seal_leak", "pump_wear", "valve_fault"],
+            "injection_molding": ["heater_fault", "cooling_insufficient", "hydraulic_leak"],
+        }.get(machine_type, [])
+
+    def _maybe_inject_random_anomaly(self, machine):
+        """Inject anomalies probabilistically based on the configured daily rate."""
+        if not settings.SIMULATOR_ENABLE_ANOMALIES or not machine.is_running or machine.anomaly_active:
+            return
+
+        anomaly_types = self._get_supported_anomaly_types(machine)
+        if not anomaly_types:
+            return
+
+        interval_probability = settings.ANOMALY_PROBABILITY * (
+            machine.data_interval_seconds / 86400
+        )
+        if random.random() >= interval_probability:
+            return
+
+        anomaly_type = random.choice(anomaly_types)
+        duration_seconds = random.randint(1800, 5400)
+        severity = round(random.uniform(1.4, 2.2), 2)
+
+        machine.inject_anomaly(anomaly_type, duration_seconds, severity)
+        logger.warning(
+            "Auto anomaly injected on %s: %s (duration=%ss, severity=%s)",
+            machine.machine_name,
+            anomaly_type,
+            duration_seconds,
+            severity,
+        )
     
     async def _connect_database(self):
         """Connect to PostgreSQL database"""
@@ -261,6 +301,10 @@ class SimulatorManager:
         try:
             while machine.is_running:
                 timestamp = datetime.utcnow()
+
+                # Periodically inject realistic anomalies so the analytics and
+                # notification pipeline has actionable events to detect.
+                self._maybe_inject_random_anomaly(machine)
                 
                 # Generate all data types
                 energy_data = machine.generate_energy_reading(timestamp)
