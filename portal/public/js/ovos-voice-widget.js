@@ -1694,16 +1694,28 @@
         try {
             console.log(`📄 Original PDF URL: ${downloadUrl}`);
             
-            // CRITICAL FIX: Rewrite direct analytics URL to go through nginx proxy
-            // This avoids CORS issues when portal is on :8080 but API is on :8001
-            // Transform: http://10.33.10.104:8001/api/v1/reports/... 
-            //       To: /api/analytics/api/v1/reports/...
+            // CRITICAL FIX: Rewrite URLs to go through nginx proxy
+            // This avoids CORS/mixed content issues (HTTPS page loading HTTP resource)
+            // Cases:
+            // 1. Relative path: /api/v1/reports/... → /api/analytics/api/v1/reports/...
+            // 2. Absolute with :8001: http://host:8001/api/v1/... → /api/analytics/api/v1/...
+            // 3. Docker service name: http://enms-analytics:8001/... → /api/analytics/...
             let proxiedUrl = downloadUrl;
-            if (downloadUrl.includes(':8001')) {
-                // Extract path after hostname:port
-                const urlObj = new URL(downloadUrl);
-                proxiedUrl = '/api/analytics' + urlObj.pathname;
-                console.log(`📄 Rewritten to nginx proxy: ${proxiedUrl}`);
+            
+            if (downloadUrl.startsWith('/api/v1/')) {
+                // Relative path from API
+                proxiedUrl = '/api/analytics' + downloadUrl;
+                console.log(`📄 Rewritten relative path to nginx proxy: ${proxiedUrl}`);
+            } else if (downloadUrl.includes(':8001') || downloadUrl.includes('enms-analytics')) {
+                // Absolute URL or Docker service name
+                try {
+                    const urlObj = new URL(downloadUrl);
+                    proxiedUrl = '/api/analytics' + urlObj.pathname;
+                    console.log(`📄 Rewritten absolute URL to nginx proxy: ${proxiedUrl}`);
+                } catch (e) {
+                    // If URL parsing fails, try direct fetch (fallback)
+                    console.warn(`⚠️ Could not parse URL, using as-is: ${downloadUrl}`);
+                }
             }
             
             const response = await fetch(proxiedUrl);
@@ -1730,43 +1742,6 @@
             console.log(`✅ PDF downloaded successfully: ${filename}`);
         } catch (err) {
             console.error('❌ Failed to download PDF from URL:', err);
-            addMessage(`PDF download failed: ${err.message}`, false, true);
-        }
-    }
-
-    /**
-     * Download PDF from URL (V2 report system)
-     * Fetches PDF from EnMS API and triggers browser download
-     * @param {string} downloadUrl - Full URL to PDF download endpoint
-     * @param {string} filename - Name for downloaded file
-     */
-    async function downloadPDFFromURL(downloadUrl, filename) {
-        try {
-            console.log(`📄 Fetching PDF from: ${downloadUrl}`);
-            
-            const response = await fetch(downloadUrl);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const blob = await response.blob();
-            
-            // Create download link
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            
-            // Cleanup
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            console.log(`✅ PDF downloaded successfully: ${filename}`);
-        } catch (err) {
-            console.error('Failed to download PDF from URL:', err);
             addMessage(`PDF download failed: ${err.message}`, false, true);
         }
     }
