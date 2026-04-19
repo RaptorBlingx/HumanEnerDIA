@@ -178,3 +178,12 @@ Short version:
 - The strongest improvement areas were speed, parser coverage, and LLM fallback architecture.
 - The current assistant already performs well on standard monitoring and operational queries.
 - The main next improvement area is fallback quality for typo-heavy, ambiguous, and open-ended spoken input.
+
+
+9. Demo Readiness Note
+
+For testing and live meeting demonstrations, the portal now supports a dev-phase trigger that creates a real anomaly record and lets the normal proactive-warning pipeline raise the notification through the live backend and WebSocket flow.
+
+This is useful for showing the end-to-end user experience on demand.
+
+It should be presented as a demo and validation aid, not as an OVOS performance metric.

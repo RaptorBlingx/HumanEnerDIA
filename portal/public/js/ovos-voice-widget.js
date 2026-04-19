@@ -11,6 +11,9 @@
 (function() {
     'use strict';
 
+    // Keep the test-warning trigger visible during the current dev/demo phase.
+    const devToolsEnabled = true;
+
     // Configuration
     const CONFIG = {
         // API endpoint - MUST use nginx proxy to avoid CORS issues
@@ -24,10 +27,17 @@
         activeAnomaliesUrl: window.location.port === '8001'
             ? 'http://' + window.location.hostname + ':8001/api/v1/anomaly/active'
             : '/api/analytics/api/v1/anomaly/active',
+        machinesUrl: window.location.port === '8001'
+            ? 'http://' + window.location.hostname + ':8001/api/v1/machines'
+            : '/api/analytics/api/v1/machines',
+        createAnomalyUrl: window.location.port === '8001'
+            ? 'http://' + window.location.hostname + ':8001/api/v1/anomaly/create'
+            : '/api/analytics/api/v1/anomaly/create',
         welcomeMessage: 'Hello! I\'m your EnMS voice assistant. Ask me about energy consumption, machine status, anomalies, forecasts, or say "factory overview" for a summary. Say "Jarvis" to activate hands-free!',
         placeholder: 'Ask about energy, machines, anomalies...',
         title: 'OVOS Voice Assistant',
         subtitle: 'Energy Management',
+        devToolsEnabled: devToolsEnabled,
         sessionPrefix: 'enms_ovos_',
         // Porcupine Wake Word Config
         // Get free key at: https://console.picovoice.ai/
@@ -58,6 +68,7 @@
     // Notification Management (WASABI Phase 1)
     let notifications = JSON.parse(localStorage.getItem('ovos_notifications') || '[]');
     let unreadCount = 0;
+    let isTriggeringDevWarning = false;
 
     function normalizeNotifications(notificationList) {
         return notificationList
@@ -295,6 +306,155 @@
         }).join('');
         
         listContainer.innerHTML = html;
+    }
+
+    function setupNotificationPanelActions() {
+        const header = document.querySelector('#notification-panel .notification-panel-header');
+        if (!header) return;
+
+        let actions = header.querySelector('.notification-panel-actions');
+        if (!actions) {
+            actions = document.createElement('div');
+            actions.className = 'notification-panel-actions';
+            header.appendChild(actions);
+        }
+
+        const clearButton = header.querySelector('.clear-all-btn');
+        if (clearButton && clearButton.parentElement !== actions) {
+            actions.appendChild(clearButton);
+        }
+
+        if (CONFIG.devToolsEnabled && !document.getElementById('notification-dev-warning-btn')) {
+            const triggerButton = document.createElement('button');
+            triggerButton.id = 'notification-dev-warning-btn';
+            triggerButton.type = 'button';
+            triggerButton.className = 'dev-warning-btn';
+            triggerButton.setAttribute('data-dev-warning-trigger', 'true');
+            triggerButton.textContent = 'Trigger Test Warning';
+            triggerButton.title = 'Dev only: create a real anomaly and wait for the proactive warning flow';
+            triggerButton.addEventListener('click', triggerTestProactiveWarning);
+            actions.prepend(triggerButton);
+        }
+    }
+
+    function setupNotificationHeaderTrigger() {
+        const bellContainer = document.querySelector('.notification-bell-container');
+        if (!bellContainer || !CONFIG.devToolsEnabled) return;
+
+        if (document.getElementById('notification-dev-warning-nav-btn')) {
+            return;
+        }
+
+        const triggerButton = document.createElement('button');
+        triggerButton.id = 'notification-dev-warning-nav-btn';
+        triggerButton.type = 'button';
+        triggerButton.className = 'dev-warning-nav-btn';
+        triggerButton.setAttribute('data-dev-warning-trigger', 'true');
+        triggerButton.textContent = 'Trigger Test Warning';
+        triggerButton.title = 'Dev only: create a real anomaly and verify the proactive warning flow';
+        triggerButton.addEventListener('click', triggerTestProactiveWarning);
+
+        bellContainer.insertAdjacentElement('afterend', triggerButton);
+    }
+
+    function setDevWarningButtonState(label, disabled) {
+        document.querySelectorAll('[data-dev-warning-trigger="true"]').forEach(button => {
+            button.disabled = disabled;
+            button.textContent = label;
+        });
+    }
+
+    async function getPreferredTestMachine() {
+        const response = await fetch(`${CONFIG.machinesUrl}?is_active=true`, {
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            throw new Error(`Machine lookup failed with status ${response.status}`);
+        }
+
+        const machines = await response.json();
+        if (!Array.isArray(machines) || machines.length === 0) {
+            throw new Error('No active machines available for anomaly testing');
+        }
+
+        return machines.find(machine => /boiler-?1/i.test(machine.name || ''))
+            || machines.find(machine => machine.is_active !== false)
+            || machines[0];
+    }
+
+    async function triggerTestProactiveWarning() {
+        if (isTriggeringDevWarning) {
+            return;
+        }
+
+        isTriggeringDevWarning = true;
+        setDevWarningButtonState('Triggering...', true);
+
+        try {
+            const machine = await getPreferredTestMachine();
+            const expectedValue = Number(machine.rated_power_kw || 80);
+            const metricValue = Number((expectedValue * 1.75).toFixed(1));
+            const deviationPercent = Number((((metricValue - expectedValue) / expectedValue) * 100).toFixed(2));
+
+            const response = await fetch(CONFIG.createAnomalyUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    machine_id: machine.id,
+                    detected_at: new Date().toISOString(),
+                    anomaly_type: 'spike',
+                    severity: 'critical',
+                    metric_name: 'power_kw',
+                    metric_value: metricValue,
+                    expected_value: expectedValue,
+                    deviation_percent: deviationPercent,
+                    confidence_score: 0.95,
+                    is_resolved: false
+                })
+            });
+
+            const responseText = await response.text();
+            let payload = {};
+
+            if (responseText) {
+                try {
+                    payload = JSON.parse(responseText);
+                } catch (error) {
+                    payload = { detail: responseText };
+                }
+            }
+
+            if (!response.ok) {
+                throw new Error(payload.detail || `Trigger failed with status ${response.status}`);
+            }
+
+            console.log('[OVOS Widget] Test anomaly created:', payload);
+
+            if (isOpen) {
+                addBotMessage(
+                    `Test anomaly created for ${machine.name}. Waiting for proactive warning over WebSocket...`,
+                    'info'
+                );
+            }
+
+            setDevWarningButtonState('Waiting...', true);
+            setTimeout(() => setDevWarningButtonState('Trigger Test Warning', false), 2000);
+        } catch (error) {
+            console.error('[OVOS Widget] Failed to trigger test anomaly:', error);
+
+            if (isOpen) {
+                addBotMessage(`Failed to trigger test anomaly: ${error.message}`, 'warning');
+            }
+
+            setDevWarningButtonState('Failed', true);
+            setTimeout(() => setDevWarningButtonState('Trigger Test Warning', false), 3000);
+        } finally {
+            isTriggeringDevWarning = false;
+        }
     }
 
     // Get icon for severity
@@ -1905,6 +2065,8 @@
     function init() {
         createStyles();
         createWidget();
+        setupNotificationPanelActions();
+        setupNotificationHeaderTrigger();
         
         // Load notifications from localStorage
         loadNotifications();
