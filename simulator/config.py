@@ -17,10 +17,10 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     
     # MQTT Configuration - Host Mosquitto Broker
-    MQTT_HOST: str = "172.18.0.1"
+    MQTT_HOST: str = "mqtt"
     MQTT_PORT: int = 1883
-    MQTT_USERNAME: str = "raptorblingx"
-    MQTT_PASSWORD: str = "raptorblingx"
+    MQTT_USERNAME: str = "enms_mqtt"
+    MQTT_PASSWORD: str = ""
     MQTT_KEEPALIVE: int = 60
     MQTT_QOS: int = 1
     MQTT_CLIENT_ID: str = "enms-simulator"
@@ -28,8 +28,8 @@ class Settings(BaseSettings):
     # Database Configuration
     POSTGRES_HOST: str = "postgres"
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str = "raptorblingx"
-    POSTGRES_PASSWORD: str = "raptorblingx"
+    POSTGRES_USER: str = "enms_app"
+    POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = "enms"
     
     # Simulator Configuration

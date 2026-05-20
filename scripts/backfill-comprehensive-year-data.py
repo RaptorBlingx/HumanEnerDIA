@@ -32,8 +32,8 @@ DB_CONFIG = {
     'host': 'localhost',
     'port': 5433,  # External port mapping
     'database': 'enms',
-    'user': 'raptorblingx',
-    'password': 'raptorblingx'
+    'user': os.getenv('POSTGRES_USER', 'enms_user'),
+    'password': os.getenv('POSTGRES_PASSWORD', '')
 }
 
 # All 7 machines with realistic operational profiles

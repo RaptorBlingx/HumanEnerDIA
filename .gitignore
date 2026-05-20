@@ -187,6 +187,9 @@ tmp/
 temp/
 *.tmp
 *.temp
+run_queries.py
+sweep.py
+docs/queries to fix. txt
 *.bak
 *.backup
 *.old

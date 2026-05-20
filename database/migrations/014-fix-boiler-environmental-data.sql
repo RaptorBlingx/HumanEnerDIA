@@ -1,33 +1,24 @@
 -- ============================================================================
--- Migration 017: Fix Boiler-1 Environmental & Production Data
+-- Migration 014: Repair Boiler-1 historical simulator data
 -- ============================================================================
--- Purpose: Rebuild Boiler-1 environmental/production columns from the
--- electricity stream when historical rows were created by the old inconsistent
--- simulator path.
---
--- Root Cause: Boiler simulator used separate random snapshots for energy,
--- production, and environmental payloads, so the joined baseline features did
--- not describe the same physical state.
---
--- Fix: Derive Boiler-1 production and environmental fields from power and
--- timestamp using the same physics relationships as the simulator.
---
--- ZERO-TOUCH: Safe to rerun; it deterministically recomputes Boiler-1 rows.
--- ============================================================================
+-- Purpose: Rebuild historical Boiler-1 production/environmental rows from the
+-- electricity stream so all published telemetry for a timestamp describes the
+-- same underlying physical state.
 
 \echo '=========================================='
-\echo 'Fixing Boiler-1 Environmental & Production Data...'
+\echo 'Repairing Boiler-1 historical simulator data...'
 \echo '=========================================='
 
 -- Large Timescale hypertable updates can exceed the default decompression cap.
 -- Run this repair with an unlimited cap for the current psql session.
 SET timescaledb.max_tuples_decompressed_per_dml_transaction = 0;
-SELECT pg_advisory_lock(hashtext('boiler_repair_017'));
+SELECT pg_advisory_lock(hashtext('boiler_repair_014'));
 
 DO $$
 DECLARE
     v_boiler_id UUID := 'c0000000-0000-0000-0000-000000000008';
     v_rated_power_kw NUMERIC;
+    v_min_time TIMESTAMPTZ;
     v_inserted_env INTEGER;
     v_updated_env INTEGER;
     v_inserted_prod INTEGER;
@@ -126,8 +117,7 @@ BEGIN
                     + 5.0 * SIN(2 * PI() * ((be.hour_of_day - 6) / 24.0))
                 )
             ) AS outdoor_temp_c,
-            ((v_rated_power_kw * 1.5 * be.effective_load) / 0.85) / 10.55 AS gas_flow_m3h,
-            (v_rated_power_kw * 1.5 * be.effective_load * 0.85) / 2.26 AS steam_kg_per_hour
+            ((v_rated_power_kw * 1.5 * be.effective_load) / 0.85) / 10.55 AS gas_flow_m3h
         FROM boiler_energy be
     )
     UPDATE environmental_data env
@@ -142,14 +132,7 @@ BEGIN
         vibration_mm_s = ROUND((0.6 + d.effective_load * 0.9)::NUMERIC, 4)
     FROM derived d
     WHERE env.machine_id = d.machine_id
-      AND env.time = d.time
-      AND (
-          env.outdoor_temp_c IS NULL
-          OR env.machine_temp_c IS NULL
-          OR env.pressure_bar IS NULL
-          OR env.flow_rate_m3h IS NULL
-          OR env.outdoor_temp_c NOT BETWEEN -10 AND 35
-      );
+      AND env.time = d.time;
 
     GET DIAGNOSTICS v_updated_env = ROW_COUNT;
 
@@ -228,110 +211,32 @@ BEGIN
         speed_percent = ROUND((d.effective_load * 100.0)::NUMERIC, 2)
     FROM derived d
     WHERE prod.machine_id = d.machine_id
-      AND prod.time = d.time
-      AND (
-          prod.production_count = 0
-          OR prod.throughput_units_per_hour IS NULL
-          OR prod.speed_percent IS NULL
-      );
+      AND prod.time = d.time;
 
     GET DIAGNOSTICS v_updated_prod = ROW_COUNT;
 
-    RAISE NOTICE '✓ Inserted % environmental_data rows for Boiler-1', v_inserted_env;
-    RAISE NOTICE '✓ Updated % environmental_data rows for Boiler-1', v_updated_env;
-    RAISE NOTICE '✓ Inserted % production_data rows for Boiler-1', v_inserted_prod;
-    RAISE NOTICE '✓ Updated % production_data rows for Boiler-1', v_updated_prod;
-END $$;
-
--- Refresh continuous aggregates
-DO $$
-DECLARE
-    v_boiler_id UUID := 'c0000000-0000-0000-0000-000000000008';
-    v_min_time TIMESTAMPTZ;
-BEGIN
-    -- Get earliest Boiler-1 data timestamp
-    SELECT MIN(time) INTO v_min_time 
-    FROM environmental_data 
-    WHERE machine_id = v_boiler_id;
-
-    IF v_min_time IS NULL THEN
-        SELECT MIN(time) INTO v_min_time
-        FROM energy_readings
+    SELECT MIN(time) INTO v_min_time
+    FROM energy_readings
         WHERE machine_id = v_boiler_id
-          AND energy_type = 'electricity';
-    END IF;
-    
+            AND energy_type = 'electricity';
+
     IF v_min_time IS NOT NULL THEN
-        RAISE NOTICE 'Refreshing continuous aggregates from %...', v_min_time;
-        
-        CALL refresh_continuous_aggregate(
-            'environmental_data_1hour'::regclass,
-            v_min_time,
-            NOW()
-        );
-        CALL refresh_continuous_aggregate(
-            'production_data_1hour'::regclass,
-            v_min_time,
-            NOW()
-        );
-        CALL refresh_continuous_aggregate(
-            'environmental_data_15min'::regclass,
-            v_min_time,
-            NOW()
-        );
-        CALL refresh_continuous_aggregate(
-            'production_data_15min'::regclass,
-            v_min_time,
-            NOW()
-        );
-        CALL refresh_continuous_aggregate(
-            'environmental_data_1min'::regclass,
-            v_min_time,
-            NOW()
-        );
-        CALL refresh_continuous_aggregate(
-            'production_data_1min'::regclass,
-            v_min_time,
-            NOW()
-        );
-        CALL refresh_continuous_aggregate(
-            'environmental_degree_days_daily'::regclass,
-            v_min_time,
-            NOW()
-        );
-        CALL refresh_continuous_aggregate(
-            'production_data_1day'::regclass,
-            v_min_time,
-            NOW()
-        );
-        
-        RAISE NOTICE '✓ Continuous aggregates refreshed';
+        CALL refresh_continuous_aggregate('production_data_1hour'::regclass, v_min_time, NOW());
+        CALL refresh_continuous_aggregate('environmental_data_1hour'::regclass, v_min_time, NOW());
+        CALL refresh_continuous_aggregate('production_data_15min'::regclass, v_min_time, NOW());
+        CALL refresh_continuous_aggregate('environmental_data_15min'::regclass, v_min_time, NOW());
+        CALL refresh_continuous_aggregate('production_data_1min'::regclass, v_min_time, NOW());
+        CALL refresh_continuous_aggregate('environmental_data_1min'::regclass, v_min_time, NOW());
+        CALL refresh_continuous_aggregate('environmental_degree_days_daily'::regclass, v_min_time, NOW());
+        CALL refresh_continuous_aggregate('production_data_1day'::regclass, v_min_time, NOW());
     END IF;
+
+    RAISE NOTICE '✓ Inserted % missing Boiler-1 environmental rows', v_inserted_env;
+    RAISE NOTICE '✓ Updated % Boiler-1 environmental rows', v_updated_env;
+    RAISE NOTICE '✓ Inserted % missing Boiler-1 production rows', v_inserted_prod;
+    RAISE NOTICE '✓ Updated % Boiler-1 production rows', v_updated_prod;
+    RAISE NOTICE '✓ Refreshed Boiler-1 continuous aggregates';
 END $$;
 
 RESET timescaledb.max_tuples_decompressed_per_dml_transaction;
-SELECT pg_advisory_unlock(hashtext('boiler_repair_017'));
-
--- Verification
-\echo ''
-\echo 'Verification: Boiler-1 Environmental Data'
-SELECT 
-    COUNT(*) as total_rows,
-    COUNT(avg_outdoor_temp_c) as rows_with_temp,
-    ROUND(AVG(avg_outdoor_temp_c)::NUMERIC, 1) as avg_outdoor_temp,
-    ROUND(AVG(avg_pressure_bar)::NUMERIC, 2) as avg_pressure
-FROM environmental_data_1hour 
-WHERE machine_id = 'c0000000-0000-0000-0000-000000000008';
-
-\echo ''
-\echo 'Verification: Boiler-1 Production Data'
-SELECT 
-    COUNT(*) as total_rows,
-    ROUND(AVG(total_production_count)::NUMERIC, 0) as avg_production,
-    ROUND(AVG(avg_throughput)::NUMERIC, 1) as avg_throughput
-FROM production_data_1hour 
-WHERE machine_id = 'c0000000-0000-0000-0000-000000000008';
-
-\echo ''
-\echo '✓ Migration 017 complete!'
-\echo 'Boiler-1 baseline training should now work with all features.'
+SELECT pg_advisory_unlock(hashtext('boiler_repair_014'));

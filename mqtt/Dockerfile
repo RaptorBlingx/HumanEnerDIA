@@ -8,9 +8,11 @@ FROM eclipse-mosquitto:2.0
 # Copy configuration
 COPY config/mosquitto.conf /mosquitto/config/mosquitto.conf
 
-# Create password file with default credentials during build
-# Username: raptorblingx, Password: raptorblingx
-RUN mosquitto_passwd -c -b /mosquitto/config/passwd raptorblingx raptorblingx && \
+# Create password file from deployment-provided credentials during build.
+ARG MQTT_USERNAME
+ARG MQTT_PASSWORD
+RUN test -n "$MQTT_USERNAME" && test -n "$MQTT_PASSWORD" && \
+    mosquitto_passwd -c -b /mosquitto/config/passwd "$MQTT_USERNAME" "$MQTT_PASSWORD" && \
     chown mosquitto:mosquitto /mosquitto/config/passwd && \
     chmod 600 /mosquitto/config/passwd
 

@@ -315,7 +315,7 @@ class SimulatorManager:
                 # Check if machine supports multi-energy (has _generate_sensor_data method)
                 if hasattr(machine, '_generate_sensor_data'):
                     # Multi-energy machine (e.g., Boiler)
-                    sensor_data = machine._generate_sensor_data()
+                    sensor_data = machine._generate_sensor_data(timestamp)
                     sensor_data['timestamp'] = timestamp.isoformat()
                     mqtt_publisher.publish_multi_energy_reading(
                         machine.machine_id,

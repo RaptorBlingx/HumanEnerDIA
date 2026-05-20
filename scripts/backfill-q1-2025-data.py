@@ -10,14 +10,15 @@ from datetime import datetime, timedelta
 from typing import Dict, Any
 import random
 import math
+import os
 
 # Database connection
 DB_CONFIG = {
     'host': 'localhost',
     'port': 5433,
     'database': 'enms',
-    'user': 'raptorblingx',
-    'password': 'raptorblingx'
+    'user': os.getenv('POSTGRES_USER', 'enms_user'),
+    'password': os.getenv('POSTGRES_PASSWORD', '')
 }
 
 # Machine configurations

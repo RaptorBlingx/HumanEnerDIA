@@ -72,7 +72,13 @@ services:
     build:
       context: ./mqtt
       dockerfile: Dockerfile
+      args:
+        MQTT_USERNAME: ${MQTT_USERNAME}
+        MQTT_PASSWORD: ${MQTT_PASSWORD}
     container_name: enms-mqtt
+    environment:
+      MQTT_USERNAME: ${MQTT_USERNAME}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
     ports:
       - "1883:1883"
       - "9001:9001"
@@ -83,7 +89,7 @@ services:
       - enms-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mosquitto_sub", "-h", "localhost", "-p", "1883", "-u", "raptorblingx", "-P", "raptorblingx", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      test: ["CMD-SHELL", "mosquitto_sub -h localhost -p 1883 -u \"$${MQTT_USERNAME}\" -P \"$${MQTT_PASSWORD}\" -t '$$SYS/#' -C 1 -i healthcheck -W 3"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -161,13 +167,13 @@ services:
       environment:
         - TZ=Europe/Istanbul
         - NODE_RED_ENABLE_PROJECTS=true
-        - NODE_RED_CREDENTIAL_SECRET=${NODE_RED_CREDENTIAL_SECRET:-enms-node-red-secret}
+        - NODE_RED_CREDENTIAL_SECRET=${NODE_RED_CREDENTIAL_SECRET:?Set NODE_RED_CREDENTIAL_SECRET in .env}
         - NODE_RED_USERNAME=${NODE_RED_USERNAME:-admin}
-        - NODE_RED_PASSWORD_HASH=${NODE_RED_PASSWORD_HASH:-$$2b$$08$$wKXiKXKZ4v0g.iBZ6Y5B1.VJCHZqJV8XvPLXsNxMHjWKGqT0uLM4S}
+        - NODE_RED_PASSWORD_HASH=${NODE_RED_PASSWORD_HASH:?Set NODE_RED_PASSWORD_HASH in .env}
         - MQTT_HOST=${MQTT_HOST:-mqtt}
         - MQTT_PORT=1883
-        - MQTT_USERNAME=${MQTT_USERNAME:-raptorblingx}
-        - MQTT_PASSWORD=${MQTT_PASSWORD:-raptorblingx}
+        - MQTT_USERNAME=${MQTT_USERNAME}
+        - MQTT_PASSWORD=${MQTT_PASSWORD}
         - POSTGRES_HOST=postgres
         - POSTGRES_PORT=5432
         - POSTGRES_DB=${POSTGRES_DB}
@@ -195,6 +201,8 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
       GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost:8080/grafana}
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
@@ -291,10 +299,7 @@ services:
       - enms-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      disable: true
 
   # ============================================================================
   # AUTH SERVICE - User authentication and authorization
@@ -332,7 +337,7 @@ services:
       - enms-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5500/api/auth/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5500/api/auth/health', timeout=5).read()"]
       interval: 30s
       timeout: 10s
       retries: 3

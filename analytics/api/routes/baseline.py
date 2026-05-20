@@ -15,7 +15,10 @@ from uuid import UUID
 import logging
 
 from services.baseline_service import baseline_service
+from services.driver_analysis_service import driver_analysis_service
 from services.model_explainer import model_explainer
+from services.seu_baseline_service import seu_baseline_service
+from models.seu import TrainBaselineRequest as SEUBaselineTrainRequest
 from database import db
 
 logger = logging.getLogger(__name__)
@@ -526,6 +529,50 @@ async def list_baseline_models(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+@router.get("/baseline/drivers", tags=["Baseline"])
+async def get_seu_driver_analysis(
+    seu_name: str = Query(..., description="SEU name, for example Compressor-1"),
+    energy_source: str = Query(..., description="Energy source, for example electricity"),
+    driver_name: Optional[str] = Query(None, description="Optional specific driver to inspect, for example temperature"),
+    top_n: int = Query(3, description="Number of top drivers to return", ge=1, le=10),
+):
+    """Return learned drivers for a specific SEU.
+
+    If no active baseline exists, the response explains that training is required and
+    returns candidate drivers derived from the energy-source feature registry.
+    """
+    try:
+        return await driver_analysis_service.get_seu_driver_analysis(
+            seu_name=seu_name,
+            energy_source=energy_source,
+            requested_driver=driver_name,
+            top_n=top_n,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.error(f"Error retrieving driver analysis: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
+
+
+@router.get("/baseline/drivers/factory", tags=["Baseline"])
+async def get_factory_driver_analysis(
+    energy_source: Optional[str] = Query(None, description="Optional energy-source filter"),
+    driver_name: Optional[str] = Query(None, description="Optional specific driver to inspect"),
+    top_n: int = Query(5, description="Number of top drivers to return", ge=1, le=10),
+):
+    """Return aggregated learned drivers across active SEUs with baselines."""
+    try:
+        return await driver_analysis_service.get_factory_driver_analysis(
+            energy_source=energy_source,
+            requested_driver=driver_name,
+            top_n=top_n,
+        )
+    except Exception as exc:
+        logger.error(f"Error retrieving factory driver analysis: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
+
+
 @router.get("/baseline/model/{model_id}", tags=["Baseline"])
 async def get_model_details(
     model_id: UUID = Path(..., description="Model UUID"),
@@ -866,112 +913,53 @@ async def train_baseline_for_seu(request: SEUTrainingRequest):
             )
         
         logger.info(f"[BASELINE-TRAIN-SEU] Features validated: {valid_features}")
-        
-        # Step 2.5: Map feature names to aggregated column names
-        # User-friendly names (from API) → Actual column names (in energy_readings_1hour)
-        feature_mapping = {
-            'production_count': 'total_production_count',
-            'outdoor_temp_c': 'avg_outdoor_temp_c',
-            'indoor_temp_c': 'avg_indoor_temp_c',
-            'machine_temp_c': 'avg_machine_temp_c',
-            'pressure_bar': 'avg_pressure_bar',
-            'power_kw': 'avg_power_kw',
-            'power_factor': 'avg_power_factor',
-            'current_a': 'avg_current_a',
-            'voltage_v': 'avg_voltage_v',
-            'load_factor': 'avg_load_factor',
-            'cycle_time_sec': 'avg_cycle_time_sec',
-            'throughput': 'avg_throughput_units_per_hour',
-            # Already correctly named (don't need mapping)
-            'total_production': 'total_production',
-            'good_units_count': 'good_units_count',
-            'defect_units_count': 'defect_units_count',
-            'max_power_kw': 'max_power_kw',
-            'heating_degree_days': 'heating_degree_days',
-            'cooling_degree_days': 'cooling_degree_days',
-            'operating_hours': 'operating_hours',
-            'is_weekend': 'is_weekend'
-        }
-        
-        # Map user features to database column names
-        if valid_features:
-            mapped_features = [feature_mapping.get(f, f) for f in valid_features]
-            logger.info(f"[BASELINE-TRAIN-SEU] Mapped features: {valid_features} → {mapped_features}")
-        else:
-            mapped_features = None
-        
-        # Step 3: Get machine_id from SEU
-        # SEUs can have multiple machines, but we'll use the first one for simplicity
-        machine_ids = seu['machine_ids']
-        if not machine_ids or len(machine_ids) == 0:
-            raise HTTPException(
-                status_code=400,
-                detail=f"SEU '{request.seu_name}' has no associated machines"
-            )
-        
-        machine_id = UUID(str(machine_ids[0]))  # Use first machine
-        logger.info(f"[BASELINE-TRAIN-SEU] Using machine_id: {machine_id}")
-        
-        # Step 4: Convert year to date range
+
+        # Step 3: Convert year to SEU training date range
         start_date = datetime(request.year, 1, 1, 0, 0, 0)
         end_date = datetime(request.year, 12, 31, 23, 59, 59)
-        
-        # Step 4.5: Check if sufficient data exists
-        async with db.pool.acquire() as conn:
-            data_count = await conn.fetchval("""
-                SELECT COUNT(DISTINCT DATE(bucket))
-                FROM energy_readings_1day
-                WHERE machine_id = $1
-                AND bucket BETWEEN $2 AND $3
-            """, machine_id, start_date, end_date)
-        
-        logger.info(f"[BASELINE-TRAIN-SEU] Found {data_count} days of data for {request.year}")
-        
-        if data_count < 7:
-            return await _build_voice_friendly_error(
-                "INSUFFICIENT_DATA",
-                seu_name=request.seu_name,
-                energy_source=request.energy_source
-            )
-        
-        # Step 5: Train baseline using proven service (97-99% accuracy!)
-        # Smart Hybrid: If user specifies features, use them. Otherwise, auto-select.
-        drivers = mapped_features if mapped_features else None
-        
-        if drivers:
-            logger.info(f"[BASELINE-TRAIN-SEU] User requested features: {drivers}")
+
+        selected_features = valid_features or ['production_count', 'outdoor_temp_c', 'is_weekend']
+
+        if valid_features:
+            logger.info(f"[BASELINE-TRAIN-SEU] User requested SEU features: {selected_features}")
         else:
-            logger.info(f"[BASELINE-TRAIN-SEU] Auto-selecting best features for maximum accuracy")
-        
-        training_response = await baseline_service.train_baseline(
-            machine_id=machine_id,
-            start_date=start_date,
-            end_date=end_date,
-            drivers=drivers,  # Use mapped features or auto-select if None
-            energy_source_id=seu['energy_source_id']  # Pass energy source for multi-energy support
+            logger.info(
+                f"[BASELINE-TRAIN-SEU] No features requested, using default SEU features: {selected_features}"
+            )
+
+        seu_train_request = SEUBaselineTrainRequest(
+            seu_id=seu_id,
+            baseline_year=request.year,
+            start_date=start_date.date(),
+            end_date=end_date.date(),
+            features=selected_features
+        )
+
+        training_response = await seu_baseline_service.train_baseline(
+            seu_train_request
         )
         
         logger.info(
-            f"[BASELINE-TRAIN-SEU] Training complete: R²={training_response['r_squared']}, "
-            f"Samples={training_response['training_samples']}"
+            f"[BASELINE-TRAIN-SEU] Training complete: R²={training_response.r_squared}, "
+            f"Samples={training_response.samples_count}"
         )
         
         # Step 6: Format response for voice output
         formula_readable = _build_voice_formula(
-            intercept=training_response['intercept'],
-            coefficients=training_response['coefficients']
+            intercept=training_response.intercept,
+            coefficients=training_response.coefficients
         )
         
         formula_technical = _build_technical_formula(
-            intercept=training_response['intercept'],
-            coefficients=training_response['coefficients']
+            intercept=training_response.intercept,
+            coefficients=training_response.coefficients
         )
         
         # Build voice-friendly message
-        r2_percent = round(training_response['r_squared'] * 100)
+        r2_percent = round(training_response.r_squared * 100)
         message = (
             f"{request.seu_name} {request.energy_source} baseline trained successfully. "
-            f"R-squared {training_response['r_squared']:.2f} ({r2_percent}% accuracy). "
+            f"R-squared {training_response.r_squared:.2f} ({r2_percent}% accuracy). "
             f"{formula_readable}"
         )
         
@@ -980,12 +968,12 @@ async def train_baseline_for_seu(request: SEUTrainingRequest):
             message=message,
             seu_name=request.seu_name,
             energy_source=request.energy_source,
-            r_squared=training_response['r_squared'],
-            rmse=training_response['rmse'],
+            r_squared=training_response.r_squared,
+            rmse=training_response.rmse,
             formula_readable=formula_readable,
             formula_technical=formula_technical,
-            samples_count=training_response['training_samples'],
-            trained_at=datetime.fromisoformat(training_response['trained_at'])
+            samples_count=training_response.samples_count,
+            trained_at=training_response.trained_at
         )
     
     except HTTPException:

@@ -102,6 +102,11 @@ BEGIN
     (v_electricity_id, 'operating_hours', 'numeric', 'energy_readings', 'time', 'CUSTOM', 'COUNT(DISTINCT EXTRACT(HOUR FROM time)) - hours machine was active')
     
     ON CONFLICT (energy_source_id, feature_name) DO NOTHING;
+
+        UPDATE energy_source_features
+        SET is_regression_feature = false
+        WHERE energy_source_id = v_electricity_id
+            AND feature_name IN ('consumption_kwh', 'avg_power_kw', 'max_power_kw', 'avg_current_a', 'avg_voltage_v');
     
     RAISE NOTICE '✓ Electricity features seeded: % features', (SELECT COUNT(*) FROM energy_source_features WHERE energy_source_id = v_electricity_id);
 END $$;
@@ -143,6 +148,11 @@ BEGIN
     (v_natural_gas_id, 'production_count', 'numeric', 'production_data', 'production_count', 'AVG', 'Average production units (for process heating load)')
     
     ON CONFLICT (energy_source_id, feature_name) DO NOTHING;
+
+        UPDATE energy_source_features
+        SET is_regression_feature = false
+        WHERE energy_source_id = v_natural_gas_id
+            AND feature_name = 'consumption_m3';
     
     RAISE NOTICE '✓ Natural gas features seeded: % features', (SELECT COUNT(*) FROM energy_source_features WHERE energy_source_id = v_natural_gas_id);
 END $$;
@@ -177,6 +187,11 @@ BEGIN
     (v_steam_id, 'production_count', 'numeric', 'production_data', 'production_count', 'AVG', 'Average production units (steam process load)')
     
     ON CONFLICT (energy_source_id, feature_name) DO NOTHING;
+
+        UPDATE energy_source_features
+        SET is_regression_feature = false
+        WHERE energy_source_id = v_steam_id
+            AND feature_name = 'consumption_kg';
     
     RAISE NOTICE '✓ Steam features seeded: % features', (SELECT COUNT(*) FROM energy_source_features WHERE energy_source_id = v_steam_id);
 END $$;
@@ -214,6 +229,11 @@ BEGIN
     (v_compressed_air_id, 'production_count', 'numeric', 'production_data', 'production_count', 'AVG', 'Average production units (pneumatic equipment load)')
     
     ON CONFLICT (energy_source_id, feature_name) DO NOTHING;
+
+        UPDATE energy_source_features
+        SET is_regression_feature = false
+        WHERE energy_source_id = v_compressed_air_id
+            AND feature_name = 'consumption_m3';
     
     RAISE NOTICE '✓ Compressed air features seeded: % features', (SELECT COUNT(*) FROM energy_source_features WHERE energy_source_id = v_compressed_air_id);
 END $$;

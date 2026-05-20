@@ -1091,11 +1091,12 @@ def send_pilot_factory_admin_notification(application_data: dict) -> bool:
         return False
     
     try:
-        # Admin email addresses
-        admin_emails = [
-            'yazilim.aarti.muhendislik@gmail.com',
-            'umut.ogur@aartimuhendislik.com'
-        ]
+        # Admin notification recipients are configured through environment
+        # variables so public releases do not expose personal addresses.
+        admin_emails = SIGNUP_ALERT_RECIPIENTS or ADMIN_EMAILS
+        if not admin_emails:
+            logger.warning("No admin notification recipients configured")
+            return False
         
         # Load email templates
         template_dir = os.path.join(os.path.dirname(__file__), 'email_templates')
@@ -1125,7 +1126,7 @@ def send_pilot_factory_admin_notification(application_data: dict) -> bool:
             maturity_color = '#999999'
         
         # Build dashboard link
-        dashboard_link = f"http://10.33.10.104:8080/admin/pilot-application-detail.html?id={application_data.get('application_id', '')}"
+        dashboard_link = f"{FRONTEND_URL}/admin/pilot-application-detail.html?id={application_data.get('application_id', '')}"
         
         # Basic replacements
         replacements = {

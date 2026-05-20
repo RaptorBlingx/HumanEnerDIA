@@ -11,6 +11,7 @@ from .base_machine import BaseMachineSimulator
 from models import MachineType, OperatingMode
 import random
 import numpy as np
+from typing import Optional, Dict, Any
 
 
 class BoilerSimulator(BaseMachineSimulator):
@@ -59,8 +60,10 @@ class BoilerSimulator(BaseMachineSimulator):
         # Energy conversion factors
         self.gas_energy_kwh_per_m3 = 10.55  # 1 m³ natural gas = 10.55 kWh
         self.steam_energy_kwh_per_kg = 2.26  # 1 kg steam = 2.26 kWh (at 10 bar)
+        self._snapshot_timestamp: Optional[datetime] = None
+        self._snapshot_data: Optional[Dict[str, Any]] = None
         
-    def _generate_sensor_data(self) -> dict:
+    def _build_sensor_data(self, timestamp: datetime) -> dict:
         """
         Generate multi-energy sensor readings with PHYSICS-BASED correlations.
         
@@ -72,8 +75,8 @@ class BoilerSimulator(BaseMachineSimulator):
             Dict with electricity, natural gas, and steam measurements
         """
         # 1. OUTDOOR TEMPERATURE - Realistic seasonal/daily variation
-        hour = datetime.now().hour
-        day_of_year = datetime.now().timetuple().tm_yday
+        hour = timestamp.hour
+        day_of_year = timestamp.timetuple().tm_yday
         
         # Seasonal variation: coldest in Jan (day ~15), warmest in July (day ~196)
         # Range: -5°C (winter) to +25°C (summer) with 15°C baseline
@@ -166,6 +169,18 @@ class BoilerSimulator(BaseMachineSimulator):
             "outdoor_temp_c": round(outdoor_temp, 1),
             "operating_mode": self.operating_mode.value
         }
+
+    def _generate_sensor_data(self, timestamp: Optional[datetime] = None) -> dict:
+        """Return a single shared sensor snapshot for the given simulation timestamp."""
+        snapshot_time = timestamp or datetime.utcnow()
+
+        if self._snapshot_timestamp == snapshot_time and self._snapshot_data is not None:
+            return dict(self._snapshot_data)
+
+        sensor_data = self._build_sensor_data(snapshot_time)
+        self._snapshot_timestamp = snapshot_time
+        self._snapshot_data = sensor_data
+        return dict(sensor_data)
     
     def _get_mode_multiplier(self) -> float:
         """
@@ -197,7 +212,7 @@ class BoilerSimulator(BaseMachineSimulator):
         Returns:
             Energy reading dict with power_kw, energy_kwh, voltage, current
         """
-        sensor_data = self._generate_sensor_data()
+        sensor_data = self._generate_sensor_data(timestamp)
         return {
             "timestamp": timestamp.isoformat(),
             "machine_id": self.machine_id,
@@ -217,7 +232,7 @@ class BoilerSimulator(BaseMachineSimulator):
             Production data dict with output counts/rates
             Field names MUST match Node-RED/database schema!
         """
-        sensor_data = self._generate_sensor_data()
+        sensor_data = self._generate_sensor_data(timestamp)
         
         # Steam production: kg/h → convert to units appropriate for 30-second interval
         # Use flow rate (kg/h) as throughput, and accumulated kg as production count
@@ -227,6 +242,7 @@ class BoilerSimulator(BaseMachineSimulator):
         # Production count: cumulative kg (multiply by factor for visibility)
         # Since each interval produces ~1-5 kg, multiply by 10 for meaningful counts
         production_count = max(1, int(steam_kg_per_interval * 10))
+        load_percent = min(100.0, max(0.0, (sensor_data.get("power_kw", 0.0) / self.rated_power_kw) * 100))
         
         return {
             "time": timestamp.isoformat(),
@@ -236,7 +252,7 @@ class BoilerSimulator(BaseMachineSimulator):
             "production_count_bad": 0,
             "throughput_units_per_hour": round(steam_kg_per_hour, 2),  # kg/h steam
             "operating_mode": sensor_data.get("operating_mode", "running"),
-            "speed_percent": round(sensor_data.get("boiler_efficiency", 0.85) * 100, 1)
+            "speed_percent": round(load_percent, 1)
         }
     
     def generate_environmental_data(self, timestamp: datetime) -> dict:
@@ -248,7 +264,7 @@ class BoilerSimulator(BaseMachineSimulator):
             Environmental data dict with temperatures, humidity, pressure
             Field names MUST match Node-RED/database schema for baseline training!
         """
-        sensor_data = self._generate_sensor_data()
+        sensor_data = self._generate_sensor_data(timestamp)
         outdoor_temp = sensor_data.get("outdoor_temp_c", 15.0)
         
         # Machine temperature: flue gas / boiler shell temperature

@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     DATABASE_HOST: str = "postgres"
     DATABASE_PORT: int = 5432
     DATABASE_NAME: str = "enms"
-    DATABASE_USER: str = "raptorblingx"
-    DATABASE_PASSWORD: str = "raptorblingx"
+    DATABASE_USER: str = "enms_user"
+    DATABASE_PASSWORD: str = "change-me"
     DATABASE_MIN_POOL_SIZE: int = 5
     DATABASE_MAX_POOL_SIZE: int = 20
     
@@ -90,7 +90,7 @@ class Settings(BaseSettings):
     # ============================================================================
     REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
-    REDIS_PASSWORD: str = "raptorblingx"
+    REDIS_PASSWORD: str = "change-me"
     REDIS_DB: int = 0
     REDIS_PUBSUB_ENABLED: bool = True
     
