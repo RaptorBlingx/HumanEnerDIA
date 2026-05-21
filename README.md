@@ -1,4 +1,4 @@
-# ⚡ EnMS - Energy Management System
+# HumanEnerDIA - Energy Management System
 
 <div align="center">
 
@@ -15,19 +15,22 @@ Part of the [WASABI Project](https://wasabiproject.eu/)
 
 ---
 
-## 🎯 Overview
+## Overview
 
-EnMS is a comprehensive energy monitoring and analytics platform designed for **real-world industrial facilities**. It provides ISO 50001-compliant energy performance monitoring, machine learning-powered insights, and voice interface capabilities.
+HumanEnerDIA is a comprehensive energy monitoring and analytics platform for
+industrial facilities. It provides ISO 50001-aligned energy performance
+monitoring, machine-learning-assisted analytics, Grafana dashboards, a web
+portal, and an OVOS-ready Digital Industrial Assistant integration.
 
-### ✨ Key Features
+### Key Features
 
 - **🏭 Real-time Monitoring**: Track energy consumption across all Significant Energy Users (SEUs)
 - **📊 Advanced Analytics**: ML-powered baselines, forecasting, and anomaly detection
 - **📈 Smart Dashboards**: Pre-built Grafana dashboards with customizable variables
-- **🎤 Voice Integration**: OVOS-ready with hybrid parsing and local Qwen3.5-2B fallback
+- **🎤 Voice Integration**: OVOS-ready via the companion HumanEnerDIA OVOS skill and REST bridge
 - **🔌 Modular Architecture**: Microservices-based, API-first design
-- **🐳 Zero-Touch Deployment**: Single command installation with Docker
-- **🔒 Production-Ready**: Security, monitoring, and backup built-in
+- **🐳 Guided Docker Deployment**: Docker Compose deployment with explicit secret placeholders
+- **🔒 Release-Oriented Defaults**: Sanitized examples, health checks, and documented production hardening steps
 
 ---
 
@@ -50,7 +53,7 @@ EnMS is a comprehensive energy monitoring and analytics platform designed for **
 │                     Core Services                            │
 ├──────────────┬─────────────────┬─────────────────────────────┤
 │  Simulator   │    Analytics    │    Query Service            │
-│  Node-RED    │    Service      │    (NLP/Voice)              │
+│  Node-RED    │    Service      │    (placeholder)            │
 └──────┬───────┴────────┬────────┴────────┬────────────────────┘
        │                │                 │
        └────────────────┴─────────────────┘
@@ -66,7 +69,7 @@ EnMS is a comprehensive energy monitoring and analytics platform designed for **
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -77,7 +80,7 @@ EnMS is a comprehensive energy monitoring and analytics platform designed for **
 
 ### Installation
 
-**Option 1: Automated Setup (Recommended)**
+**Option 1: Guided Setup (Recommended)**
 
 ```bash
 # Clone the repository
@@ -87,11 +90,10 @@ cd enms
 # Copy environment template
 cp .env.example .env
 
-# (Optional) Edit passwords - defaults work for development
+# Fill in the required values before first startup
 nano .env
 
-# Run the setup script
-chmod +x setup.sh
+# Run the setup helper
 ./setup.sh
 ```
 
@@ -103,12 +105,14 @@ git clone https://github.com/raptorblingx/enms.git
 cd enms
 cp .env.example .env
 
-# Build and start (defaults in .env.example work out of the box)
+# Build and start
 docker compose build
 docker compose up -d
 ```
 
-That's it! 🎉 The system is ready to use with sensible defaults.
+The setup helper is a thin wrapper around `docker compose build` and
+`docker compose up -d`. It refuses to run while placeholder values remain in
+`.env` so the bundle does not start with fake secrets by accident.
 
 ### Access the System
 
@@ -116,7 +120,7 @@ After installation completes:
 
 - **Unified Portal**: http://localhost:8080
 - **Grafana**: http://localhost:8080/grafana (credentials in .env)
-- **Node-RED**: http://localhost:1880
+- **Node-RED**: http://localhost:1881
 - **Analytics UI**: http://localhost:8080/analytics/ui/
 - **API Documentation**: http://localhost:8080/api/analytics/docs
 - **Simulator Control**: http://localhost:8003/docs
@@ -204,10 +208,8 @@ POST   /api/v1/kpi/calculate         # Calculate KPIs
 ### Query Service (Port 8002)
 
 ```
-POST   /api/v1/voice/query           # Natural language query (OVOS)
-GET    /api/v1/energy/machine/{id}   # Get machine energy data
-GET    /api/v1/energy/machines       # Get all machines data
-GET    /api/v1/production/{id}       # Get production metrics
+Reserved for future query APIs. The current container is intentionally a
+placeholder and is not part of release health expectations.
 ```
 
 ### Simulator Service (Port 8003)
@@ -226,29 +228,33 @@ Full API documentation: http://localhost/api/docs
 
 ## 🎤 OVOS Integration
 
-EnMS is designed to work with Open Voice OS. Example voice commands:
+HumanEnerDIA is designed to work with Open Voice OS through the companion OVOS
+skill and REST bridge. Example voice commands:
 
 - *"What's the energy consumption of compressor 1 in the last hour?"*
 - *"Show me machines using more than 50 kilowatts"*
 - *"How is temperature affecting HVAC efficiency today?"*
 
-The current OVOS stack uses a hybrid routing path: heuristic and Adapt matching handle the normal fast path, and harder queries can escalate to a local Qwen3.5-2B GGUF fallback model. That fallback is validated before calling backend APIs, so the upgrade increases local model capacity without changing the main fast-path behavior.
+The current OVOS stack uses a hybrid routing path: heuristic and Adapt matching
+handle the normal fast path, and harder queries can optionally escalate to a
+local Qwen3.5-2B GGUF fallback model. The fallback is disabled in the base
+full-stack bundle unless `INSTALL_LLM_FALLBACK=true` is set and the model file
+is supplied separately.
 
 ### Integration Endpoint
 
 ```bash
-curl -X POST http://localhost:8002/api/v1/voice/query \
+curl -X POST http://localhost:5000/query \
   -H "Content-Type: application/json" \
   -d '{
-    "intent": "energy_consumption",
-    "entities": {
-      "machine": "compressor-1",
-      "timeframe": "last_hour"
-    }
+    "text": "what is the power of compressor one",
+    "session_id": "readme-smoke"
   }'
 ```
 
-See [OVOS Integration Guide](docs/ovos-integration.md) for details.
+See [ENMS API Documentation for OVOS](docs/api-documentation/ENMS-API-DOCUMENTATION-FOR-OVOS.md)
+and the WASABI release docs under [docs/wasabi-shop](docs/wasabi-shop/) for
+the distributable skill and full-stack packaging flow.
 
 ---
 
@@ -258,7 +264,7 @@ See [OVOS Integration Guide](docs/ovos-integration.md) for details.
 enms/
 ├── docker-compose.yml           # Service orchestration
 ├── .env.example                 # Environment template
-├── setup.sh                     # One-command installer
+├── setup.sh                     # Guided setup helper
 ├── docs/                        # Documentation
 ├── nginx/                       # API Gateway config
 ├── portal/                      # Unified web interface
@@ -267,7 +273,7 @@ enms/
 ├── database/                    # PostgreSQL schema & init
 ├── simulator/                   # Factory data generator
 ├── analytics/                   # ML service (Python/FastAPI)
-├── query-service/               # Query API (Python/FastAPI)
+├── query-service/               # Placeholder for future query APIs
 ├── mqtt/                        # Mosquitto configuration
 ├── redis/                       # Redis configuration
 └── scripts/                     # Utility scripts
@@ -290,13 +296,12 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 ### Running Tests
 
 ```bash
-# Run all tests
-./scripts/test.sh
-
-# Run specific service tests
-docker-compose exec analytics pytest
-docker-compose exec query-service pytest
+docker compose config
+docker compose exec analytics pytest
 ```
+
+The query-service container is currently a placeholder, so it does not have a
+release test suite.
 
 ### Viewing Logs
 
@@ -359,7 +364,9 @@ BACKUP_RETENTION_DAYS=30
 - [Project Knowledge Base](Project-Knowledge-Base.md) - Architecture & development guide
 - [API Documentation](docs/api-documentation/) - REST API reference
 - [ISO 50001 Guide](docs/ISO-50001-IMPLEMENTATION-GUIDE.md) - Energy management standards
-- [OVOS Integration](docs/README-OVOS-INTEGRATION.md) - Voice assistant integration
+- [WASABI Release Runbook](docs/wasabi-shop/HUMANERDIA_WASABI_RELEASE_RUNBOOK.md) - release and shop publishing checklist
+- [Full Stack Installation](docs/wasabi-shop/HUMANERDIA_FULL_STACK_INSTALLATION.md) - buyer-facing deployment guide
+- [ENMS API Documentation for OVOS](docs/api-documentation/ENMS-API-DOCUMENTATION-FOR-OVOS.md) - OVOS/backend API contract
 
 ---
 
@@ -405,7 +412,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [x] Core monitoring and dashboards
 - [x] ML-powered analytics
 - [x] API-first architecture
-- [ ] OVOS voice integration (In Progress)
+- [x] OVOS voice integration through companion skill and REST bridge
 - [ ] Mobile app
 - [ ] Multi-tenancy support
 - [ ] Cloud deployment templates (AWS, Azure, GCP)

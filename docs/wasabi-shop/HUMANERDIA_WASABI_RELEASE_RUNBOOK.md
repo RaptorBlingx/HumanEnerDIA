@@ -1,11 +1,17 @@
 # HumanEnerDIA WASABI Shop Release Runbook
 
 This runbook turns the WASABI plan into an operational checklist for publishing
-the HumanEnerDIA OVOS skill as a WASABI White Label Shop product.
+two HumanEnerDIA WASABI White Label Shop products:
 
-## 1. Release Artifact
+- the standalone OVOS skill
+- the full stack deployment bundle
 
-Build the shop upload ZIP from the OVOS repository:
+For overall production delivery criteria, see
+[`../DELIVERY_READINESS.md`](../DELIVERY_READINESS.md).
+
+## 1. Release Artifacts
+
+Build the standalone OVOS skill ZIP from the OVOS repository:
 
 ```bash
 cd /home/ubuntu/ovos-llm
@@ -21,6 +27,32 @@ Keep the optional Qwen model outside the main ZIP:
 
 - `Qwen3.5-2B-Q4_K_M.gguf`
 - `/home/ubuntu/ovos-llm/releases/Qwen3.5-2B-Q4_K_M.gguf.sha256`
+
+Build the full stack deployment bundle from the HumanEnerDIA repository:
+
+```bash
+cd /home/ubuntu/humanergy
+./scripts/package_wasabi_full_stack.sh 1.0.0
+```
+
+Upload:
+
+- `/home/ubuntu/humanergy/releases/HumanEnerDIA-full-stack-v1.0.0.tar.gz`
+- `/home/ubuntu/humanergy/releases/HumanEnerDIA-full-stack-v1.0.0.tar.gz.sha256`
+
+Publish both products to WASABI with one command:
+
+```bash
+cd /home/ubuntu/wasabi
+./tools/publish_humanerdia_catalog.sh all
+```
+
+Or publish just one artifact:
+
+```bash
+./tools/publish_humanerdia_catalog.sh ovos-skill
+./tools/publish_humanerdia_catalog.sh full-stack
+```
 
 ## 2. WASABI Shop Install
 
@@ -49,24 +81,26 @@ After first login:
 If the WASABI compose file binds port `80`, adjust the compose override or
 reverse proxy so the local test URL is `http://SERVER_IP:18080`.
 
-## 3. Shop Product
+## 3. Shop Products
 
-Create a free virtual product:
+Create two free virtual products:
 
-- Name: `HumanEnerDIA OVOS Skill for Industrial Energy Management`
-- Category/tags: digital assistant, OVOS skill, energy management, ISO 50001,
-  manufacturing, AI assistant.
-- Download: `HumanEnerDIA-OVOS-skill-v1.0.0.zip`
-- Additional attachment: release notes and SHA256 checksum.
-- Optional model note: the Qwen GGUF model is distributed separately.
+- `HumanEnerDIA OVOS Skill for Industrial Energy Management`
+- `HumanEnerDIA Full Stack for Industrial Energy Management`
 
-Use the product copy in `HUMANERDIA_WASABI_SHOP_PRODUCT.md`.
+Recommended category for both current listings: `Skills` (category `12`).
+
+Use these product copy sources:
+
+- `HUMANERDIA_WASABI_SHOP_PRODUCT.md` for the standalone skill
+- `HUMANERDIA_FULL_STACK_WASABI_SHOP_PRODUCT.md` for the full stack
 
 ## 4. Verification
 
-Run these checks before publishing or re-publishing the product:
+Run these checks before publishing or re-publishing either product:
 
 ```bash
+docker compose config
 curl -fsS http://localhost:8080/health
 curl -fsS http://localhost:8001/api/v1/health
 curl -fsS http://localhost:5000/health
@@ -98,16 +132,25 @@ Before upload, confirm the ZIP does not contain:
 
 Rotate any credential that previously appeared in docs or tracked examples.
 
+For the full-stack tarball, run the same exclusion check against the archive and
+confirm it does not include `.env`, Git metadata, Docker volumes, `node_modules`,
+model caches, analytics saved models, or OVOS GGUF files.
+
 ## 6. Current Release State
 
-As of 2026-05-20, the local WASABI deployment is running on:
+As of 2026-05-21, the local WASABI deployment is running on:
 
 - Front office: `http://10.33.10.104:18080/`
 - Shop category: `http://10.33.10.104:18080/wasabiSHOP/`
-- Product page: `http://10.33.10.104:18080/skills/38-humanenerdia-ovos-skill-for-industrial-energy-management.html`
+- OVOS skill product page: `http://10.33.10.104:18080/skills/38-humanenerdia-ovos-skill-for-industrial-energy-management.html`
+- Full stack product page: `http://10.33.10.104:18080/skills/39-humanenerdia-full-stack-for-industrial-energy-management.html`
 
-The HumanEnerDIA product is product id `38`, configured as a free virtual
-download, and the order/download flow was verified with order id `14`.
+Current HumanEnerDIA product ids:
+
+- `38` for the OVOS skill bundle
+- `39` for the full stack deployment bundle
+
+Both are configured as free virtual downloads.
 
 Release backup:
 

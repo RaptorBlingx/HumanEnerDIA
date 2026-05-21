@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   # ============================================================================
   # API GATEWAY - Single entry point for all services
   # ============================================================================
   nginx:
     image: nginx:1.25-alpine
-    container_name: enms-nginx
+    container_name: ${CONTAINER_PREFIX:-enms}-nginx
     ports:
       - "${NGINX_HTTP_PORT:-8080}:80"
       - "${NGINX_HTTPS_PORT:-8443}:443"
@@ -37,7 +35,7 @@ services:
   # ============================================================================
   postgres:
     image: timescale/timescaledb:latest-pg16
-    container_name: enms-postgres
+    container_name: ${CONTAINER_PREFIX:-enms}-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -66,7 +64,7 @@ services:
       retries: 5
 
   # ============================================================================
-  # MQTT BROKER - Eclipse Mosquitto (Zero-touch with built-in credentials)
+  # MQTT BROKER - Eclipse Mosquitto (credentials supplied through .env)
   # ============================================================================
   mqtt:
     build:
@@ -75,13 +73,13 @@ services:
       args:
         MQTT_USERNAME: ${MQTT_USERNAME}
         MQTT_PASSWORD: ${MQTT_PASSWORD}
-    container_name: enms-mqtt
+    container_name: ${CONTAINER_PREFIX:-enms}-mqtt
     environment:
       MQTT_USERNAME: ${MQTT_USERNAME}
       MQTT_PASSWORD: ${MQTT_PASSWORD}
     ports:
-      - "1883:1883"
-      - "9001:9001"
+      - "${MQTT_EXTERNAL_PORT:-1883}:1883"
+      - "${MQTT_WEBSOCKET_PORT:-9001}:9001"
     volumes:
       - mqtt-data:/mosquitto/data
       - mqtt-logs:/mosquitto/log
@@ -99,7 +97,7 @@ services:
   # ============================================================================
   redis:
     image: redis:7-alpine
-    container_name: enms-redis
+    container_name: ${CONTAINER_PREFIX:-enms}-redis
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     ports:
       - "${REDIS_EXTERNAL_PORT:-6380}:6379"
@@ -121,7 +119,7 @@ services:
     build:
       context: ./simulator
       dockerfile: Dockerfile
-    container_name: enms-simulator
+    container_name: ${CONTAINER_PREFIX:-enms}-simulator
     environment:
       MQTT_HOST: ${MQTT_HOST:-mqtt}
       MQTT_PORT: 1883
@@ -158,7 +156,7 @@ services:
       build:
         context: ./nodered
         dockerfile: Dockerfile
-      container_name: enms-nodered
+      container_name: ${CONTAINER_PREFIX:-enms}-nodered
       restart: unless-stopped
       ports:
         - "${NODERED_PORT:-1881}:1880"
@@ -197,7 +195,7 @@ services:
   # ============================================================================
   grafana:
     image: grafana/grafana:10.2.0
-    container_name: enms-grafana
+    container_name: ${CONTAINER_PREFIX:-enms}-grafana
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
@@ -232,7 +230,7 @@ services:
     build:
       context: ./analytics
       dockerfile: Dockerfile
-    container_name: enms-analytics
+    container_name: ${CONTAINER_PREFIX:-enms}-analytics
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
@@ -267,13 +265,13 @@ services:
       retries: 3
 
   # ============================================================================
-  # QUERY SERVICE - API for complex queries and OVOS integration
+  # QUERY SERVICE - Reserved placeholder for future query APIs
   # ============================================================================
   query-service:
     build:
       context: ./query-service
       dockerfile: Dockerfile
-    container_name: enms-query-service
+    container_name: ${CONTAINER_PREFIX:-enms}-query-service
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
@@ -308,7 +306,7 @@ services:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
-    container_name: enms-auth-service
+    container_name: ${CONTAINER_PREFIX:-enms}-auth-service
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
@@ -329,7 +327,7 @@ services:
       AUTH_SERVICE_PORT: 5500
       DEBUG_MODE: ${DEBUG_MODE:-false}
     ports:
-      - "5500:5500"
+      - "${AUTH_SERVICE_EXTERNAL_PORT:-5500}:5500"
     depends_on:
       postgres:
         condition: service_healthy
@@ -349,9 +347,9 @@ services:
     build:
       context: ./chatbot/rasa
       dockerfile: Dockerfile.actions
-    container_name: enms-rasa-actions
+    container_name: ${CONTAINER_PREFIX:-enms}-rasa-actions
     ports:
-      - "5055:5055"
+      - "${RASA_ACTIONS_PORT:-5055}:5055"
     networks:
       - enms-network
     restart: unless-stopped
@@ -369,7 +367,7 @@ services:
     build:
       context: ./chatbot/rasa
       dockerfile: Dockerfile
-    container_name: enms-rasa
+    container_name: ${CONTAINER_PREFIX:-enms}-rasa
     ports:
       - "${RASA_PORT:-5005}:5005"
     depends_on:
@@ -392,7 +390,7 @@ services:
     build:
       context: ./chatbot
       dockerfile: Dockerfile
-    container_name: enms-chatbot
+    container_name: ${CONTAINER_PREFIX:-enms}-chatbot
     environment:
       NODE_ENV: production
       BACKEND_PORT: 5006
@@ -419,21 +417,21 @@ services:
 networks:
   enms-network:
     driver: bridge
-    name: enms-network
+    name: ${ENMS_NETWORK_NAME:-enms-network}
 
 # ============================================================================
 # VOLUMES - Persistent data storage
 # ============================================================================
 volumes:
   postgres-data:
-    name: enms-postgres-data
+    name: ${VOLUME_PREFIX:-enms}-postgres-data
   mqtt-data:
-    name: enms-mqtt-data
+    name: ${VOLUME_PREFIX:-enms}-mqtt-data
   mqtt-logs:
-    name: enms-mqtt-logs
+    name: ${VOLUME_PREFIX:-enms}-mqtt-logs
   redis-data:
-    name: enms-redis-data
+    name: ${VOLUME_PREFIX:-enms}-redis-data
   nodered-data:
-    name: enms-nodered-data
+    name: ${VOLUME_PREFIX:-enms}-nodered-data
   grafana-data:
-    name: enms-grafana-data
+    name: ${VOLUME_PREFIX:-enms}-grafana-data
