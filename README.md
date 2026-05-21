@@ -84,8 +84,8 @@ portal, and an OVOS-ready Digital Industrial Assistant integration.
 
 ```bash
 # Clone the repository
-git clone https://github.com/raptorblingx/enms.git
-cd enms
+git clone https://github.com/RaptorBlingx/HumanEnerDIA.git humanergy
+cd humanergy
 
 # Copy environment template
 cp .env.example .env
@@ -101,8 +101,8 @@ nano .env
 
 ```bash
 # Clone and configure
-git clone https://github.com/raptorblingx/enms.git
-cd enms
+git clone https://github.com/RaptorBlingx/HumanEnerDIA.git humanergy
+cd humanergy
 cp .env.example .env
 
 # Build and start
@@ -402,8 +402,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/raptorblingx/enms/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/raptorblingx/enms/discussions)
+- **Issues**: [GitHub Issues](https://github.com/RaptorBlingx/HumanEnerDIA/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/RaptorBlingx/HumanEnerDIA/discussions)
 
 ---
 

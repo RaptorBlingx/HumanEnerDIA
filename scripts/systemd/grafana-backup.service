@@ -1,6 +1,6 @@
 [Unit]
 Description=EnMS Grafana Dashboard Backup
-Documentation=https://github.com/raptorblingx/enms
+Documentation=https://github.com/RaptorBlingx/HumanEnerDIA
 After=docker.service
 Requires=docker.service
 
@@ -8,10 +8,10 @@ Requires=docker.service
 Type=oneshot
 User=ubuntu
 Group=ubuntu
-WorkingDirectory=/home/ubuntu/enms
-ExecStart=/home/ubuntu/enms/scripts/backup-grafana-dashboards.sh
-StandardOutput=append:/home/ubuntu/enms/logs/grafana-backup.log
-StandardError=append:/home/ubuntu/enms/logs/grafana-backup-error.log
+WorkingDirectory=/home/ubuntu/humanergy
+ExecStart=/home/ubuntu/humanergy/scripts/backup-grafana-dashboards.sh
+StandardOutput=append:/home/ubuntu/humanergy/logs/grafana-backup.log
+StandardError=append:/home/ubuntu/humanergy/logs/grafana-backup-error.log
 
 # Restart policy
 Restart=no

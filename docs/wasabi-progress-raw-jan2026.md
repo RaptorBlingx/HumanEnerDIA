@@ -802,15 +802,15 @@ User: "Show me Boiler-1 instead"
 
 ### GitHub Repositories
 - **ovos-llm:** https://github.com/RaptorBlingx/ovos-llm.git
-- **enms:** https://github.com/RaptorBlingx/enms.git
+- **HumanEnerDIA:** https://github.com/RaptorBlingx/HumanEnerDIA.git
 
 ### Branches
 - **main** - Production-ready code
-- **feat/zero-touch-deployment** - Development branch with latest features
+- **dev** - Delivery preparation and release-candidate work
 
 ### Commit Statistics (Dec 24, 2025 - Jan 22, 2026)
 - **ovos-llm:** 18 commits
-- **enms:** 37 commits
+- **HumanEnerDIA:** 37 commits
 - **Total:** 55 commits
 
 ---
