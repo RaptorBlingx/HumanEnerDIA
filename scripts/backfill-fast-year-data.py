@@ -19,13 +19,14 @@ import asyncio
 from datetime import datetime, timedelta
 import random
 import math
+import os
 
 DB_CONFIG = {
     'host': 'localhost',
     'port': 5432,
     'database': 'enms',
-    'user': 'raptorblingx',
-    'password': 'raptorblingx'
+    'user': os.getenv('POSTGRES_USER', 'enms_user'),
+    'password': os.getenv('POSTGRES_PASSWORD', '')
 }
 
 # Machines with simple power profiles

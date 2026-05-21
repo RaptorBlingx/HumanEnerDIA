@@ -12,9 +12,9 @@ datasources:
     access: proxy
     url: postgres:5432
     database: enms
-    user: raptorblingx
+    user: ${POSTGRES_USER}
     secureJsonData:
-      password: raptorblingx
+      password: ${POSTGRES_PASSWORD}
     jsonData:
       sslmode: 'disable'
       postgresVersion: 1600  # PostgreSQL 16

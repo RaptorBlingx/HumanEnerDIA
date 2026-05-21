@@ -37,12 +37,28 @@ class SEUBaselineService:
     """
     
     _instance = None
+    _DISALLOWED_REGRESSION_FEATURES = {
+        'consumption_kwh',
+        'consumption_m3',
+        'consumption_kg',
+        'total_energy_kwh',
+        'avg_power_kw',
+        'max_power_kw',
+        'avg_current_a',
+        'avg_voltage_v'
+    }
     
     def __new__(cls):
         """Singleton pattern to reuse instance."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
+
+    @classmethod
+    def _is_disallowed_regression_feature(cls, feature_name: str) -> bool:
+        """Reject energy measurements and direct proxies as regression drivers."""
+        normalized = feature_name.lower()
+        return normalized.startswith('consumption_') or normalized in cls._DISALLOWED_REGRESSION_FEATURES
     
     async def train_baseline(
         self, 
@@ -254,12 +270,25 @@ class SEUBaselineService:
         available_columns = set(sample.keys())
         
         logger.info(f"[SEU-TRAIN] Available columns in data: {sorted(available_columns)}")
+
+        safe_requested_features = []
+        excluded_features = []
+        for feature in requested_features:
+            if self._is_disallowed_regression_feature(feature):
+                excluded_features.append(feature)
+            else:
+                safe_requested_features.append(feature)
+
+        if excluded_features:
+            logger.warning(
+                f"[SEU-TRAIN] Excluding non-driver features from regression input: {excluded_features}"
+            )
         
         # Determine which requested features are actually in the data
         # Note: Some features might have been renamed during aggregation
         # (e.g., 'consumption_kwh' might be stored as 'consumption_kwh')
         feature_names = []
-        for feature in requested_features:
+        for feature in safe_requested_features:
             if feature in available_columns:
                 feature_names.append(feature)
             else:
@@ -269,11 +298,17 @@ class SEUBaselineService:
                         feature_names.append(col)
                         logger.info(f"[SEU-TRAIN] Mapped '{feature}' → '{col}'")
                         break
+
+        feature_names = [
+            feature_name
+            for feature_name in feature_names
+            if not self._is_disallowed_regression_feature(feature_name)
+        ]
         
         if not feature_names:
             raise ValueError(
-                f"None of requested features {requested_features} found in data. "
-                f"Available columns: {sorted(available_columns)}"
+                "No valid regression drivers found after excluding energy measurement "
+                f"features. Requested: {requested_features}. Available columns: {sorted(available_columns)}"
             )
         
         logger.info(f"[SEU-TRAIN] Using features: {feature_names}")

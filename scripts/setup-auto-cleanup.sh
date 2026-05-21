@@ -5,13 +5,13 @@ echo "🔧 Setting up automated Docker cleanup for EnMS"
 echo ""
 
 # Check if cleanup script exists
-if [ ! -f "/home/ubuntu/enms/scripts/docker-cleanup.sh" ]; then
+if [ ! -f "/home/ubuntu/humanergy/scripts/docker-cleanup.sh" ]; then
     echo "❌ Error: docker-cleanup.sh not found!"
     exit 1
 fi
 
 # Make cleanup script executable
-chmod +x /home/ubuntu/enms/scripts/docker-cleanup.sh
+chmod +x /home/ubuntu/humanergy/scripts/docker-cleanup.sh
 
 # Check current crontab
 echo "📋 Current crontab:"
@@ -45,7 +45,7 @@ case $choice in
 esac
 
 # Add to crontab
-CRON_JOB="$CRON_SCHEDULE cd /home/ubuntu/enms && ./scripts/docker-cleanup.sh -y >> /var/log/docker-cleanup.log 2>&1"
+CRON_JOB="$CRON_SCHEDULE cd /home/ubuntu/humanergy && ./scripts/docker-cleanup.sh -y >> /var/log/docker-cleanup.log 2>&1"
 
 # Check if already exists
 if crontab -l 2>/dev/null | grep -q "docker-cleanup.sh"; then
@@ -72,7 +72,7 @@ echo ""
 echo "📝 Logs will be written to: /var/log/docker-cleanup.log"
 echo ""
 echo "To test now:"
-echo "  cd /home/ubuntu/enms && ./scripts/docker-cleanup.sh"
+echo "  cd /home/ubuntu/humanergy && ./scripts/docker-cleanup.sh"
 echo ""
 echo "To view logs:"
 echo "  tail -f /var/log/docker-cleanup.log"

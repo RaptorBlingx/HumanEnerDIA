@@ -1,6 +1,6 @@
 [Unit]
 Description=EnMS Grafana Dashboard Backup Timer
-Documentation=https://github.com/raptorblingx/enms
+Documentation=https://github.com/RaptorBlingx/HumanEnerDIA
 Requires=grafana-backup.service
 
 [Timer]

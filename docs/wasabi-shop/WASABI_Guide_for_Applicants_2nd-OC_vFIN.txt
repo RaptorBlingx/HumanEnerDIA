@@ -1,0 +1,1220 @@
+Guide for Applicants
+
+WHITE-LABEL SHOP FOR DIGITAL
+INTELLIGENT ASSISTANCE AND HUMAN-AI
+COLLABORATION IN MANUFACTURING
+OPEN CALL FOR EXPERIMENTS 2
+GUIDE FOR APPLICANTS
+
+July 2023 (v1)
+
+Guide for Applicants
+
+Table of Contents
+1
+
+2
+
+3
+
+INTRODUCTION TO WASABI ........................................................................................................... 3
+1.1
+
+Project summary...........................................................................................................................................3
+
+1.2
+
+Overview of the three existing WASABI Use Cases ......................................................................................4
+
+1.3
+
+I4MS initiative ...............................................................................................................................................4
+
+GENERAL INFORMATION ................................................................................................................ 5
+2.1
+
+Objectives of the call for experiments..........................................................................................................5
+
+2.2
+
+Descriptive information ................................................................................................................................5
+
+2.3
+
+Experiment goals ..........................................................................................................................................6
+
+2.4
+
+Definition of key concepts ............................................................................................................................6
+
+2.5
+
+WASABI Support ...........................................................................................................................................8
+
+OPEN CALL REQUIREMENTS..........................................................................................................10
+3.1
+
+Who can apply? ..........................................................................................................................................10
+
+3.2
+
+Eligibility criteria .........................................................................................................................................11
+
+4
+
+EXPECTATION FOR APPLICANTS .................................................................................................... 11
+
+5
+
+OBLIGATIONS OF SELECTED EXPERIMENT WINNERS .......................................................................12
+
+6
+
+7
+
+5.1
+
+Experiment activities ..................................................................................................................................12
+
+5.2
+
+Experiment timeline ...................................................................................................................................13
+
+BUDGET CONSIDERATIONS ...........................................................................................................15
+6.1
+
+Structure of the budget and funding rate ..................................................................................................15
+
+6.2
+
+Payments ....................................................................................................................................................15
+
+EXPERIMENT DESIGN, SUBMISSION AND EVALUATION ....................................................................16
+7.1
+
+Step 1: Experiment design ..........................................................................................................................16
+
+7.2
+
+Step 2: Submission of the proposal ............................................................................................................17
+
+7.3
+
+Step 3: Evaluation and selection.................................................................................................................18
+
+8
+
+INTELLECTUAL PROPERTY RIGHTS ............................................................................................... 20
+
+9
+
+SUPPORT FOR APPLICANTS ......................................................................................................... 20
+9.1
+
+Call Helpdesk ..............................................................................................................................................20
+
+9.2
+
+Useful Documents ......................................................................................................................................20
+
+9.3
+
+Official WASABI website .............................................................................................................................20
+
+10 PROJECT PARTNERS ....................................................................................................................21
+
+2
+
+Guide for Applicants
+
+1 INTRODUCTION TO WASABI
+1.1 Project summary
+WASABI aims to provide SMEs with the tools and knowledge to improve workers’ capacities and performance,
+providing advanced user interfaces for continuous augmented hybrid decision-making. Such interfaces assist
+employees in interacting with complex software, effectively reducing its skill floor. Consequently, humans will find
+using the software easier, becoming more open to applying it effectively.
+One of the key technologies in WASABI’s solution portfolio is the Digital Intelligent Assistant (DIA) – a humanlike, task-oriented artificial intelligence (AI) with a conversational interface.
+An assistant supports or entirely takes over time-consuming, stressful, or otherwise undesirable activities for the
+client. A Digital Assistant (DA) does the same through software for its user(s). WASABI focuses on DAs, that are also
+conversational agents. A conversational agent is an application that accepts user input in the form of voice or text
+and provides responses in natural language. Assistants on mobile devices and Smartspeakers with screens allow
+rich media responses. Besides, conversational designers can build dialogs so that the assistant has one or more
+personas to interact with various user groups of age, gender, and social, educational, and cultural backgrounds.
+Figure 1 illustrates the working principle of a digital assistant for the industry.
+
+Figure 1. Working principle of a digital assistant for the industry [BIBA – Bremer Institut fuer Produktion und Logistik GmbH (2020)]
+
+In addition, WASABI consortium develops a federated, white-label shop (the WASABI White Label Shop) based on
+PrestaShop – i.e., an acknowledged open-source shop framework – to accelerate the uptake of intelligent digital
+assistance. In particular, the platform allows users to create customized shop instances tailored to various
+applications, offering flexibility, diverse business models, and decentralized data control. The WWLS serves as a
+foundational tool for WASABI deployment, enabling owners to quickly build and deploy tailored solutions.
+WASABI is opening its second Open Call (OC) for experiments that will provide financial support to at least 10
+funded experiments led by SMEs. This open call is designed to support AI-based digital assistance
+experiments involving SMEs from manufacturing. The call focuses on attracting applicants from all
+manufacturing sectors and aims to develop modules/components for the WASABI web shop, and to expand the
+WASABI solutions portfolio.
+The open call will strive to improve the sustainability of processes and products, make industrial processes
+more agile, and make manufacturing jobs more attractive for workers through better human-machine
+interfaces and more intuitive interaction with digital tools.
+The present Guide for Applicants details the WASABI open call and how to apply.
+
+3
+
+Guide for Applicants
+
+1.2 Overview of the three existing WASABI Use Cases
+This section presents three WASABI business cases to help applicants identify potential experiments using digital
+intelligent assistants. Find more information on the WASABI website.
+Business Case 1: Augmented waste management and valorisation
+This case focuses on waste management in manufacturing, aiming to valorise waste. When a production process
+cannot avoid generating waste for technical reasons, this waste may be reusable by other organizations, provided
+its characteristics meet the requirements. Advanced user interfaces assist workers in describing production waste
+to determine whether it qualifies for reuse by third parties. Workers provide descriptions of waste via a mobile
+conversational interface, supplemented with rich-media records, such as images and videos of waste and relevant
+machinery. If users require specific expert-level waste descriptions, e.g., a laboratory analysis, users are guided to
+contact local experts. This case seeks to enhance sustainability by significantly simplifying the waste valorisation
+process.
+Business Case 2: Assisted workforce management after regional and global crises
+This case focuses on managing the manufacturing workforce following a regional crisis that forces many people
+to search for employments. Such crises may lead individuals to flee or migrate to, or within, Europe. These
+individuals are likely to possess diverse job experiences, education, ethnic, social, and demographic backgrounds
+as well as different languages, which can pose challenges to workplace integration. Manufacturing organizations
+suffering facing workforce shortages can leverage human-centred AI-based digital assistance solutions to
+onboard new recruits more efficiently. Key characteristics of these solutions include multilingual conversational
+interfaces, customizable personas, frustration-mitigation mechanisms, and adaptable assistance based on
+learning progress. This case aims to enhance societal resilience after a crisis while increasing organisational agility
+by rapidly expanding and upskilling the workforce. Additionally, employers can integrate new workers faster and
+free the time of the existing employees, resulting in productivity gains.
+Business case 3: Assisted quality assurance for sustainable products
+This case focuses on augmenting product quality testing to improve product and worker safety, carbon footprint,
+enhance workers’ cognitive skills and reduce the burden of repetitive, monotonous, error-prone, and knowledgeintensive activities. A digital assistant supports workers in product testing by interactively executing a validation
+protocol that ensures the highest safety and sustainability standards while simultaneously reducing validation
+time and energy consumption. To this end, the assistant integrates trustworthy machine learning models to learn
+key product stress characteristics from past testing data, generating synthetic, high-throughput product quality
+testing datasets. During the testing definition phase, the assistant l helps the operator select the dataset that best
+suits the specific testing conditions, European directives, and international safety, performance, and
+sustainability standards. In the testing phase, operators interact with the assistant to receive valuable information
+on intermediate results. The assistant also collects user feedback, which will be used for training data labelling.
+Through this continuous feedback loop and adaptive validation protocol, the assistant and the operator
+collaborate to increase the sustainability and efficiency of the product quality testing process.
+
+1.3 I4MS initiative
+The WASABI project is aligned with the goals and objectives of the I4MS initiative, a Horizon Europe programme
+that supports manufacturing SMEs with their digital transformation. I4MS is also one of the European
+Commission’s key initiatives regarding the continued development of the pan-EU network of Digital Innovation
+Hubs.
+
+4
+
+Guide for Applicants
+
+2 GENERAL INFORMATION
+2.1 Objectives of the call for experiments
+WASABI’s 2nd Open Call aims to fund consortia made of 2 or 3 entities with an SME from the manufacturing
+sector acting as the coordinator. This means that the SME will take the lead in managing the project, coordinate
+the implementation of the proposed activities, be responsible for communication with the WASABI consortium,
+and ensure compliance with the obligations outlined in Chapter 5.
+The objective of the experiment is two-fold:
+-
+
+first, the experiment should develop and use a Digital Intelligent Assistant (DIA) - AI-based assistant
+(OVOS skill) - for their processes or products.
+second, the experiment should deploy and test a PrestaShop-based shop – WASABI marketplace - to
+distribute the DIA developed.
+
+The open call aligns with the European Union’s goal of achieving greater sustainability and resilience for European
+manufacturers and contributing to goals such as the Green Deal and building capacity against future crises.
+Furthermore, adding experiments to the WASABI ecosystem will directly increase the number of AI-based
+assistance applications in SMEs and encourage their broader adoption. The open call also aims to increase
+innovation capacity and make digital assistance technologies and related services available to different
+manufacturing companies.
+
+2.2 Descriptive information
+Table 1. WASABI 2nd Open Call summary fiche
+
+ITEM
+
+DETAILS
+
+Open Call Identifier:
+
+WASABI-OC2
+
+Project Full Name:
+
+White-label shop for digital intelligent assistance and human-AI collaboration in
+manufacturing
+
+Acronym:
+
+WASABI
+
+Open Call Deadline:
+
+October 9, 2025, 17:00 CEST
+
+Expected duration of the
+experiment:
+
+12 Months
+
+Total Funding of the
+Open Call:
+
+€ 1.522.250,00
+
+Maximum financial
+support per experiment
+
+€ 125.000,00
+
+Who Can Apply
+
+Consortia composed of 2 or 3 entities are eligible to apply, with the conditions
+described in section 3.1.
+
+Maximum financial
+support per third party:
+
+The maximum amount of financial support that can be granted to each entity
+within a consortium is of €60.000.
+
+Funding Rate
+
+•
+•
+
+For-profit entities have a 60% funding rate.
+Non-profit entities have a 100% funding rate.
+
+5
+
+Guide for Applicants
+
+Indicative
+Budget:
+
+Expenditure Proposals should present an indicative expenditure budget in their proposal.
+
+Submission Language:
+
+English
+
+Submission Site:
+
+https://wasabi.ems-innovalia.org/user/registration
+
+Contact Email:
+
+wasabi_opencall@innovalia.org
+
+2.3 Experiment goals
+The WASABI OC2 is seeking experiments that aim to improve critical processes or products in the manufacturing
+sector by integrating conversation-based digital assistance.
+Each selected experiment must:
+1. Develop a digital assistant to address a specific challenge in manufacturing:
+o
+
+Develop an OVOS skill for the targeted challenge.
+
+o
+
+Evaluate the skill in an experiment with the end-user SME.
+
+o
+
+Use the “Docker Compose project for OVOS” provided by the WASABI Consortium.
+
+2. Create a WASABI shop to distribute the developed OVOS skill.
+o
+
+Create a marketplace and related shop making it operationally.
+
+o
+
+Set up the core functional module for the seller profile.
+
+o
+
+Upload the developed OVOS skill to the shop for distribution or sale.
+
+o
+
+Evaluate the shop and its core modules by filling out the evaluation forms provided by WASABI.
+
+Key concept definitions relevant to the implementation of the experiment are provided in Chapter 2.4. Additional
+technical context and guidance to support applicants in understanding the tools, technologies, and frameworks
+made available through the WASABI project can be found in Chapter 2.5.
+
+2.4 Definition of key concepts
+This chapter presents a series of definitions related to the WASABI digital assistant and shop. It includes a
+description of the digital assistant and the shop components distinguishing between core components, which
+are mandatory, and optional components, which applicants may choose to include to add functionalities or
+support based on their specific needs and strategies.
+
+2.4.1 Digital assistant
+2.4.1.1
+
+Core components
+
+o
+
+OVOS: An open-source voice assistant framework focusing on privacy and customizability1. More details can
+be found at openvoiceos.org.
+
+o
+
+Docker Compose project for OVOS: A git-based project containing pre-configured folders and files for
+deploying a minimalistic OVOS-based stack. It includes essential OVOS skills and is customizable with
+additional skills developed by the experiments. The project is equipped with a readme file providing
+deployment instructions for Linux systems, and it requires Docker version 26.0.0 or higher.
+
+1
+
+https://github.com/OpenVoiceOS
+
+6
+
+Guide for Applicants
+
+The Docker Compose project for OVOS is in BIBA’s self-hosted GitLab code repository. Access is restricted, and
+only invited parties can pull the code. The project contains the configuration for the containers illustrated in
+Figure 2.
+
+Figure 2: Container architecture of the Docker Compose project for OVOS
+The containers rely on public Docker images (e.g., maintained by the OVOS project). A few public OVOS skills
+are deployed to provide minimum functionality.
+The OVOS-related images change frequently, and older image versions are not always publicly accessible.
+Experiments must maintain copies of the images themselves to ensure they can demonstrate their experiment
+results.
+2.4.1.2
+
+Optional components
+
+o
+
+COALA App APK: An APK file used to install the COALA App on Android application, enabling interaction with
+WASABI’s OVOS infrastructure. The app is compatible with Android version 10 and higher. Each version of the
+COALA App is provided as a separate APK file, available to experiments upon request. The COALA App features
+a login function and chat interface for communication with an OVOS assistant, with messages relayed via the
+Hivemind service. User management is handled through Keycloak. The app is open-source (GPLv3 license),
+allowing modifications in accordance with the license terms. The COALA logo is a registered trademark.
+
+o
+
+rEUse platform: A platform for the traceability and management of circular entities. The platform itself can
+be deployed on the cloud or locally in a containerized form (docker) in case where there are important
+limitations with external connectivity. Provides REST APIs to interact programmatically in addition to the web
+interface available to end-users. Authentication is managed through either a local authentication component
+or -optionally- partial integration with key cloak for specific scenarios (requires extensive customization). Can
+support multiple users and provides attachment functionality to individual entries and fields. In the context
+of WASABI, it has been utilized to enable traceability functions for the end-users of the Waste Management
+skill.
+
+o
+
+WISE: An analytics component developed by ATLANTIS to support the DIA for Quality Assurance for WASABI.
+WISE stands for WASABI’s Intelligent quality Support Enhancement. Based on analytic algorithms, data
+acquisition and pre-processing, WISE monitors the status of critical industrial equipment to provide useful
+insights into the related processes upon request. Fully integrated into the DIA backend, it enhances the
+assistant’s responses with intelligent, data-driven context. Its individual functionalities can be adjusted after
+proper customisation and depending on the data available.
+
+o
+
+DocuBoT: An AI component based on pre-trained Large Language Model (LLM) that was integrated into the
+backed of Quality Assurance DIA. DocuBoT can act as a standalone personalized digital assistant that answers
+
+7
+
+Guide for Applicants
+
+complex questions in natural language, extracting information from available documents. The component
+integrates information from multiple sources to deliver concise, multilingual responses for professionals
+involved in quality assurance processes.
+o
+
+RASA: A conversational AI software for building text and voice-based assistants. More details can be found at
+rasa.com.
+
+o
+
+PREVENTION: An analytics component developed by ICCS to support the DIA for Quality Assurance for
+WASABI. PREVENTION stands for PREscriptiVE aNalyTIcs for quality OptimizatioN. It processes time-series
+sensorial and event data to provide reliable and meaningful insights regarding quality issues. It operates
+within the Analytics-as-a-Service paradigm, offering functionalities for descriptive, predictive, and
+prescriptive analytics.
+
+2.4.2 WASABI shop
+2.4.2.1
+
+o
+
+Core components
+
+WASABI White Label Shop (WWLS): The WASABI White Label Shop (WWLS) is an online distribution platform
+for digital assistance solutions. Built with open-source software (PrestaShop), it features an integrated shared
+dataspace for shop instances. The shop offers end-users a replicable tool to create the custom shop instances
+tailored to various application.
+
+2.4.2.2
+
+Optional components
+
+o
+
+Federation module: The WASABI Federation Module is an IDS Compliant component developed to facilitate
+federated querying of digital intelligent assistant skills, while allowing for secure and sovereign data exchange
+between participants of the WASABI Marketplace (Skill Owners, shop owners and skill buyers). To achieve
+these functionalities, participants should download and deploy the necessary software, following specific
+guidelines, and using the components to integrate with a corresponding WASABI marketplace instance. Based
+on the current architecture, the Federation Module could be considered as an optional component.
+
+o
+
+NFT Royalty module: The NFT Royalty Module is an extension for PrestaShop 8 that equips a standard
+marketplace with Web3 capabilities. Once installed it adds an Admin Dashboard for deploying and funding a
+royalty distribution smart contract, securely stores the marketplace’s admin wallet keys, and injects a “Skill
+Module” tab into the product workflow so administrators can mint each approved skill as an ERC‑721 NFT.
+During checkout the module records every purchase of a previously minted Skill as an on‑chain donation
+event and it includes both an aggregate royalty payout interface for the marketplace Administrator and an
+Author Dashboard where creators connect their MetaMask wallet to monitor or re‑allocate their royalty
+shares, all without touching PrestaShop core code.
+Because none of PrestaShop’s essential commerce functions (catalogue, cart, payment or order fulfilment)
+depend on this Web3 layer, the NFT Royalty Module is classified as an optional component. A merchant who
+does not require NFT minting or royalty automation can disable or uninstall it with no impact on the normal
+operation of the store, whereas those seeking blockchain functionality can add it without modifying core
+behavior.
+
+2.5 WASABI Support
+To ensure the successful execution of the experiments, the WASABI consortium provides targeted technical
+support aligned with the key activities each experiment is expected to carry out.
+The support is intended to assist the experiment teams in overcoming technical challenges and ensuring the
+successful execution of their projects. However, the WASABI consortium will not carry out the work of the
+experiments, nor generally support in how to setup computing infrastructure, networking, or fix IT security issues.
+
+8
+
+Guide for Applicants
+
+Therefore, at least one person needs to be nominated from applicant’s side who has skills and position to handle
+IT issues during the experiment.
+Support will be delivered through a variety of methods, including:
+•
+
+Webinar and workshop sessions introducing key components and offering practical deployment
+guidance;
+
+•
+
+Helpdesk support offering remote support via email, ticketing systems, or dedicated channels;
+
+•
+
+1:1 technical mentoring, delivered via Microsoft Teams to assist with component deployment and
+integration;
+
+•
+
+Documentation and manuals detailing installation, usage instructions, and best practices for
+component;
+
+•
+
+Video tutorial explaining core functionalities of the component and offering practical use-case examples.
+
+The table below summarizes the available support for each WASABI component:
+COMPONENT
+
+TYPE OF SUPPORT
+
+DELIVERY METHOD(S)
+
+OVOS skill
+
+Support with customization of OVOS skills.
+
+Documentation and manual;
+tutorial; 1:1 technical mentoring.
+
+Docker
+project
+
+Video
+
+Compose Support with the deployment of the Docker Webinar; Documentation and manual;
+Compose project for OVOS.
+1:1 technical mentoring.
+
+COALA App APK
+
+Provision of downloadable APK file and Documentation and manual.
+description of features.
+
+rEUse platform
+
+Support with deployment, integration and Documentation and manual; Webinar;
+usage of the reUse component.
+Helpdesk support
+
+WISE component
+
+Support with development, integration and Workshop; Document
+customisation of WISE component.
+Helpdesk support.
+
+and
+
+manual;
+
+DocuBoT component Support with development, integration and Workshop; Document
+customisation of DocuBoT component.
+Helpdesk support.
+
+and
+
+manual;
+
+RASA component
+
+Support with development of rule-based Video tutorial; Documentation
+conversational platform RASA.
+manual; 1:1 technical support.
+
+PREVENTION
+component
+
+Support with deployment, integration and Workshop.
+customization
+of
+the
+PREVENTION
+component.
+
+and
+
+Marketplace Module Support with the deployment of the Workshop; Helpdesk support.
+marketplace module.
+Federation Module
+
+Support with the deployment and integration Workshop; Document
+of the federation module.
+Helpdesk support.
+
+and
+
+manual;
+
+NFT Royalty Module Support with the deployment, integration and Workshop.
+customization of the NFT royalty module.
+
+9
+
+Guide for Applicants
+
+3 OPEN CALL REQUIREMENTS
+3.1 Who can apply?
+The Open Call is open to SMEs from the manufacturing sector interested in integrating and exploring AIbased digital assistant solutions to support, optimize, or enhance their existing processes or products.2
+Participation of a Digital Innovation Hub (DIH) or a European Digital Innovation Hub (EDIH) is mandatory for all
+proposals. 3
+We are specifically looking for innovative actors ready to:
+•
+
+Develop and test a Digital Intelligence Assistant (DIA) tailored to a real-world use case in the
+manufacturing sector;
+
+•
+
+Distribute the DIA via the WASABI marketplace, enabling its adoption by other SMEs.
+
+Consortia composition structure
+To participate in the Open Call, the consortia must include at least one SME from the manufacturing sector and
+one DIH. Optionally, a third partner may be involved, particularly if the manufacturing SME lacks in-house IT
+expertise or where additional IT expertise is required to complement the manufacturing SME's capabilities.
+Therefore, the following configurations are eligible to apply for the financial support:
+•
+
+CASE A: Manufacturing SME + DIH
+In this configuration, the manufacturing SME acts as both:
+o
+
+the developer of the DIA solution and its integration into the WASABI marketplace and;
+
+o
+
+the end-user of the DIA to improve their own process or product.
+
+This setup is suited for manufacturing SMEs with sufficient in-house IT capabilities to independently
+carry out the technical development.
+•
+
+CASE B: Manufacturing SME + DIH + IT solution provider4
+In this configuration:
+o
+
+the manufacturing SME serves as the end-user of the DIA to improve their own process or
+product.
+
+o
+
+the IT solution provider serves as the developer of the DIA solution and its integration into the
+WASABI marketplace.
+
+This structure is strongly recommended when the manufacturing SME does not have internal IT
+expertise, ensuring the necessary technical quality and integration capabilities.
+
+2
+
+From a legal standpoint, eligible SMEs are defined as follows: “The category of micro, small and medium-sized enterprises (SMEs) is made
+up of enterprises which employ fewer than 250 persons and which have an annual turnover not exceeding EUR 50 million, and/or an annual
+balance sheet total not exceeding EUR 43 million.”2
+3
+
+DIHs/EDIHs must be registered in the European Commission’s catalogue: https://european-digital-innovation-hubs.ec.europa.eu/. The
+role of the DIH must be clearly defined in the proposal.
+IT solution providers are eligible to be part of the consortium, provided they also meet the definition of a Small and Medium-sized
+Enterprise (SME).
+4
+
+10
+
+Guide for Applicants
+
+The proposal must be submitted by the manufacturing SME. The role and responsibilities of the DIH/EDIH, or any
+other consortium member (IT solution provider), must be clearly outlined in the submitted proposal. The
+manufacturing SME must ensure the experiment can be successfully completed even without the IT solution
+provider.
+Given the technical complexity of developing AI-based digital assistants and integrating them into the WASABI
+ecosystem, eligible applicants must demonstrate the capabilities and experience required to develop, implement,
+and commercialize such solutions.
+
+3.2 Eligibility criteria
+To be considered eligible, consortia members must meet the following requirements:
+•
+
+Legal entities applying for financial support to third parties must be established in one of the following
+countries:
+o
+
+the Member States of the European Union (EU-27);
+
+o
+
+the Horizon Europe Associated Countries, as listed in the official Horizon Europe document
+“List of Participating Countries in Horizon Europe” (version 2.4 – 15.01.2023).5
+
+•
+
+Submit the proposal in English. Proposals submitted in any other language will be excluded.
+
+•
+
+Submit the proposal within the stipulated deadline. Proposals submitted later will be excluded.
+
+•
+
+The Applicants must fully comply with GDPR and the AI Act, which will be declared through a selfassessment to identify risks.
+
+•
+
+Status of the organisation presenting the Proposal falls under the categories presented in section 3.1.
+
+4 EXPECTATION FOR APPLICANTS
+Proposals must include:
+•
+
+A detailed description of the technical architecture, including a clear illustration. Please indicate the
+components you want to use from WASABI (see Chapter 2.4) and the components you want to build during
+the experiment.
+
+•
+
+A description of the expected challenge(s) and solution(s) provided to address them. In particular,
+applicants should explain how DIA based on conversational Artificial Intelligent will guide the end user
+through complex workflows.
+
+•
+
+A demonstration of the consortium’s technical expertise and hands-on experience, showing the
+ability to independently develop the DIA and to deploy, configure, and manage a WASABI White Label
+Shop (WWLS) instance based on PrestaShop. The expected expertise and practical experience include
+familiarity with APIs, container-based deployment (e.g., Docker), and smart contract technologies (e.g.,
+ERC-721). Proposals lacking concrete evidence of such capabilities will fail to address the
+“Implementation” evaluation criteria.
+
+•
+
+A detailed work plan outlining how the proposed solution will be designed, developed, deployed,
+tested, and made operational.
+
+5
+
+Entities established in associated countries are eligible for funding only if the Horizon Europe association agreement with their
+respective country of establishment is applicable at the time of signature of the WASABI Grant Agreement (i.e., February 2023).
+
+11
+
+Guide for Applicants
+
+•
+
+A description of how the project will comply with the principles of trustworthy AI and relevant EU
+legislation, including the AI Act, and how the project will ensure GDPR compliance.
+
+Additionally, as the Open Call aims to attract innovative consortia who want to integrate and further develop the
+technologies developed within the WASABI project, applicants must fulfil specific technical requirements in the
+Proposal Template.
+1. Innovative Application of Conversational AI: Applicants should incorporate open-source
+conversational AI technologies into their Proposal. Proposals should demonstrate how these tools could
+contribute to an anthropomorphic, task-oriented AI with a conversational interface. Integrating large
+language models is possible provided the model is open, such as Llama or Mistral.
+2. Open Data Exchange Formats: All proposed experiments should prioritize using open data exchange
+formats. This approach will allow for increased transparency, interoperability, and collaboration between
+different aspects of the WASABI project and DIHs.
+These requirements are critical elements of your Proposal and will serve as key criteria in the evaluation process.
+We encourage applicants to address each point carefully and thoroughly.
+
+5 OBLIGATIONS OF SELECTED EXPERIMENT WINNERS
+5.1 Experiment activities
+Experiments selected though the Open Call must carry out some mandatory activities. These include meetings,
+dissemination activities, and submission of deliverables.
+1. Meetings (remote participation required)
+MEETING TYPE
+
+DESCRIPTION
+
+Kick-off Meeting
+
+This marks the official start of the WASABI journey. All selected experiments
+will meet to receive an overview of the project, understand the expectations
+set forth in the Open Call, and review the activities outlined in the Open Call
+This session also provides the opportunity for each selected experiment to
+briefly present their case to the wider WASABI community.
+
+Monitoring Meetings (x5)
+
+Every two months following the kick-off, each selected experiment will attend
+a dedicated session with the WASABI monitoring team. These meetings are
+designed to:
+• Review the progress of the experiment;
+• Identify and address challenges or potential bottlenecks;
+• Discuss upcoming steps;
+• Demonstrate how AI-based voice assistance is being applied.
+
+Final Monitoring Event
+
+At the end of the experiment, all selected experiments will participate in a
+final wrap-up event. This session will serve as an opportunity to:
+• Present final results and key achievements;
+• Share insights and lessons learned;
+• Demonstrate how AI-based voice assistance is being applied.
+
+12
+
+Guide for Applicants
+
+Workshops/Webinars/Trainings Workshops, webinars, and training sessions may be organised by the WASABI
+consortium or supporting initiatives of the European Commission.
+Participation is mandatory if officially requested by the Contracting Authority.
+2. Dissemination activities
+DISSEMINATION ACTIVITY
+
+DESCRIPTION
+
+Experiment information
+
+Provide information about the experiment on WASABI’s project website.
+
+3. Deliverables to submit
+DELIVERABLE
+
+DESCRIPTION
+
+IPR plan
+
+A plan that outlines how IP generated during the experiment will be managed,
+protected, and exploited by experiment winners.
+
+Experiment Handbook (EH) A comprehensive document used to monitor progress and assess impact. It
+includes the experiment’s full scope, process, results, and lessons learned. The
+EH also documents software details, Key Performance Indicators (KPIs), and an
+exploitation plan for the shop.6
+Demonstration
+
+A live or recorded demonstration of the solution applied in the experiment,
+showing natural language interactions. Demonstrations must be provided
+during monitoring meetings and the final event.
+
+Cost Statement (CS)
+
+A financial summary of costs incurred during the experiment. While no detailed
+justification is required upon submission, participants must retain records for
+potential audits, in accordance with Horizon Europe regulations.
+
+5.2 Experiment timeline
+The experiments will have a duration of 12 months. The timeline of the experiments will be the following:
+Table 2. Experiment timeline
+
+TASKS AND MEETINGS
+
+M1
+
+M2
+
+M3
+
+M4
+
+M5
+
+M6
+
+M7
+
+M8
+
+M9
+
+M10 M11 M12
+
+MEETINGS
+Kick-off meeting
+Individual Monitoring Meeting
+Final monitoring event
+DELIVERABLES
+IPR plan
+Experiment Handbook
+6
+
+The exploitation plan should assess the operational cost of running the shop instance created to promote the developed
+Digital Assistant and outline a strategy to generate revenue that can cover those costs and ensure the sustainability of the
+shop.
+
+13
+
+Guide for Applicants
+
+Demonstration
+Cost statement
+
+14
+
+Guide for Applicants
+
+6 BUDGET CONSIDERATIONS
+The total funding for the 2nd Open Call is € 1.522.250,00. Funding will be allocated to the selected experiments
+until the budget is fully allocated. Therefore, OC2 aims to support at least 10 consortia, subject to the final budget
+distribution.
+
+6.1 Structure of the budget and funding rate
+The WASABI 2nd Open Call will adopt the Lump Sum cost reporting system. This system significantly simplifies
+financial management by reducing the need for cost reporting, thereby reducing the administrative burden on
+beneficiaries.
+Applicants must present the budget per consortium member of the experiment in the proposal. All proposed
+costs must be exclusively dedicated to the execution of the experiment.
+Proposals shall allocate at least 85% of the overall funding of the experiment to SMEs.
+The maximum funding per experiment is 125.000€, with a maximum of 60.000€ per third party, as outlined in
+Table 1.
+
+6.2 Payments
+The payment of the requested funding will be made in tranches as follows:
+•
+
+The first payment will be done with the approval of the first two deliverables at M2. This payment will
+correspond to 25% of the total requested amount.
+
+•
+
+The second payment will be done after the individual monitoring meeting in M7 upon approval of
+progress. This payment will correspond to 50% of the total requested amount.
+
+•
+
+The third payment will be done after completion of the experiment and final approval of all deliverables
+linked to WASABI through the contract at M12. This payment will correspond to 25% of the total requested
+amount.
+
+15
+
+Guide for Applicants
+
+7 EXPERIMENT DESIGN, SUBMISSION AND EVALUATION
+The proposals received will go through the following evaluation process:
+
+Figure 3. Open Call participation procedure
+
+The steps are briefly described in the sub-sections below.
+
+7.1 Step 1: Experiment design
+Applicants have to prepare a description of the experiment and a technical description with details concerning
+the implementation of the project and the exploitation of results.
+The proposal template has 3 sections that applicants must fill in:
+1. Technical Excellence
+2. Impact
+3. Implementation
+These sections together must not exceed ten pages in length (with text no smaller than 11-point Arial font).
+Proposals will be truncated to this page count, and the independent expert evaluators will only be provided with
+the truncated version.
+In addition to the 10-page proposal description, the proposal must have a cover page. Therefore, the total length
+of the proposal will be of 11 pages.
+The proposal is submitted in a single stage through the Evaluation Management System (EMS) online platform:
+https://wasabi.ems-innovalia.org. The template can be downloaded from the EMS platform or from the WASABI
+web page. Applicants are required to:
+•
+•
+•
+
+Carefully read and follow the instructions provided in the proposal template.
+Upload the proposal as a PDF document, ensuring it complies with the proposal structured.
+Ensure that the PDF size does not exceed 20 MB.
+
+Table 3. Structure of the proposal (and indicative length per section)
+
+SECTION
+1. Technical Excellence
+(4 pages)
+2. Impact
+(2 pages)
+3. Implementation
+(4 pages)
+
+SUB-SECTIONS
+1.1.
+Objectives of the experiment
+1.2.
+Experiment overview
+1.3.
+Objectives of the experiment
+1.4.
+Scientific and Technological Excellence
+2.1.
+Expected impact on the SME
+2.2.
+Dissemination and exploitation plan
+3.1.
+3.2.
+3.3.
+
+Work Plan
+Budget of the experiment
+Participant presentation
+
+16
+
+Guide for Applicants
+
+7.2 Step 2: Submission of the proposal
+The proposals are submitted digitally, by the Applicant, in a single-stage through the Evaluation Management
+System (EMS) platform. Proposals prepared according to the instructions provided, shall be submitted
+electronically through the EMS platform.
+To begin the submission process, Applicants should visit the WASABI EMS website: https://wasabi.emsinnovalia.org. On the homepage, Applicants should click on “Register” (¡Error! No se encuentra el origen de la
+referencia.4). Then, Applicants should select the option “New proposal” as shown in Figure Y.
+
+Figure 4. EMS platform overview
+
+Upon creating the application, Applicants first provide general information about the proposal, such as title of the
+proposal and experiment acronym, in the “General details” section. Furthermore, Applicants have to select the
+topic and keywords of the Call that best match their proposal.
+Once the general details are saved, Applicants will have access to fill out the rest of the sections of the proposal
+online. In the “Technical Proposal” section, Candidates are required to provide an abstract of their proposal
+(Figure 5).
+
+Include a summary of the experiment in around 300 words. Including objectives, sector of activity and technologies to be
+used.
+
+Figure 5. Insert abstract
+
+Next, Applicants can upload their technical proposal in the “Annexes” section (Figure 6).
+
+17
+
+Guide for Applicants
+
+Figure 6. Upload technical proposal.
+
+Once all sections are filled in, Applicants can submit the proposal and receive a PDF version of it afterwards (Figure
+6).
+
+Figure 7. Submit proposal
+
+Applicants may submit updated or new versions of their proposal as many times as needed before the call closure.
+Only the last version submitted before the deadline will be considered for evaluation. Late submissions, including
+those affected by force majeure, will not be evaluated. Similarly, proposals submitted through any means other
+than the online submission tool (EMS) will be rejected.
+After the close of the Call, an Acknowledgment of receipt will be emailed to applicants by WASABI. Sending an
+acknowledgment of receipt does not imply that your Proposal has been accepted as eligible for evaluation.
+
+7.3 Step 3: Evaluation and selection
+The proposals received will go through the following evaluation process detailed below.
+
+7.3.1 Eligibility check
+All proposals received go through the automatic eligibility check. The eligibility check ensures that the criteria
+presented in section 3.2 are met.
+
+7.3.2 Evaluation
+The evaluation criteria and the scoring scale used are very well aligned with Horizon Europe Programme but
+augmented to favour the application and integration of DIA technologies in the manufacturing sector. The
+following table presents the detailed description for each evaluation criteria.
+Table 4. Evaluation criteria
+
+EVALUATION CRITERIA
+1. Excellence
+
+DESCRIPTION
+✓ Quality and soundness of main concept and objectives.
+✓ Demonstrate alignment with WASABI objectives.
+✓ Address the sectors and technologies of the WASABI open call.
+
+18
+
+Guide for Applicants
+
+✓ Innovation capacity of the experiment.
+✓ Implementation and adequate usage of DIA technologies.
+✓ New products or services to be developed.
+✓ Open data exchange and experience with Docker.
+✓ Quality of the Service-Oriented Architecture design.
+✓ Presence of a system integrator.
+✓ Collaboration with the WASABI team.
+2. Impact
+
+✓ Potential impact of the application experiment (including KPIs).
+✓ Replicability of the experiment in other SMEs.
+✓ Quality of the communication and dissemination plan.
+✓ Quality of the exploitation model.
+
+3. Implementation
+
+✓ Overall quality of the work plan.
+✓ Adequate budget and eligible costs to carry out the experiment.
+✓ Quality and relevant experience of the consortium members.
+✓ Demonstrate the capacity and expertise of the consortium members.
+✓ Demonstrate the appropriateness of the consortium members
+
+Each proposal will be evaluated by two evaluators against the criteria outlined above. Each evaluator will record
+their opinion on each Proposal using the evaluation form. They will then communicate to reach a consensus on
+each Proposal’s quality. The result of that agreement (comments and scores) will be reflected in the Evaluation
+Summary Report (ESR). Only proposals with scores above thresholds for each criterion, as indicated below, will
+be retained for funding.
+Once the evaluation is completed, all the proposals will be ranked and a shortlist of a maximum of 10 proposals,
+will finally be proposed to receive funding. The rest of the approved proposals will be included in a reserve list.
+The evaluation will be carried out by experts who are independent of the applicants. These experts will be
+individuals with experience and knowledge in digital technologies and implementing digital strategies.
+Once the evaluation process is completed for all proposals, Applicants, whether successful or unsuccessful, will
+receive a notice on the outcome of the evaluation and their ESR.
+The following table details the evaluation scores for each criterion ranging from 0 to 5:
+Table 5. Interpretation of scores
+
+SCORE
+
+DESCRIPTION
+
+0. Fail
+
+The Proposal fails to address the criterion under examination or cannot be judged due to
+missing or incomplete information.
+
+1. Poor
+
+The criterion is addressed inadequately, or there are serious inherent weaknesses.
+
+2. Fair
+
+While the Proposal broadly addresses the criterion, there are significant weaknesses.
+
+3. Good
+
+The Proposal addresses the criterion well, although improvements would be necessary
+
+4. Very good
+
+The Proposal addresses the criterion very well, although certain improvements are still
+possible.
+
+5. Excellent
+
+The Proposal successfully addresses all relevant aspects of the criterion in question.
+
+7.3.3 Evaluators
+Each proposal will be evaluated by two experts, being one internal expert and one expert external from the
+consortium partners. The evaluators will sign a declaration of confidentiality and a non-conflict declaration.
+
+19
+
+Guide for Applicants
+
+7.3.4 Ranking of proposals and final selection
+The result of the evaluation will be a ranking of the proposals based on the scores they have received.
+In the event that two proposals receive the same score, the order of priority will be determined as follows:
+•
+
+Impact: Proposals will be prioritized based on the scores awarded for the “Impact” criterion (#2).
+
+•
+
+Technical Excellence: If the scores for "Impact" are also equal, priority will then be determined by the
+scores for the “Excellence” criterion (#1).
+
+•
+
+Implementation: If the scores for both "Impact" and "Excellence" are equal, priority will be determined
+based on the “Implementation” criterion (#3), with particular attention to the efficient use of resources.
+
+CRITERION
+
+THRESHOLD
+
+PRIORITY
+
+Technical excellence
+
+3
+
+2
+
+Impact
+
+4
+
+1
+
+Implementation
+
+3
+
+3
+
+8 INTELLECTUAL PROPERTY RIGHTS
+As indicated in Chapter 5.2, experiments must provide a detailed IPR plan.
+The developed OVOS skills should use a permissive open-source license like Apache 2.0 unless the experiment
+demonstrates an immediate and concrete commercial interest. Related backend services can use any license
+including a proprietary.
+
+9 SUPPORT FOR APPLICANTS
+In addition to the present Guide for Applicants, the following tools are available to support Applicants:
+
+9.1 Call Helpdesk
+Applicants may contact the WASABI helpdesk should they wish to receive further information on the content and
+
+conditions of the Call for Proposal. In particular for technical assistance with the submission process on EMS and
+further information on the call, please refer to: wasabi_opencall@innovalia.org
+
+9.2 Useful Documents
+A Frequently Asked Questions document is available on the website. The document will be periodically updated
+to reflect the questions received.
+
+9.3 Official WASABI website
+A dedicated webpage is available on the official WASABI website to check all the related information and to
+download all the documents useful for the application. The webpage is linked with the EMS platform to facilitate
+the connection between the tool and the uploading of the application.
+
+20
+
+Guide for Applicants
+
+10 PROJECT PARTNERS
+
+21
+
+

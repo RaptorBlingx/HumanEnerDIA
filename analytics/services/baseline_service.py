@@ -17,9 +17,11 @@ from database import (
     db,
     get_machine_by_id,
     get_machine_data_combined,
-    save_baseline_model,
+    save_baseline_model_with_conn,
     get_active_baseline_model,
-    deactivate_baseline_models
+    deactivate_baseline_models,
+    deactivate_baseline_models_with_conn,
+    get_latest_baseline_model_version
 )
 from config import settings
 
@@ -38,7 +40,8 @@ async def insert_performance_metric(
     rmse: float,
     mae: float,
     mape: Optional[float] = None,
-    data_completeness: float = 1.0
+    data_completeness: float = 1.0,
+    conn: Optional[Any] = None
 ) -> UUID:
     """
     Insert performance metrics into model_performance_metrics table.
@@ -75,13 +78,21 @@ async def insert_performance_metric(
         RETURNING id
     """
     
-    async with db.pool.acquire() as conn:
+    if conn is not None:
         metric_id = await conn.fetchval(
             query,
             model_id, model_type, machine_id, model_version,
             evaluation_start, evaluation_end, sample_count,
             r_squared, rmse, mae, mape, data_completeness
         )
+    else:
+        async with db.pool.acquire() as pooled_conn:
+            metric_id = await pooled_conn.fetchval(
+                query,
+                model_id, model_type, machine_id, model_version,
+                evaluation_start, evaluation_end, sample_count,
+                r_squared, rmse, mae, mape, data_completeness
+            )
     
     logger.info(f"✓ Performance metric inserted: {metric_id} (R²={r_squared:.4f})")
     return metric_id
@@ -89,6 +100,37 @@ async def insert_performance_metric(
 
 class BaselineService:
     """Service for managing energy baseline models."""
+
+    @staticmethod
+    async def _resolve_training_energy_source_id(
+        energy_source_id: Optional[UUID]
+    ) -> UUID:
+        """Resolve the energy source before versioning or deactivation logic runs."""
+        if energy_source_id:
+            return energy_source_id
+
+        async with db.pool.acquire() as conn:
+            electricity_id = await conn.fetchval(
+                "SELECT id FROM energy_sources WHERE name = 'electricity' LIMIT 1"
+            )
+
+        if not electricity_id:
+            raise ValueError("Electricity energy source not found")
+
+        return UUID(str(electricity_id))
+
+    @staticmethod
+    async def _lock_baseline_version_allocation(
+        conn: Any,
+        machine_id: UUID,
+        energy_source_id: UUID
+    ) -> None:
+        """Serialize version allocation per machine/energy-source pair."""
+        await conn.fetchval(
+            "SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))",
+            str(machine_id),
+            str(energy_source_id)
+        )
     
     @staticmethod
     async def train_baseline(
@@ -147,17 +189,18 @@ class BaselineService:
             logger.error(f"[TRAIN-SVC] {error_msg}")
             raise ValueError(error_msg)
         
-        # Get next model version (considering energy source for multi-energy machines)
-        logger.info(f"[TRAIN-SVC] Step 3: Getting next model version")
-        existing_model = await get_active_baseline_model(machine_id, energy_source_id)
-        next_version = existing_model['model_version'] + 1 if existing_model else 1
-        logger.info(f"[TRAIN-SVC] Next version will be: {next_version} (energy_source_id: {energy_source_id})")
+        resolved_energy_source_id = await BaselineService._resolve_training_energy_source_id(
+            energy_source_id
+        )
+        logger.info(
+            f"[TRAIN-SVC] Resolved training energy source: {resolved_energy_source_id}"
+        )
         
         # Create and train model
         logger.info(f"[TRAIN-SVC] Step 4: Creating model instance")
         model = BaselineModel(
             machine_id=str(machine_id),
-            model_version=next_version
+            model_version=0
         )
         
         logger.info(f"[TRAIN-SVC] Step 5: Starting model training")
@@ -181,60 +224,68 @@ class BaselineService:
                 f"({settings.BASELINE_MIN_R2}). Model may not be accurate."
             )
         
-        # Save model to disk
-        model_path = model.save()
-        
-        # Deactivate old models (for this energy source if specified)
-        await deactivate_baseline_models(machine_id, energy_source_id)
-        
-        # Save model metadata to database
-        model_data = model.to_dict()
-        
-        # Add energy_source_id if provided (for multi-energy machines)
-        if energy_source_id:
-            model_data['energy_source_id'] = energy_source_id
-            logger.info(f"[TRAIN-SVC] Using provided energy_source_id: {energy_source_id}")
-        else:
-            # Backward compatibility: default to electricity if not specified
-            logger.info(f"[TRAIN-SVC] No energy_source_id provided, defaulting to electricity")
-            async with db.pool.acquire() as conn:
-                electricity_id = await conn.fetchval(
-                    "SELECT id FROM energy_sources WHERE name = 'electricity' LIMIT 1"
+        async with db.pool.acquire() as conn:
+            async with conn.transaction():
+                await BaselineService._lock_baseline_version_allocation(
+                    conn,
+                    machine_id,
+                    resolved_energy_source_id
                 )
-            model_data['energy_source_id'] = electricity_id
-            logger.info(f"[TRAIN-SVC] Set energy_source_id to electricity: {electricity_id}")
+                latest_version = await get_latest_baseline_model_version(
+                    machine_id,
+                    resolved_energy_source_id,
+                    conn=conn
+                )
+                next_version = latest_version + 1
+                logger.info(
+                    f"[TRAIN-SVC] Allocated model version {next_version} for machine {machine_id} "
+                    f"and energy source {resolved_energy_source_id}"
+                )
+
+                model.model_version = next_version
+                model_path = model.save()
+
+                await deactivate_baseline_models_with_conn(
+                    conn,
+                    machine_id,
+                    resolved_energy_source_id
+                )
+
+                model_data = model.to_dict()
+                model_data['energy_source_id'] = resolved_energy_source_id
+
+                logger.info(f"[TRAIN-SVC] Model data keys: {list(model_data.keys())}")
+                logger.info(f"[TRAIN-SVC] energy_source_id value: {model_data.get('energy_source_id')}")
+
+                model_id = await save_baseline_model_with_conn(conn, model_data)
         
-        logger.info(f"[TRAIN-SVC] Model data keys: {list(model_data.keys())}")
-        logger.info(f"[TRAIN-SVC] energy_source_id value: {model_data.get('energy_source_id')}")
-        
-        model_id = await save_baseline_model(model_data)
-        
-        logger.info(
-            f"✓ Baseline model trained and saved: {model_id} "
-            f"(R²={model.r_squared:.4f})"
-        )
-        
-        # NEW: Insert performance metrics for model tracking
-        logger.info(f"[TRAIN-SVC] Step 6: Inserting performance metrics")
-        try:
-            metric_id = await insert_performance_metric(
-                model_id=UUID(str(model_id)),
-                model_type='baseline',
-                machine_id=machine_id,
-                model_version=next_version,
-                evaluation_start=start_date,
-                evaluation_end=end_date,
-                sample_count=len(data),
-                r_squared=model.r_squared,
-                rmse=model.rmse,
-                mae=model.mae,
-                mape=None,  # Not calculated for baseline
-                data_completeness=1.0  # Full training dataset
-            )
-            logger.info(f"✓ Performance metric recorded: {metric_id}")
-        except Exception as e:
-            logger.error(f"Failed to insert performance metric: {e}", exc_info=True)
-            # Don't fail training if metrics insertion fails
+                logger.info(
+                    f"✓ Baseline model trained and saved: {model_id} "
+                    f"(R²={model.r_squared:.4f})"
+                )
+
+                # NEW: Insert performance metrics for model tracking
+                logger.info(f"[TRAIN-SVC] Step 6: Inserting performance metrics")
+                try:
+                    metric_id = await insert_performance_metric(
+                        model_id=UUID(str(model_id)),
+                        model_type='baseline',
+                        machine_id=machine_id,
+                        model_version=next_version,
+                        evaluation_start=start_date,
+                        evaluation_end=end_date,
+                        sample_count=len(data),
+                        r_squared=model.r_squared,
+                        rmse=model.rmse,
+                        mae=model.mae,
+                        mape=None,  # Not calculated for baseline
+                        data_completeness=1.0,  # Full training dataset
+                        conn=conn
+                    )
+                    logger.info(f"✓ Performance metric recorded: {metric_id}")
+                except Exception as e:
+                    logger.error(f"Failed to insert performance metric: {e}", exc_info=True)
+                    # Don't fail training if metrics insertion fails
         
         # Return comprehensive results
         return {
@@ -465,30 +516,30 @@ class BaselineService:
         """
         if energy_source_id:
             query = """
-                SELECT 
-                    id, machine_id, model_name, model_version,
+                SELECT
+                    id, machine_id, energy_source_id, model_name, model_version,
                     training_samples, r_squared, rmse, mae,
                     is_active, created_at
                 FROM energy_baselines
-                WHERE machine_id = $1
+                WHERE machine_id = $1 AND energy_source_id = $2
                 ORDER BY model_version DESC
             """
             async with db.pool.acquire() as conn:
-                rows = await conn.fetch(query, machine_id)
+                rows = await conn.fetch(query, machine_id, energy_source_id)
                 return [dict(row) for row in rows]
-        else:
-            query = """
-                SELECT 
-                    id, machine_id, model_name, model_version,
-                    training_samples, r_squared, rmse, mae,
-                    is_active, created_at
-                FROM energy_baselines
-                WHERE machine_id = $1
-                ORDER BY model_version DESC
-            """
-            async with db.pool.acquire() as conn:
-                rows = await conn.fetch(query, machine_id)
-                return [dict(row) for row in rows]
+
+        query = """
+            SELECT
+                id, machine_id, energy_source_id, model_name, model_version,
+                training_samples, r_squared, rmse, mae,
+                is_active, created_at
+            FROM energy_baselines
+            WHERE machine_id = $1
+            ORDER BY model_version DESC
+        """
+        async with db.pool.acquire() as conn:
+            rows = await conn.fetch(query, machine_id)
+            return [dict(row) for row in rows]
     
     @staticmethod
     async def get_model_details(model_id: UUID) -> Optional[Dict[str, Any]]:
@@ -504,12 +555,15 @@ class BaselineService:
         query = """
             SELECT 
                 eb.id, eb.machine_id, eb.model_name, eb.model_type, eb.model_version,
+                eb.energy_source_id,
                 eb.training_start_date, eb.training_end_date, eb.training_samples,
                 eb.coefficients, eb.intercept, eb.feature_names,
                 eb.r_squared, eb.rmse, eb.mae, eb.is_active, eb.created_at,
-                m.name as machine_name, m.type as machine_type
+                m.name as machine_name, m.type as machine_type,
+                es.name as energy_source_name, es.unit as energy_unit
             FROM energy_baselines eb
             JOIN machines m ON eb.machine_id = m.id
+            LEFT JOIN energy_sources es ON eb.energy_source_id = es.id
             WHERE eb.id = $1
         """
         

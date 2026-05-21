@@ -15,19 +15,19 @@ echo "📍 Server IP: $SERVER_IP"
 # Verify current commits
 echo ""
 echo "📋 Verifying latest commits are pushed..."
-cd /home/ubuntu/enms
+cd /home/ubuntu/humanergy
 ENMS_HEAD=$(git rev-parse HEAD)
-ENMS_ORIGIN=$(git rev-parse origin/feat/zero-touch-deployment)
+ENMS_ORIGIN=$(git rev-parse forgejo/dev)
 if [ "$ENMS_HEAD" = "$ENMS_ORIGIN" ]; then
-    echo "✅ EnMS: All commits pushed ($ENMS_HEAD)"
+    echo "✅ HumanEnerDIA: All commits pushed ($ENMS_HEAD)"
 else
-    echo "❌ EnMS: Local commits not pushed!"
+    echo "❌ HumanEnerDIA: Local commits not pushed!"
     exit 1
 fi
 
 cd /home/ubuntu/ovos-llm
 OVOS_HEAD=$(git rev-parse HEAD)
-OVOS_ORIGIN=$(git rev-parse origin/feat/zero-touch-deployment)
+OVOS_ORIGIN=$(git rev-parse forgejo/main)
 if [ "$OVOS_HEAD" = "$OVOS_ORIGIN" ]; then
     echo "✅ OVOS: All commits pushed ($OVOS_HEAD)"
 else
@@ -40,11 +40,11 @@ echo ""
 echo "🔍 Verifying configuration files..."
 
 # EnMS .env.example
-if grep -q "OVOS_BRIDGE_HOST=ovos-enms" /home/ubuntu/enms/.env.example; then
-    echo "✅ EnMS .env.example: OVOS_BRIDGE_HOST=ovos-enms"
+if grep -q "OVOS_BRIDGE_HOST=ovos-enms" /home/ubuntu/humanergy/.env.example; then
+    echo "✅ HumanEnerDIA .env.example: OVOS_BRIDGE_HOST=ovos-enms"
 else
-    echo "❌ EnMS .env.example: OVOS_BRIDGE_HOST not set to ovos-enms!"
-    grep "OVOS_BRIDGE_HOST" /home/ubuntu/enms/.env.example
+    echo "❌ HumanEnerDIA .env.example: OVOS_BRIDGE_HOST not set to ovos-enms!"
+    grep "OVOS_BRIDGE_HOST" /home/ubuntu/humanergy/.env.example
     exit 1
 fi
 
@@ -76,7 +76,7 @@ else
 fi
 
 # Analytics health check code
-if grep -q 'data.get("messagebus_connected"' /home/ubuntu/enms/analytics/api/routes/ovos_voice.py; then
+if grep -q 'data.get("messagebus_connected"' /home/ubuntu/humanergy/analytics/api/routes/ovos_voice.py; then
     echo "✅ Analytics ovos_voice.py: Uses messagebus_connected"
 else
     echo "❌ Analytics ovos_voice.py: Missing messagebus_connected mapping!"
@@ -89,10 +89,10 @@ echo "✅ ALL CHECKS PASSED!"
 echo "=========================================="
 echo ""
 echo "Zero-touch deployment is ready. To test:"
-echo "1. Clean: rm -rf ~/enms ~/ovos-llm && docker system prune -af"
-echo "2. Clone EnMS: git clone -b feat/zero-touch-deployment https://github.com/RaptorBlingx/enms.git"
-echo "3. Deploy: cd enms && ./scripts/zero-touch-deploy.sh $SERVER_IP"
-echo "4. Clone OVOS: git clone -b feat/zero-touch-deployment https://github.com/RaptorBlingx/ovos-llm.git"
+echo "1. Clean: rm -rf ~/humanergy ~/ovos-llm && docker system prune -af"
+echo "2. Clone HumanEnerDIA: git clone -b dev https://github.com/RaptorBlingx/HumanEnerDIA.git humanergy"
+echo "3. Deploy: cd humanergy && ./scripts/zero-touch-deploy.sh $SERVER_IP"
+echo "4. Clone OVOS: git clone https://github.com/RaptorBlingx/ovos-llm.git"
 echo "5. Deploy: cd ovos-llm && cp .env.example .env && docker compose build && docker compose up -d"
 echo "6. Wait 30s, test: curl http://localhost:8080/api/ovos/voice/health"
 echo ""

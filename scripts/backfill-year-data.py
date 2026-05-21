@@ -26,8 +26,8 @@ DB_CONFIG = {
     'host': 'localhost',
     'port': 5432,
     'database': 'enms',
-    'user': os.getenv('POSTGRES_USER', 'raptorblingx'),
-    'password': os.getenv('POSTGRES_PASSWORD', 'raptorblingx')
+    'user': os.getenv('POSTGRES_USER', 'enms_user'),
+    'password': os.getenv('POSTGRES_PASSWORD', '')
 }
 
 # Machine configuration (from your existing data)

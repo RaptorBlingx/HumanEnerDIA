@@ -290,9 +290,13 @@
             
             <div class="grid grid-cols-4" style="gap: 24px;">
                 <!-- Active Machines Card -->
-                <div class="industrial-card" style="box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;"
-                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
+                <a href="/api/analytics/ui/comparison"
+                   class="industrial-card"
+                   aria-label="Open machine comparison"
+                   title="Open machine comparison"
+                   style="display: block; text-decoration: none; color: inherit; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;"
+                   onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
                     <div class="industrial-card-body" style="padding: 32px; text-align: center;">
                         <div style="width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 16px; background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(10, 36, 99, 0.2);">
                             <svg width="32" height="32" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
@@ -304,12 +308,16 @@
                         <div style="font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 8px;">ACTIVE MACHINES</div>
                         <div style="font-size: 13px; color: #2ECC71; font-weight: 500;" id="machines-change">+2 from yesterday</div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Baseline Models Card -->
-                <div class="industrial-card" style="box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;"
-                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
+                <a href="/api/analytics/ui/baseline"
+                   class="industrial-card"
+                   aria-label="Open energy baseline training"
+                   title="Open Energy Baseline Training"
+                   style="display: block; text-decoration: none; color: inherit; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;"
+                   onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
                     <div class="industrial-card-body" style="padding: 32px; text-align: center;">
                         <div style="width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 16px; background: linear-gradient(135deg, #00A8E8 0%, #007BA7 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(0, 168, 232, 0.2);">
                             <svg width="32" height="32" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
@@ -320,12 +328,16 @@
                         <div style="font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 8px;">BASELINE MODELS</div>
                         <div style="font-size: 13px; color: #00A8E8; font-weight: 500;" id="models-change">All trained</div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Anomalies Card -->
-                <div class="industrial-card" style="box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;"
-                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
+                <a href="/api/analytics/ui/anomaly"
+                   class="industrial-card"
+                   aria-label="Open anomaly detection"
+                   title="Open Anomaly Detection"
+                   style="display: block; text-decoration: none; color: inherit; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;"
+                   onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
                     <div class="industrial-card-body" style="padding: 32px; text-align: center;">
                         <div style="width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 16px; background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(243, 156, 18, 0.2);">
                             <svg width="32" height="32" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
@@ -336,12 +348,16 @@
                         <div style="font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 8px;">ANOMALIES (24H)</div>
                         <div style="font-size: 13px; color: #6b7280; font-weight: 500;" id="anomaly-change">Within normal range</div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Scheduler Jobs Card -->
-                <div class="industrial-card" style="box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;"
-                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
+                <a href="/api/analytics/ui/"
+                   class="industrial-card"
+                   aria-label="Open analytics dashboard"
+                   title="Open Analytics Dashboard"
+                   style="display: block; text-decoration: none; color: inherit; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;"
+                   onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.12)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
                     <div class="industrial-card-body" style="padding: 32px; text-align: center;">
                         <div style="width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 16px; background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(46, 204, 113, 0.2);">
                             <svg width="32" height="32" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
@@ -352,7 +368,7 @@
                         <div style="font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 8px;">SCHEDULER JOBS</div>
                         <div style="font-size: 13px; color: #2ECC71; font-weight: 500;" id="scheduler-change">Running</div>
                     </div>
-                </div>
+                </a>
             </div>
         </section>
 
@@ -1264,6 +1280,6 @@
     </script>
     
     <!-- OVOS Voice Assistant Widget -->
-    <script src="/js/ovos-voice-widget.js?v=20260420a"></script>
+    <script src="/js/ovos-voice-widget.js?v=20260422b"></script>
 </body>
 </html>

@@ -11,14 +11,15 @@ import random
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple
 import numpy as np
+import os
 
 # Database connection
 DB_CONFIG = {
     'host': 'localhost',
     'port': 5433,
     'database': 'enms',
-    'user': 'raptorblingx',
-    'password': 'raptorblingx'
+    'user': os.getenv('POSTGRES_USER', 'enms_user'),
+    'password': os.getenv('POSTGRES_PASSWORD', '')
 }
 
 # Efficiency improvement factor (2-4% savings)

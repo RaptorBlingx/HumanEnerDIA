@@ -97,9 +97,12 @@ def create_admin_user(email: str, password: str, full_name: str = "Admin User",
         return False
 
 if __name__ == "__main__":
-    # Admin credentials
-    admin_email = "yazilim.aarti.muhendislik@gmail.com"
-    admin_password = "Raptor@321"
+    admin_email = os.environ.get("ADMIN_EMAIL")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
+
+    if not admin_email or not admin_password:
+        print("Set ADMIN_EMAIL and ADMIN_PASSWORD before running this script.")
+        sys.exit(1)
     
     print(f"Creating admin user: {admin_email}")
     success = create_admin_user(
@@ -114,8 +117,8 @@ if __name__ == "__main__":
     if success:
         print(f"\n✅ Admin user ready!")
         print(f"   Email: {admin_email}")
-        print(f"   Password: {admin_password}")
-        print(f"   You can now login at: http://10.33.10.104:8080/login.html")
+        print("   Password: configured from ADMIN_PASSWORD")
+        print("   You can now login through the configured portal URL.")
     else:
         print("\n❌ Failed to create admin user")
         sys.exit(1)

@@ -2037,15 +2037,39 @@
         `;
     }
 
+    function getInsightLinkLabel(link) {
+        if (!link || typeof link !== 'object') {
+            return '';
+        }
+
+        return String(link.label || link.title || link.text || link.name || '').trim();
+    }
+
+    function getInsightLinkHref(link) {
+        if (!link || typeof link !== 'object') {
+            return '#';
+        }
+
+        return String(link.href || link.url || link.download_url || '#').trim() || '#';
+    }
+
+    function isSuppressedInsightLink(link) {
+        return /^open reports?$/i.test(getInsightLinkLabel(link));
+    }
+
     function renderInsightLinks(links) {
-        if (!links.length) {
+        const visibleLinks = Array.isArray(links)
+            ? links.filter(Boolean).filter(link => !isSuppressedInsightLink(link))
+            : [];
+
+        if (!visibleLinks.length) {
             return '';
         }
 
         return `
             <div class="ovos-insight-links">
-                ${links.map(link => `
-                    <a class="ovos-insight-link" href="${escapeHtml(link.href || '#')}">${escapeHtml(link.label || 'Open')}</a>
+                ${visibleLinks.map(link => `
+                    <a class="ovos-insight-link" href="${escapeHtml(getInsightLinkHref(link))}">${escapeHtml(getInsightLinkLabel(link) || 'Open')}</a>
                 `).join('')}
             </div>
         `;
@@ -2104,7 +2128,12 @@
         const metrics = Array.isArray(normalizedInsights.summary_metrics) ? normalizedInsights.summary_metrics.filter(Boolean) : [];
         const badges = Array.isArray(normalizedInsights.status_badges) ? normalizedInsights.status_badges.filter(Boolean) : [];
         const lines = Array.isArray(normalizedInsights.secondary_lines) ? normalizedInsights.secondary_lines.filter(Boolean).slice(0, 4) : [];
-        const links = Array.isArray(normalizedInsights.links) ? normalizedInsights.links.filter(Boolean).slice(0, 2) : [];
+        const links = Array.isArray(normalizedInsights.links)
+            ? normalizedInsights.links
+                .filter(Boolean)
+                .filter(link => !isSuppressedInsightLink(link))
+                .slice(0, 2)
+            : [];
 
         title.textContent = normalizedInsights.title || 'Operational insights';
         subtitle.textContent = normalizedInsights.subtitle || '';

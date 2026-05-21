@@ -11,14 +11,14 @@ module.exports = {
     flowFilePretty: true,
     
     // Credential encryption
-    credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET || "enms-node-red-secret-key-change-in-production",
+    credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET,
     
     // Admin UI settings
     adminAuth: {
         type: "credentials",
         users: [{
             username: process.env.NODE_RED_USERNAME || "admin",
-            password: process.env.NODE_RED_PASSWORD_HASH || "$2b$08$wKXiKXKZ4v0g.iBZ6Y5B1.VJCHZqJV8XvPLXsNxMHjWKGqT0uLM4S", // "admin"
+            password: process.env.NODE_RED_PASSWORD_HASH,
             permissions: "*"
         }]
     },
@@ -131,10 +131,10 @@ module.exports = {
     
     // MQTT settings (for reference, actual config in nodes) - Host Mosquitto Broker
     mqtt: {
-        broker: process.env.MQTT_HOST || "172.18.0.1",
+        broker: process.env.MQTT_HOST || "mqtt",
         port: parseInt(process.env.MQTT_PORT || "1883"),
-        username: process.env.MQTT_USERNAME || "raptorblingx",
-        password: process.env.MQTT_PASSWORD || "raptorblingx"
+        username: process.env.MQTT_USERNAME || "enms_mqtt",
+        password: process.env.MQTT_PASSWORD || ""
     },
     
     // PostgreSQL settings (for reference)
@@ -142,7 +142,7 @@ module.exports = {
         host: process.env.POSTGRES_HOST || "postgres",
         port: parseInt(process.env.POSTGRES_PORT || "5432"),
         database: process.env.POSTGRES_DB || "enms",
-        user: process.env.POSTGRES_USER || "raptorblingx",
-        password: process.env.POSTGRES_PASSWORD || "raptorblingx"
+        user: process.env.POSTGRES_USER || "enms_app",
+        password: process.env.POSTGRES_PASSWORD || ""
     }
 };

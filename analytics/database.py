@@ -437,6 +437,65 @@ async def save_baseline_model(model_data: Dict[str, Any]) -> UUID:
     return model_id
 
 
+async def save_baseline_model_with_conn(conn: asyncpg.Connection, model_data: Dict[str, Any]) -> UUID:
+    """Save baseline model using an existing connection/transaction."""
+    query = """
+        INSERT INTO energy_baselines (
+            machine_id, energy_source_id, model_name, model_type, model_version,
+            training_start_date, training_end_date, training_samples,
+            coefficients, intercept, feature_names,
+            r_squared, rmse, mae, is_active, trained_by
+        ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+        )
+        RETURNING id
+    """
+
+    model_id = await conn.fetchval(
+        query,
+        model_data['machine_id'],
+        model_data['energy_source_id'],
+        model_data['model_name'],
+        model_data.get('model_type', 'linear_regression'),
+        model_data['model_version'],
+        model_data['training_start_date'],
+        model_data['training_end_date'],
+        model_data['training_samples'],
+        model_data['coefficients'],
+        model_data.get('intercept'),
+        model_data['feature_names'],
+        model_data.get('r_squared'),
+        model_data.get('rmse'),
+        model_data.get('mae'),
+        model_data.get('is_active', True),
+        model_data.get('trained_by', 'analytics-service')
+    )
+
+    logger.info(f"✓ Baseline model saved in transaction: {model_id}")
+    return model_id
+
+
+async def get_latest_baseline_model_version(
+    machine_id: UUID,
+    energy_source_id: UUID,
+    conn: Optional[asyncpg.Connection] = None
+) -> int:
+    """Return the latest stored version for a machine/energy-source pair, active or not."""
+    query = """
+        SELECT COALESCE(MAX(model_version), 0)
+        FROM energy_baselines
+        WHERE machine_id = $1 AND energy_source_id = $2
+    """
+
+    if conn is not None:
+        latest_version = await conn.fetchval(query, machine_id, energy_source_id)
+    else:
+        async with db.pool.acquire() as pooled_conn:
+            latest_version = await pooled_conn.fetchval(query, machine_id, energy_source_id)
+
+    return int(latest_version or 0)
+
+
 async def save_anomaly(anomaly_data: Dict[str, Any]) -> UUID:
     """
     Save detected anomaly to database.
@@ -569,3 +628,28 @@ async def deactivate_baseline_models(machine_id: UUID, energy_source_id: Optiona
         async with db.pool.acquire() as conn:
             await conn.execute(query, machine_id)
         logger.info(f"Deactivated all baseline models for machine: {machine_id}")
+
+
+async def deactivate_baseline_models_with_conn(
+    conn: asyncpg.Connection,
+    machine_id: UUID,
+    energy_source_id: Optional[UUID] = None
+):
+    """Deactivate baseline models using an existing connection/transaction."""
+    if energy_source_id:
+        query = """
+            UPDATE energy_baselines
+            SET is_active = FALSE
+            WHERE machine_id = $1 AND energy_source_id = $2 AND is_active = TRUE
+        """
+        await conn.execute(query, machine_id, energy_source_id)
+        logger.info(f"Deactivated baseline models for machine: {machine_id}, energy source: {energy_source_id}")
+        return
+
+    query = """
+        UPDATE energy_baselines
+        SET is_active = FALSE
+        WHERE machine_id = $1 AND is_active = TRUE
+    """
+    await conn.execute(query, machine_id)
+    logger.info(f"Deactivated all baseline models for machine: {machine_id}")

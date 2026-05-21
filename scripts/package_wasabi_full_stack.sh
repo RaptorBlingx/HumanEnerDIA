@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OVOS_ROOT="${OVOS_ROOT:-/home/ubuntu/ovos-llm}"
+VERSION="${1:-1.0.0}"
+RELEASE_DIR="$ROOT_DIR/releases"
+ARTIFACT_BASE="HumanEnerDIA-full-stack-v${VERSION}"
+ARTIFACT_PATH="$RELEASE_DIR/${ARTIFACT_BASE}.tar.gz"
+CHECKSUM_PATH="${ARTIFACT_PATH}.sha256"
+NOTES_PATH="$RELEASE_DIR/${ARTIFACT_BASE}-release-notes.md"
+STAGE_ROOT="$(mktemp -d)"
+BUNDLE_DIR="$STAGE_ROOT/${ARTIFACT_BASE}"
+
+cleanup() {
+  rm -rf "$STAGE_ROOT"
+}
+trap cleanup EXIT
+
+if [[ ! -d "$OVOS_ROOT/enms-ovos-skill" ]]; then
+  echo "OVOS source directory not found: $OVOS_ROOT" >&2
+  exit 1
+fi
+
+mkdir -p "$RELEASE_DIR" "$BUNDLE_DIR"
+
+copy_humanergy_dir() {
+  local src="$1"
+  local dest="$2"
+  shift 2
+  rsync -a \
+    --exclude '.git/' \
+    --exclude '.env' \
+    --exclude '__pycache__/' \
+    --exclude '.pytest_cache/' \
+    --exclude 'htmlcov/' \
+    --exclude 'node_modules/' \
+    --exclude 'dist/' \
+    --exclude 'logs/' \
+    --exclude 'cache/' \
+    --exclude 'postgres-data/' \
+    --exclude '*.log' \
+    --exclude '*.pyc' \
+    --exclude '*.pyo' \
+    --exclude '*.dump' \
+    --exclude '*.bak' \
+    --exclude '*.old' \
+    --exclude 'releases/' \
+    --exclude 'models/saved/' \
+    "$@" \
+    "$src" "$dest"
+}
+
+copy_ovos_dir() {
+  local src="$1"
+  local dest="$2"
+  rsync -a \
+    --exclude '.git/' \
+    --exclude '.env' \
+    --exclude '__pycache__/' \
+    --exclude '.pytest_cache/' \
+    --exclude 'htmlcov/' \
+    --exclude 'logs/' \
+    --exclude 'releases/' \
+    --exclude 'models/' \
+    --exclude '*.log' \
+    --exclude '*.pyc' \
+    "$src" "$dest"
+}
+
+install -m 644 "$ROOT_DIR/LICENSE" "$BUNDLE_DIR/LICENSE"
+install -m 644 "$ROOT_DIR/README.md" "$BUNDLE_DIR/README.md"
+install -m 755 "$ROOT_DIR/setup.sh" "$BUNDLE_DIR/setup.sh"
+install -m 644 "$ROOT_DIR/docker-compose.yml" "$BUNDLE_DIR/docker-compose.yml"
+install -m 644 "$ROOT_DIR/scripts/release/docker-compose.ovos.yml" "$BUNDLE_DIR/docker-compose.ovos.yml"
+install -m 644 "$ROOT_DIR/docs/wasabi-shop/HUMANERDIA_FULL_STACK_INSTALLATION.md" "$BUNDLE_DIR/INSTALL.md"
+install -m 644 "$ROOT_DIR/docs/wasabi-shop/HUMANERDIA_FULL_STACK_WASABI_SHOP_PRODUCT.md" "$BUNDLE_DIR/PRODUCT.md"
+
+cp "$ROOT_DIR/.env.example" "$BUNDLE_DIR/.env.example"
+sed -i \
+  -e 's/^OVOS_BRIDGE_HOST=.*/OVOS_BRIDGE_HOST=ovos/' \
+  -e 's|^FRONTEND_URL=.*|FRONTEND_URL=https://your-humanerdia-domain.example|' \
+  "$BUNDLE_DIR/.env.example"
+
+copy_humanergy_dir "$ROOT_DIR/analytics/" "$BUNDLE_DIR/analytics/"
+copy_humanergy_dir "$ROOT_DIR/auth-service/" "$BUNDLE_DIR/auth-service/"
+copy_humanergy_dir "$ROOT_DIR/chatbot/" "$BUNDLE_DIR/chatbot/" --exclude '/models/' --exclude 'dist/'
+copy_humanergy_dir "$ROOT_DIR/database/" "$BUNDLE_DIR/database/"
+copy_humanergy_dir "$ROOT_DIR/docs/" "$BUNDLE_DIR/docs/"
+copy_humanergy_dir "$ROOT_DIR/grafana/" "$BUNDLE_DIR/grafana/"
+copy_humanergy_dir "$ROOT_DIR/monitoring/" "$BUNDLE_DIR/monitoring/"
+copy_humanergy_dir "$ROOT_DIR/mqtt/" "$BUNDLE_DIR/mqtt/"
+copy_humanergy_dir "$ROOT_DIR/nginx/" "$BUNDLE_DIR/nginx/"
+copy_humanergy_dir "$ROOT_DIR/nodered/" "$BUNDLE_DIR/nodered/" \
+  --exclude 'data/.npm/' \
+  --exclude 'data/projects/.sshkeys/' \
+  --exclude 'data/*.backup'
+copy_humanergy_dir "$ROOT_DIR/portal/" "$BUNDLE_DIR/portal/"
+copy_humanergy_dir "$ROOT_DIR/protection/" "$BUNDLE_DIR/protection/"
+copy_humanergy_dir "$ROOT_DIR/query-service/" "$BUNDLE_DIR/query-service/"
+copy_humanergy_dir "$ROOT_DIR/redis/" "$BUNDLE_DIR/redis/"
+copy_humanergy_dir "$ROOT_DIR/scripts/" "$BUNDLE_DIR/scripts/"
+copy_humanergy_dir "$ROOT_DIR/simulator/" "$BUNDLE_DIR/simulator/"
+
+mkdir -p "$BUNDLE_DIR/ovos-stack"
+for file in Dockerfile docker-compose.yml ovos.conf requirements.txt requirements-llm.txt setup.sh supervisord.conf README.md; do
+  install -m 644 "$OVOS_ROOT/$file" "$BUNDLE_DIR/ovos-stack/$file"
+done
+chmod 755 "$BUNDLE_DIR/ovos-stack/setup.sh"
+copy_ovos_dir "$OVOS_ROOT/enms-ovos-skill/" "$BUNDLE_DIR/ovos-stack/enms-ovos-skill/"
+
+rm -f "$ARTIFACT_PATH" "$CHECKSUM_PATH" "$NOTES_PATH"
+tar -C "$STAGE_ROOT" -czf "$ARTIFACT_PATH" "$ARTIFACT_BASE"
+sha256sum "$ARTIFACT_PATH" > "$CHECKSUM_PATH"
+
+{
+  echo "# HumanEnerDIA Full Stack v${VERSION} Release Notes"
+  echo
+  echo "Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  echo
+  echo "## WASABI Shop Artifact"
+  echo
+  echo "- Upload file: \`${ARTIFACT_BASE}.tar.gz\`"
+  echo "- SHA256: \`$(cut -d ' ' -f1 "$CHECKSUM_PATH")\`"
+  echo "- Product name: HumanEnerDIA Full Stack for Industrial Energy Management"
+  echo "- Core license: MIT for HumanEnerDIA backend/full-stack repository"
+  echo "- Included OVOS component license: Apache-2.0 OR GPL-3.0-or-later"
+  echo
+  echo "## Bundle Contents"
+  echo
+  echo "The archive contains the EnMS backend stack, portal, analytics services,"
+  echo "database initialization, dashboards, MQTT pipeline, authentication service,"
+  echo "and an embedded OVOS runtime/skill directory under \`ovos-stack/\`."
+  echo
+  echo "## Exclusions"
+  echo
+  echo "- Live .env files"
+  echo "- Docker runtime volumes and local data"
+  echo "- Trained analytics baseline/anomaly models"
+  echo "- OVOS GGUF models and caches"
+  echo "- Top-level chatbot model dump, node_modules, __pycache__, logs, and release artifacts"
+  echo "- The required Rasa runtime model under \`chatbot/rasa/models/\` is retained because the repository does not include a rebuildable training set."
+  echo
+  echo "## Guided Install"
+  echo
+  echo "1. Extract the archive"
+  echo "2. Copy \`.env.example\` to \`.env\`"
+  echo "3. Fill required values"
+  echo "4. Run \`./setup.sh\` or use \`docker compose -f docker-compose.yml -f docker-compose.ovos.yml up -d\`"
+  echo "5. Optional Qwen fallback: set \`INSTALL_LLM_FALLBACK=true\`, place the GGUF in"
+  echo "   \`ovos-stack/enms-ovos-skill/models/\`, and rebuild the OVOS image"
+  echo
+  echo "## Smoke Checks"
+  echo
+  echo "\`\`\`bash"
+  echo "curl -fsS http://localhost:8080/health"
+  echo "curl -fsS http://localhost:8001/api/v1/health"
+  echo "curl -fsS http://localhost:5000/health"
+  echo "curl -sS -X POST http://localhost:5000/query \\"
+  echo "  -H 'Content-Type: application/json' \\"
+  echo "  -d '{\"text\":\"what is the power of compressor one\",\"session_id\":\"full-stack-release\"}'"
+  echo "\`\`\`"
+} > "$NOTES_PATH"
+
+echo "Created $ARTIFACT_PATH"
+echo "Created $CHECKSUM_PATH"
+echo "Created $NOTES_PATH"
