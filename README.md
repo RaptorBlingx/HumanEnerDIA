@@ -149,7 +149,8 @@ git push
 sudo ./scripts/setup-grafana-auto-backup.sh
 ```
 
-For detailed information, see: [docs/GRAFANA-PERSISTENCE.md](docs/GRAFANA-PERSISTENCE.md)
+For operational backup guidance, see the
+[Operations Runbook](docs/OPERATIONS_RUNBOOK.md).
 
 > **Note**: Node-RED changes are also automatically saved to the filesystem.
 
@@ -222,7 +223,8 @@ PUT    /simulator/config             # Update configuration
 POST   /simulator/inject-anomaly     # Inject anomaly for testing
 ```
 
-Full API documentation: http://localhost/api/docs
+Full analytics API documentation through Nginx:
+http://localhost:8080/api/analytics/docs
 
 ---
 
@@ -286,11 +288,8 @@ enms/
 ### Running in Development Mode
 
 ```bash
-# Use development compose file
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
-
-# Enable hot-reload for services
-# See docker-compose.dev.yml for configuration
+docker compose build
+docker compose up -d
 ```
 
 ### Running Tests
@@ -307,10 +306,10 @@ release test suite.
 
 ```bash
 # All services
-docker-compose logs -f
+docker compose logs -f
 
 # Specific service
-docker-compose logs -f analytics
+docker compose logs -f analytics
 ```
 
 ---
@@ -336,16 +335,16 @@ docker-compose logs -f analytics
 
 ## 🗄️ Backup & Recovery
 
-### Manual Backup
+### Manual Database Backup
+
+There is no generic tracked `scripts/backup.sh` or `scripts/restore.sh`.
+Use `pg_dump`, platform snapshots, or the backup procedure in the
+[Operations Runbook](docs/OPERATIONS_RUNBOOK.md).
+
+### Grafana Dashboard Backup
 
 ```bash
-./scripts/backup.sh
-```
-
-### Restore from Backup
-
-```bash
-./scripts/restore.sh backups/enms_backup_2025-10-08.sql.gz
+./scripts/backup-grafana-dashboards.sh
 ```
 
 ### Automated Backups
@@ -360,10 +359,13 @@ BACKUP_RETENTION_DAYS=30
 
 ## 📚 Documentation
 
-- [GRAFANA-PERSISTENCE.md](docs/GRAFANA-PERSISTENCE.md) - Dashboard backup & persistence
-- [Project Knowledge Base](Project-Knowledge-Base.md) - Architecture & development guide
-- [API Documentation](docs/api-documentation/) - REST API reference
-- [ISO 50001 Guide](docs/ISO-50001-IMPLEMENTATION-GUIDE.md) - Energy management standards
+- [Documentation Index](docs/README.md) - Start here for all maintained docs
+- [Technical Architecture Guide](docs/TECHNICAL_ARCHITECTURE_GUIDE.md) - System architecture and service map
+- [Operations Runbook](docs/OPERATIONS_RUNBOOK.md) - Day-2 operations and troubleshooting
+- [Business User Guide](docs/BUSINESS_USER_GUIDE.md) - Portal and dashboard usage for non-technical users
+- [KPI Reference](docs/KPI_REFERENCE.md) - KPI and ISO 50001 term definitions
+- [Database Schema Reference](docs/DATABASE_SCHEMA_REFERENCE.md) - Tables, aggregates, and operational queries
+- [API Documentation](docs/api-documentation/) - REST API references
 - [WASABI Release Runbook](docs/wasabi-shop/HUMANERDIA_WASABI_RELEASE_RUNBOOK.md) - release and shop publishing checklist
 - [Full Stack Installation](docs/wasabi-shop/HUMANERDIA_FULL_STACK_INSTALLATION.md) - buyer-facing deployment guide
 - [ENMS API Documentation for OVOS](docs/api-documentation/ENMS-API-DOCUMENTATION-FOR-OVOS.md) - OVOS/backend API contract
