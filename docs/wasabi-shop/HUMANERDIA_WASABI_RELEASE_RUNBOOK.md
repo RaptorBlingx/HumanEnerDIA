@@ -81,6 +81,10 @@ After first login:
 If the WASABI compose file binds port `80`, adjust the compose override or
 reverse proxy so the local test URL is `http://SERVER_IP:18080`.
 
+Ensure the PrestaShop web container has a restart policy, for example
+`restart: always`; otherwise the database may return after a host restart while
+the front office remains down.
+
 ## 3. Shop Products
 
 Create two free virtual products:
@@ -141,7 +145,7 @@ model caches, analytics saved models, or OVOS GGUF files.
 As of 2026-05-21, the local WASABI deployment is running on:
 
 - Front office: `http://10.33.10.104:18080/`
-- Shop category: `http://10.33.10.104:18080/wasabiSHOP/`
+- Shop category: `http://10.33.10.104:18080/12-skills`
 - OVOS skill product page: `http://10.33.10.104:18080/skills/38-humanenerdia-ovos-skill-for-industrial-energy-management.html`
 - Full stack product page: `http://10.33.10.104:18080/skills/39-humanenerdia-full-stack-for-industrial-energy-management.html`
 

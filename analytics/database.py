@@ -337,7 +337,11 @@ async def get_machine_data_combined(
             pd.avg_throughput as avg_throughput_units_per_hour,
             pd.total_production_good,
             pd.total_production_bad,
-            pd.quality_percent,
+            CASE
+                WHEN pd.total_production_count > 0 THEN
+                    (pd.total_production_good::DECIMAL / pd.total_production_count) * 100
+                ELSE 0
+            END AS quality_percent,
             pd.avg_speed_percent,
             ed.avg_outdoor_temp_c,
             ed.avg_indoor_temp_c,

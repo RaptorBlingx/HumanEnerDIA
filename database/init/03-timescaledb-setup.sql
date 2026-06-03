@@ -191,7 +191,7 @@ SELECT
     CASE 
         WHEN MAX(power_kw) > 0 THEN AVG(power_kw) / MAX(power_kw)
         ELSE 0
-    END AS load_factor,
+    END AS avg_load_factor,
     
     COUNT(*) AS total_readings
     
@@ -210,6 +210,12 @@ SELECT
     SUM(production_count) AS total_production_count,
     SUM(production_count_good) AS total_production_good,
     SUM(production_count_bad) AS total_production_bad,
+
+    CASE
+        WHEN SUM(production_count) > 0 THEN
+            (SUM(production_count_good)::DECIMAL / SUM(production_count)) * 100
+        ELSE 0
+    END AS quality_percent,
     
     AVG(throughput_units_per_hour) AS avg_throughput,
     AVG(speed_percent) AS avg_speed_percent,

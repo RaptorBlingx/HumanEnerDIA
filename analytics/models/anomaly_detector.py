@@ -96,14 +96,21 @@ class AnomalyDetector:
         
         # Add baseline deviation if predictions provided
         if baseline_predictions is not None and 'total_energy_kwh' in df.columns:
-            df['baseline_deviation'] = df['total_energy_kwh'].astype(float) - baseline_predictions
+            predictions = np.asarray(baseline_predictions, dtype=float)
+            df['baseline_deviation'] = (
+                pd.to_numeric(df['total_energy_kwh'], errors='coerce').astype(float)
+                - predictions
+            )
             feature_columns.append('baseline_deviation')
         
         # Extract features
         if not feature_columns:
             raise ValueError("No valid features found for anomaly detection")
         
-        X = df[feature_columns].fillna(0).values
+        for column in feature_columns:
+            df[column] = pd.to_numeric(df[column], errors='coerce')
+
+        X = df[feature_columns].fillna(0.0).to_numpy(dtype=float)
         
         logger.info(f"Prepared features for anomaly detection: {feature_columns}")
         
