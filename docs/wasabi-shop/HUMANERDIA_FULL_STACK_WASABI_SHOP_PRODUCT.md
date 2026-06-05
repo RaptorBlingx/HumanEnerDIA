@@ -20,23 +20,25 @@ Digital download, free/open distribution for the initial WASABI release.
 - Authentication service
 - Simulator and chatbot components
 - Embedded OVOS runtime and HumanEnerDIA OVOS skill source
+- Zero-touch setup helper and release verifier
 
 ## Requirements
 
 - Linux server or workstation
 - Docker Engine and Docker Compose
 - Enough RAM and disk for a multi-service stack
-- Buyer-provided secrets in `.env`
 - Optional Qwen GGUF model only when local Tier-3 LLM fallback is enabled
 
 ## Installation Summary
 
 1. Extract `HumanEnerDIA-full-stack-v1.0.0.tar.gz`
-2. Copy `.env.example` to `.env`
-3. Fill the required values
-4. Run `./setup.sh`
-5. Verify portal, Grafana, and OVOS health endpoints
-6. Run a smoke query through the OVOS bridge
+2. Run `./setup.sh`
+3. Verify portal, Grafana, analytics, and OVOS health endpoints
+4. Run a smoke query through the OVOS bridge
+
+`setup.sh` creates `.env` when needed and generates first-run secrets for local
+evaluation. For production, rotate those generated values, configure DNS/TLS,
+and review exposed ports before public use.
 
 The base bundle keeps `INSTALL_LLM_FALLBACK=false` so the install remains
 lighter. Buyers who want local Qwen fallback can provide
@@ -51,9 +53,9 @@ Third-party services keep their own upstream licenses.
 
 ## Known Limitations
 
-This artifact is designed as a guided deployment bundle for evaluation and
-integration. Production hardening still requires buyer-specific secrets, DNS,
-TLS, backups, and infrastructure review.
+This artifact is designed as a zero-touch evaluation bundle and a guided
+production starting point. Production hardening still requires buyer-specific
+DNS, TLS, backup policy, secret rotation, and infrastructure review.
 
 The `query-service` container is currently a reserved placeholder and is not
 part of release health expectations.

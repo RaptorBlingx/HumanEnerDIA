@@ -100,8 +100,8 @@ COMMENT ON FUNCTION get_seu_daily_aggregates_dd IS
 Much faster than on-the-fly calculation for large date ranges.';
 
 -- Grant permissions
-GRANT SELECT ON environmental_degree_days_daily TO raptorblingx;
-GRANT EXECUTE ON FUNCTION get_seu_daily_aggregates_dd TO raptorblingx;
+GRANT SELECT ON environmental_degree_days_daily TO CURRENT_USER;
+GRANT EXECUTE ON FUNCTION get_seu_daily_aggregates_dd TO CURRENT_USER;
 
 -- ============================================================================
 -- Backfill Historical Data

@@ -29,7 +29,7 @@ portal, and an OVOS-ready Digital Industrial Assistant integration.
 - **📈 Smart Dashboards**: Pre-built Grafana dashboards with customizable variables
 - **🎤 Voice Integration**: OVOS-ready via the companion HumanEnerDIA OVOS skill and REST bridge
 - **🔌 Modular Architecture**: Microservices-based, API-first design
-- **🐳 Guided Docker Deployment**: Docker Compose deployment with explicit secret placeholders
+- **🐳 Guided Docker Deployment**: Docker Compose deployment with generated first-run secrets
 - **🔒 Release-Oriented Defaults**: Sanitized examples, health checks, and documented production hardening steps
 
 ---
@@ -87,14 +87,15 @@ portal, and an OVOS-ready Digital Industrial Assistant integration.
 git clone https://github.com/RaptorBlingx/HumanEnerDIA.git humanergy
 cd humanergy
 
-# Copy environment template
-cp .env.example .env
-
-# Fill in the required values before first startup
-nano .env
-
-# Run the setup helper
+# Create .env, generate first-run secrets, build, and start
 ./setup.sh
+```
+
+For browser access from another machine, pass the host name or IP that users
+will open:
+
+```bash
+./setup.sh --server-ip energy-demo.local
 ```
 
 **Option 2: Manual Setup**
@@ -105,14 +106,17 @@ git clone https://github.com/RaptorBlingx/HumanEnerDIA.git humanergy
 cd humanergy
 cp .env.example .env
 
+# Fill every <CHANGE_ME...> value in .env before starting.
+
 # Build and start
+docker compose config
 docker compose build
 docker compose up -d
 ```
 
-The setup helper is a thin wrapper around `docker compose build` and
-`docker compose up -d`. It refuses to run while placeholder values remain in
-`.env` so the bundle does not start with fake secrets by accident.
+The setup helper preserves existing non-placeholder `.env` values. When values
+are missing or still use `<CHANGE_ME...>` placeholders, it generates local
+first-run secrets and stores them in `.env`.
 
 ### Access the System
 
@@ -123,7 +127,7 @@ After installation completes:
 - **Node-RED**: http://localhost:1881
 - **Analytics UI**: http://localhost:8080/analytics/ui/
 - **API Documentation**: http://localhost:8080/api/analytics/docs
-- **Simulator Control**: http://localhost:8003/docs
+- **Simulator Control**: http://localhost:8080/api/simulator/docs
 
 > **Note**: Replace `localhost` with your server IP for remote access
 
@@ -367,6 +371,7 @@ BACKUP_RETENTION_DAYS=30
 - [Database Schema Reference](docs/DATABASE_SCHEMA_REFERENCE.md) - Tables, aggregates, and operational queries
 - [API Documentation](docs/api-documentation/) - REST API references
 - [WASABI Release Runbook](docs/wasabi-shop/HUMANERDIA_WASABI_RELEASE_RUNBOOK.md) - release and shop publishing checklist
+- [Clean Machine E2E Runbook](docs/wasabi-shop/HUMANERDIA_CLEAN_MACHINE_E2E_RUNBOOK.md) - clean-machine validation for both WASABI products
 - [Full Stack Installation](docs/wasabi-shop/HUMANERDIA_FULL_STACK_INSTALLATION.md) - buyer-facing deployment guide
 - [ENMS API Documentation for OVOS](docs/api-documentation/ENMS-API-DOCUMENTATION-FOR-OVOS.md) - OVOS/backend API contract
 

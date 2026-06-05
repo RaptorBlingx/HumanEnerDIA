@@ -155,9 +155,9 @@ COMMENT ON FUNCTION get_seu_daily_aggregates_with_quality IS 'Daily aggregates w
 -- Grant permissions
 -- ============================================================================
 
-GRANT EXECUTE ON FUNCTION calculate_degree_days(DATE, DATE, DECIMAL) TO raptorblingx;
-GRANT EXECUTE ON FUNCTION get_seu_daily_aggregates_dd(UUID, DATE, DATE, DECIMAL) TO raptorblingx;
-GRANT EXECUTE ON FUNCTION get_seu_daily_aggregates_with_quality(UUID, DATE, DATE) TO raptorblingx;
+GRANT EXECUTE ON FUNCTION calculate_degree_days(DATE, DATE, DECIMAL) TO CURRENT_USER;
+GRANT EXECUTE ON FUNCTION get_seu_daily_aggregates_dd(UUID, DATE, DATE, DECIMAL) TO CURRENT_USER;
+GRANT EXECUTE ON FUNCTION get_seu_daily_aggregates_with_quality(UUID, DATE, DATE) TO CURRENT_USER;
 
 -- ============================================================================
 -- Validation

@@ -6,13 +6,11 @@ production delivery or WASABI-distributed release.
 ## Branch And Merge Readiness
 
 - Target production branch: `forgejo/main`.
-- Current release branch: `dev`.
-- A simulated merge of committed `dev` into `forgejo/main` produces a merge
-  tree without textual conflicts.
-- The merge is not a fast-forward. Review and merge through a normal release
-  commit or pull request, then tag the delivery version.
-- Keep `docs/simulated-pilot/` from `main`; those files are additive and are
-  preserved by the simulated merge.
+- Current WASABI release path: `main`, aligned with `forgejo/main` and
+  `github/main` during the 2026-06-05 release-readiness pass.
+- Keep `feat/simulated-pilot-identity-alignment` separate unless a dedicated
+  pilot merge is reviewed. It contains newer pilot-work commits but diverges
+  from the WASABI shop release path.
 
 ## Release Artifacts
 
@@ -29,8 +27,10 @@ production delivery or WASABI-distributed release.
 - `.env.example` must contain placeholders for secrets, not real credentials.
 - Rotate any credential that has appeared in terminal history, chat, docs, or
   tracked files.
-- Buyers must set at least database, Grafana, Node-RED, Redis, MQTT, JWT, API
-  key, and public frontend URL values before first start.
+- For local evaluation, `./setup.sh` may generate first-run secrets from
+  `.env.example`.
+- For production, buyers must rotate generated database, Grafana, Node-RED,
+  Redis, MQTT, JWT, API key, and public frontend URL values before public use.
 
 ## Deployment Verification
 
@@ -45,6 +45,12 @@ curl -fsS http://localhost:5000/health
 curl -sS -X POST http://localhost:5000/query \
   -H 'Content-Type: application/json' \
   -d '{"text":"what is the power of compressor one","session_id":"delivery-smoke"}'
+```
+
+Or run the release verifier:
+
+```bash
+./scripts/verify-wasabi-release.sh --skip-shop
 ```
 
 The `query-service` container is currently a placeholder and is intentionally

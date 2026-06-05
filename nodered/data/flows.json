@@ -205,9 +205,9 @@
         "idleFieldType": "num",
         "connectionTimeout": "10000",
         "connectionTimeoutFieldType": "num",
-        "user": "$(POSTGRES_USER)",
+        "user": "${POSTGRES_USER}",
         "userFieldType": "str",
-        "password": "$(POSTGRES_PASSWORD)",
+        "password": "${POSTGRES_PASSWORD}",
         "passwordFieldType": "str"
     },
     {

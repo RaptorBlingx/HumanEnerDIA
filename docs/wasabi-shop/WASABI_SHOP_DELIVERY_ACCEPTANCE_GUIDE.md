@@ -160,6 +160,29 @@ Expected:
 - Product pages show the correct title, image, description, price, and add-to-cart
   flow.
 
+Front-office production-readiness checks:
+
+```bash
+curl -fsSL http://10.33.10.104:18080/ >/tmp/wasabi-home.html
+curl -fsSL http://10.33.10.104:18080/10-products >/tmp/wasabi-products.html
+curl -fsSL http://10.33.10.104:18080/11-virtual-products >/tmp/wasabi-virtual-products.html
+curl -fsSL http://10.33.10.104:18080/12-skills >/tmp/wasabi-skills.html
+curl -fsSL http://10.33.10.104:18080/content/4-about-us >/tmp/wasabi-about.html
+curl -fsSL http://10.33.10.104:18080/content/6-legal-documents >/tmp/wasabi-legal-documents.html
+curl -fsSL http://10.33.10.104:18080/contact-us >/tmp/wasabi-contact.html
+
+rg -i 'Lorem ipsum|info@sizeyou|Via Corradino|seller@wasabi\.test|Mohamad Jarad|value="Array"' /tmp/wasabi-*.html
+```
+
+Expected:
+
+- The home page has HumanEnerDIA-specific slider, package, and support copy.
+- The `Products`, `Virtual products`, and `Skills` categories resolve and show
+  the expected active HumanEnerDIA products.
+- The seller card image loads from `/img/mp_seller/ufnvilwopuuy.png`.
+- Footer support details use `wasabi@aartimuhendislik.com`.
+- The stale-text scan returns no matches.
+
 ## 6. Buyer / End-User Checkout Checks
 
 Use a non-admin buyer account.

@@ -15,6 +15,7 @@ developers, integrators, and release reviewers.
 | Check release and delivery status | [Delivery Readiness](./DELIVERY_READINESS.md) |
 | Integrate OVOS with the backend API | [ENMS API Documentation for OVOS](./api-documentation/ENMS-API-DOCUMENTATION-FOR-OVOS.md) |
 | Package or publish WASABI shop products | [WASABI Shop Docs](./wasabi-shop/) |
+| Test both WASABI products on a clean machine | [Clean Machine E2E Runbook](./wasabi-shop/HUMANERDIA_CLEAN_MACHINE_E2E_RUNBOOK.md) |
 
 ## Documentation by Audience
 
@@ -39,6 +40,7 @@ Release and delivery:
 
 - [Delivery Readiness](./DELIVERY_READINESS.md)
 - [Documentation Plan](./DOCUMENTATION_PLAN.md)
+- [Clean Machine E2E Runbook](./wasabi-shop/HUMANERDIA_CLEAN_MACHINE_E2E_RUNBOOK.md)
 - [WASABI Release Runbook](./wasabi-shop/HUMANERDIA_WASABI_RELEASE_RUNBOOK.md)
 - [Full Stack Installation](./wasabi-shop/HUMANERDIA_FULL_STACK_INSTALLATION.md)
 

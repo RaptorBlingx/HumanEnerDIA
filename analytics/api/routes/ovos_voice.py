@@ -10,7 +10,7 @@ Architecture:
     EnMS Frontend → This Proxy → OVOS REST Bridge (WSL2:5000) → OVOS Messagebus → EnMS Skill
 
 Configuration via environment variables:
-    OVOS_BRIDGE_HOST: IP address of OVOS REST Bridge (default: 192.168.1.103)
+    OVOS_BRIDGE_HOST: Hostname of OVOS REST Bridge (default: ovos-enms)
     OVOS_BRIDGE_PORT: Port of OVOS REST Bridge (default: 5000)
     OVOS_BRIDGE_TIMEOUT: Request timeout in seconds (default: 20)
 """
@@ -31,7 +31,7 @@ router = APIRouter(prefix="/ovos/voice", tags=["OVOS Voice"])
 # Configuration (Environment Variables)
 # ============================================================================
 
-OVOS_BRIDGE_HOST = os.getenv("OVOS_BRIDGE_HOST", "192.168.1.103")
+OVOS_BRIDGE_HOST = os.getenv("OVOS_BRIDGE_HOST", "ovos-enms")
 OVOS_BRIDGE_PORT = os.getenv("OVOS_BRIDGE_PORT", "5000")
 OVOS_BRIDGE_TIMEOUT = float(os.getenv("OVOS_BRIDGE_TIMEOUT", "20"))
 OVOS_BRIDGE_URL = f"http://{OVOS_BRIDGE_HOST}:{OVOS_BRIDGE_PORT}"
@@ -113,7 +113,7 @@ async def voice_query(request: VoiceQueryRequest):
     - "What's the forecast for tomorrow?"
     
     **Configuration:**
-    Set OVOS_BRIDGE_HOST environment variable to the Windows/WSL2 machine IP.
+    Set OVOS_BRIDGE_HOST to the OVOS REST bridge hostname or IP.
     """
     start_time = datetime.now()
     
@@ -308,7 +308,7 @@ async def voice_config():
         "bridge_url": OVOS_BRIDGE_URL,
         "timeout_seconds": OVOS_BRIDGE_TIMEOUT,
         "env_vars": {
-            "OVOS_BRIDGE_HOST": "Set this to change the bridge IP",
+            "OVOS_BRIDGE_HOST": "Set this to change the bridge host",
             "OVOS_BRIDGE_PORT": "Set this to change the bridge port (default: 5000)",
             "OVOS_BRIDGE_TIMEOUT": "Set this to change timeout (default: 20s)"
         }

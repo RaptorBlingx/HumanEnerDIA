@@ -62,12 +62,6 @@ module.exports = {
             level: "info",
             metrics: false,
             audit: false
-        },
-        file: {
-            level: "info",
-            metrics: false,
-            audit: false,
-            handler: require.resolve("./file-log-handler")
         }
     },
     

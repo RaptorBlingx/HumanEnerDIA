@@ -6,6 +6,9 @@ two HumanEnerDIA WASABI White Label Shop products:
 - the standalone OVOS skill
 - the full stack deployment bundle
 
+For clean-machine buyer validation, use
+[`HUMANERDIA_CLEAN_MACHINE_E2E_RUNBOOK.md`](./HUMANERDIA_CLEAN_MACHINE_E2E_RUNBOOK.md).
+
 For overall production delivery criteria, see
 [`../DELIVERY_READINESS.md`](../DELIVERY_READINESS.md).
 
@@ -104,13 +107,26 @@ Use these product copy sources:
 Run these checks before publishing or re-publishing either product:
 
 ```bash
-docker compose config
-curl -fsS http://localhost:8080/health
-curl -fsS http://localhost:8001/api/v1/health
-curl -fsS http://localhost:5000/health
-curl -sS -X POST http://localhost:5000/query \
-  -H 'Content-Type: application/json' \
-  -d '{"text":"what is the power of compressor one","session_id":"wasabi-release"}'
+cd /home/ubuntu/humanergy
+./scripts/verify-wasabi-release.sh --shop-url http://10.33.10.104:18080
+```
+
+For a local full-stack deployment without the shop checks:
+
+```bash
+./scripts/verify-wasabi-release.sh --skip-shop
+```
+
+Manual Compose validation for the raw repository:
+
+```bash
+docker compose --env-file .env -f docker-compose.yml config
+```
+
+Manual Compose validation for an extracted full-stack bundle:
+
+```bash
+docker compose --env-file .env -f docker-compose.yml -f docker-compose.ovos.yml config
 ```
 
 Known local service notes from the release preparation:
@@ -142,7 +158,7 @@ model caches, analytics saved models, or OVOS GGUF files.
 
 ## 6. Current Release State
 
-As of 2026-05-21, the local WASABI deployment is running on:
+As of 2026-06-05, the local WASABI deployment is running on:
 
 - Front office: `http://10.33.10.104:18080/`
 - Shop category: `http://10.33.10.104:18080/12-skills`
@@ -155,6 +171,24 @@ Current HumanEnerDIA product ids:
 - `39` for the full stack deployment bundle
 
 Both are configured as free virtual downloads.
+
+The full-stack bundle is expected to install with:
+
+```bash
+tar -xzf HumanEnerDIA-full-stack-v1.0.0.tar.gz
+cd HumanEnerDIA-full-stack-v1.0.0
+./setup.sh
+./scripts/verify-wasabi-release.sh --skip-shop
+```
+
+The OVOS ZIP is expected to install into an existing OVOS runtime or the
+companion OVOS Docker repository. It still requires a reachable
+HumanEnerDIA/EnMS analytics API endpoint.
+
+During the 2026-06-05 release-readiness pass, `main` was aligned with
+`forgejo/main` and `github/main`. The remote branch
+`feat/simulated-pilot-identity-alignment` had newer pilot-work commits but was
+kept separate because it diverges from this WASABI release path.
 
 Release backup:
 

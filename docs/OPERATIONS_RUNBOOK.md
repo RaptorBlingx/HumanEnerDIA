@@ -45,27 +45,29 @@ Screenshot placeholder:
 
 ## Startup Procedure
 
-1. Confirm `.env` exists and has no `<CHANGE_ME...>` placeholders.
-2. Validate Compose:
-
-   ```bash
-   docker compose --env-file .env -f docker-compose.yml config
-   ```
-
-3. Build and start:
+1. Run the setup helper, which creates `.env` and generates first-run secrets
+   when needed:
 
    ```bash
    ./setup.sh
    ```
 
-   Or manually:
+2. For manual starts, confirm `.env` exists and has no `<CHANGE_ME...>`
+   placeholders.
+3. Validate Compose:
+
+   ```bash
+   docker compose --env-file .env -f docker-compose.yml config
+   ```
+
+4. Build and start manually only when bypassing `setup.sh`:
 
    ```bash
    docker compose build
    docker compose up -d
    ```
 
-4. Verify health endpoints:
+5. Verify health endpoints:
 
    ```bash
    curl -fsS http://localhost:8080/health

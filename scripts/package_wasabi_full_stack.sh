@@ -144,11 +144,14 @@ sha256sum "$ARTIFACT_PATH" > "$CHECKSUM_PATH"
   echo "## Guided Install"
   echo
   echo "1. Extract the archive"
-  echo "2. Copy \`.env.example\` to \`.env\`"
-  echo "3. Fill required values"
-  echo "4. Run \`./setup.sh\` or use \`docker compose -f docker-compose.yml -f docker-compose.ovos.yml up -d\`"
-  echo "5. Optional Qwen fallback: set \`INSTALL_LLM_FALLBACK=true\`, place the GGUF in"
+  echo "2. Run \`./setup.sh\`"
+  echo "3. Run \`./scripts/verify-wasabi-release.sh --skip-shop\`"
+  echo "4. Optional Qwen fallback: set \`INSTALL_LLM_FALLBACK=true\`, place the GGUF in"
   echo "   \`ovos-stack/enms-ovos-skill/models/\`, and rebuild the OVOS image"
+  echo
+  echo "\`setup.sh\` creates \`.env\` when needed, generates local first-run secrets,"
+  echo "validates Docker Compose, builds the images, and starts the stack. For"
+  echo "production, rotate generated secrets and configure DNS/TLS before exposure."
   echo
   echo "## Smoke Checks"
   echo

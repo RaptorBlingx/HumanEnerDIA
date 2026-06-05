@@ -13,14 +13,19 @@ Digital download, free/open distribution.
 
 ## Requirements
 
-- Linux server or workstation with Docker.
 - Open Voice OS compatible runtime.
 - HumanEnerDIA/EnMS analytics API endpoint.
+- Python 3.10+ for direct skill installation.
 - Optional: `Qwen3.5-2B-Q4_K_M.gguf` for Tier-3 local LLM fallback.
+
+The WASABI ZIP is the standalone skill artifact. It does not include the full
+HumanEnerDIA backend and it does not replace an OVOS runtime. For a clean
+machine OVOS runtime experiment, use the companion OVOS Docker repository and
+point `ENMS_API_URL` at a reachable HumanEnerDIA backend.
 
 ## Installation Summary
 
-1. Download and extract `HumanEnerDIA-OVOS-skill-v1.0.0.zip`.
+1. Download `HumanEnerDIA-OVOS-skill-v1.0.0.zip`.
 2. Configure the backend API:
 
    ```bash
@@ -30,11 +35,12 @@ Digital download, free/open distribution.
 3. Install the skill:
 
    ```bash
-   cd enms-ovos-skill
+   unzip HumanEnerDIA-OVOS-skill-v1.0.0.zip -d HumanEnerDIA-OVOS-skill-v1.0.0
+   cd HumanEnerDIA-OVOS-skill-v1.0.0
    python3 -m pip install -e .
    ```
 
-4. Start the OVOS stack and REST bridge.
+4. Start your OVOS runtime and REST bridge.
 5. Run a smoke query:
 
    ```bash

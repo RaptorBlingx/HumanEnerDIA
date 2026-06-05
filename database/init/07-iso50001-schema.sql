@@ -334,9 +334,9 @@ $$;
 \echo ''
 \echo '→ Granting permissions...'
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON energy_sources TO raptorblingx;
-GRANT SELECT, INSERT, UPDATE, DELETE ON seus TO raptorblingx;
-GRANT SELECT, INSERT, UPDATE, DELETE ON seu_energy_performance TO raptorblingx;
+GRANT SELECT, INSERT, UPDATE, DELETE ON energy_sources TO CURRENT_USER;
+GRANT SELECT, INSERT, UPDATE, DELETE ON seus TO CURRENT_USER;
+GRANT SELECT, INSERT, UPDATE, DELETE ON seu_energy_performance TO CURRENT_USER;
 
 \echo '✓ Permissions granted'
 
