@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+APP_ROOT="${APP_ROOT:-/home/ubuntu/HumanEnerDIA-Prod-staging}"
 OVOS_ROOT="${OVOS_ROOT:-/home/ubuntu/ovos-llm}"
 VERSION="${1:-1.0.0}"
 RELEASE_DIR="$ROOT_DIR/releases"
@@ -22,6 +23,10 @@ if [[ ! -d "$OVOS_ROOT/enms-ovos-skill" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$APP_ROOT/docker-compose.yml" ]]; then
+  APP_ROOT="$ROOT_DIR"
+fi
+
 mkdir -p "$RELEASE_DIR" "$BUNDLE_DIR"
 
 copy_humanergy_dir() {
@@ -30,20 +35,30 @@ copy_humanergy_dir() {
   shift 2
   rsync -a \
     --exclude '.git/' \
+    --exclude '.gitignore' \
+    --exclude '.gitkeep' \
     --exclude '.env' \
     --exclude '__pycache__/' \
     --exclude '.pytest_cache/' \
+    --exclude 'tests/' \
+    --exclude 'test_*.py' \
+    --exclude '*_test.py' \
+    --exclude '*test*.html' \
     --exclude 'htmlcov/' \
     --exclude 'node_modules/' \
     --exclude 'dist/' \
     --exclude 'logs/' \
     --exclude 'cache/' \
+    --exclude 'backup/' \
+    --exclude 'dashboards-backup/' \
     --exclude 'postgres-data/' \
+    --exclude 'README.md' \
     --exclude '*.log' \
     --exclude '*.pyc' \
     --exclude '*.pyo' \
     --exclude '*.dump' \
     --exclude '*.bak' \
+    --exclude '*.bak_*' \
     --exclude '*.old' \
     --exclude 'releases/' \
     --exclude 'models/saved/' \
@@ -56,9 +71,28 @@ copy_ovos_dir() {
   local dest="$2"
   rsync -a \
     --exclude '.git/' \
+    --exclude '.gitignore' \
+    --exclude '.gitkeep' \
     --exclude '.env' \
+    --exclude 'docs/' \
+    --exclude 'scripts/' \
+    --exclude 'tests/' \
+    --exclude 'enms_ovos_skill/tests/' \
     --exclude '__pycache__/' \
     --exclude '.pytest_cache/' \
+    --exclude 'pytest.ini' \
+    --exclude 'test_*.py' \
+    --exclude '*_test.py' \
+    --exclude '*.phase*' \
+    --exclude '*.pre-*' \
+    --exclude 'run_gui.sh' \
+    --exclude 'bridge/README.md' \
+    --exclude 'bridge/pdf_download_example.html' \
+    --exclude 'bridge/test_*' \
+    --exclude 'bridge/*windows*' \
+    --exclude 'bridge/*wsl*' \
+    --exclude 'bridge/*.bat' \
+    --exclude 'bridge/hey_mycroft.tflite' \
     --exclude 'htmlcov/' \
     --exclude 'logs/' \
     --exclude 'releases/' \
@@ -68,39 +102,69 @@ copy_ovos_dir() {
     "$src" "$dest"
 }
 
-install -m 644 "$ROOT_DIR/LICENSE" "$BUNDLE_DIR/LICENSE"
-install -m 644 "$ROOT_DIR/README.md" "$BUNDLE_DIR/README.md"
-install -m 755 "$ROOT_DIR/setup.sh" "$BUNDLE_DIR/setup.sh"
-install -m 644 "$ROOT_DIR/docker-compose.yml" "$BUNDLE_DIR/docker-compose.yml"
+install -m 644 "$APP_ROOT/LICENSE" "$BUNDLE_DIR/LICENSE"
+install -m 755 "$APP_ROOT/setup.sh" "$BUNDLE_DIR/setup.sh"
+install -m 644 "$APP_ROOT/docker-compose.yml" "$BUNDLE_DIR/docker-compose.yml"
 install -m 644 "$ROOT_DIR/scripts/release/docker-compose.ovos.yml" "$BUNDLE_DIR/docker-compose.ovos.yml"
 install -m 644 "$ROOT_DIR/docs/wasabi-shop/HUMANERDIA_FULL_STACK_INSTALLATION.md" "$BUNDLE_DIR/INSTALL.md"
 install -m 644 "$ROOT_DIR/docs/wasabi-shop/HUMANERDIA_FULL_STACK_WASABI_SHOP_PRODUCT.md" "$BUNDLE_DIR/PRODUCT.md"
+install -m 755 "$ROOT_DIR/scripts/verify-wasabi-release.sh" "$BUNDLE_DIR/verify-release.sh"
 
-cp "$ROOT_DIR/.env.example" "$BUNDLE_DIR/.env.example"
+cat > "$BUNDLE_DIR/README.md" <<EOF
+# HumanEnerDIA Full Stack v${VERSION}
+
+Production evaluation bundle for the HumanEnerDIA industrial energy-management
+stack with an embedded OVOS runtime and skill.
+
+## Start
+
+\`\`\`bash
+./setup.sh
+./verify-release.sh
+\`\`\`
+
+For remote browser access:
+
+\`\`\`bash
+./setup.sh --server-ip <host-or-ip>
+\`\`\`
+
+Read \`INSTALL.md\` for the complete end-user deployment guide. Generated
+first-run credentials are stored in \`.env\`; rotate them before production
+exposure.
+EOF
+
+cp "$APP_ROOT/.env.example" "$BUNDLE_DIR/.env.example"
 sed -i \
   -e 's/^OVOS_BRIDGE_HOST=.*/OVOS_BRIDGE_HOST=ovos/' \
   -e 's|^FRONTEND_URL=.*|FRONTEND_URL=https://your-humanerdia-domain.example|' \
   "$BUNDLE_DIR/.env.example"
 
-copy_humanergy_dir "$ROOT_DIR/analytics/" "$BUNDLE_DIR/analytics/"
-copy_humanergy_dir "$ROOT_DIR/auth-service/" "$BUNDLE_DIR/auth-service/"
-copy_humanergy_dir "$ROOT_DIR/chatbot/" "$BUNDLE_DIR/chatbot/" --exclude '/models/' --exclude 'dist/'
-copy_humanergy_dir "$ROOT_DIR/database/" "$BUNDLE_DIR/database/"
-copy_humanergy_dir "$ROOT_DIR/docs/" "$BUNDLE_DIR/docs/"
-copy_humanergy_dir "$ROOT_DIR/grafana/" "$BUNDLE_DIR/grafana/"
-copy_humanergy_dir "$ROOT_DIR/monitoring/" "$BUNDLE_DIR/monitoring/"
-copy_humanergy_dir "$ROOT_DIR/mqtt/" "$BUNDLE_DIR/mqtt/"
-copy_humanergy_dir "$ROOT_DIR/nginx/" "$BUNDLE_DIR/nginx/"
-copy_humanergy_dir "$ROOT_DIR/nodered/" "$BUNDLE_DIR/nodered/" \
+copy_humanergy_dir "$APP_ROOT/analytics/" "$BUNDLE_DIR/analytics/"
+copy_humanergy_dir "$APP_ROOT/auth-service/" "$BUNDLE_DIR/auth-service/"
+copy_humanergy_dir "$APP_ROOT/chatbot/" "$BUNDLE_DIR/chatbot/" \
+  --exclude '/rasa/models/components/' \
+  --exclude '/rasa/models/metadata.json' \
+  --exclude '/rasa/tests/' \
+  --exclude '/models/' \
+  --exclude 'dist/'
+
+mkdir -p "$BUNDLE_DIR/database"
+copy_humanergy_dir "$APP_ROOT/database/init/" "$BUNDLE_DIR/database/init/"
+install -m 644 "$APP_ROOT/database/postgresql.conf" "$BUNDLE_DIR/database/postgresql.conf"
+
+copy_humanergy_dir "$APP_ROOT/grafana/" "$BUNDLE_DIR/grafana/"
+copy_humanergy_dir "$APP_ROOT/mqtt/" "$BUNDLE_DIR/mqtt/"
+copy_humanergy_dir "$APP_ROOT/nginx/" "$BUNDLE_DIR/nginx/"
+copy_humanergy_dir "$APP_ROOT/nodered/" "$BUNDLE_DIR/nodered/" \
   --exclude 'data/.npm/' \
   --exclude 'data/projects/.sshkeys/' \
   --exclude 'data/*.backup'
-copy_humanergy_dir "$ROOT_DIR/portal/" "$BUNDLE_DIR/portal/"
-copy_humanergy_dir "$ROOT_DIR/protection/" "$BUNDLE_DIR/protection/"
-copy_humanergy_dir "$ROOT_DIR/query-service/" "$BUNDLE_DIR/query-service/"
-copy_humanergy_dir "$ROOT_DIR/redis/" "$BUNDLE_DIR/redis/"
-copy_humanergy_dir "$ROOT_DIR/scripts/" "$BUNDLE_DIR/scripts/"
-copy_humanergy_dir "$ROOT_DIR/simulator/" "$BUNDLE_DIR/simulator/"
+copy_humanergy_dir "$APP_ROOT/portal/" "$BUNDLE_DIR/portal/" \
+  --exclude 'public/pilot-*' \
+  --exclude 'public/admin/pilot-*' \
+  --exclude 'public/js/*pilot*'
+copy_humanergy_dir "$APP_ROOT/simulator/" "$BUNDLE_DIR/simulator/"
 
 mkdir -p "$BUNDLE_DIR/ovos-stack"
 for file in Dockerfile docker-compose.yml ovos.conf requirements.txt requirements-llm.txt setup.sh supervisord.conf README.md; do
@@ -130,22 +194,27 @@ sha256sum "$ARTIFACT_PATH" > "$CHECKSUM_PATH"
   echo
   echo "The archive contains the EnMS backend stack, portal, analytics services,"
   echo "database initialization, dashboards, MQTT pipeline, authentication service,"
-  echo "and an embedded OVOS runtime/skill directory under \`ovos-stack/\`."
+  echo "a production verifier, and an embedded OVOS runtime/skill directory under"
+  echo "\`ovos-stack/\`."
   echo
   echo "## Exclusions"
   echo
   echo "- Live .env files"
   echo "- Docker runtime volumes and local data"
+  echo "- Internal docs, pilot/proposal materials, crawl data, reports, and TODO files"
+  echo "- Development, test, backfill, package, release, and maintenance scripts"
+  echo "- Unit/integration tests and test fixtures"
+  echo "- Grafana dashboard backups and transient backup files"
   echo "- Trained analytics baseline/anomaly models"
   echo "- OVOS GGUF models and caches"
-  echo "- Top-level chatbot model dump, node_modules, __pycache__, logs, and release artifacts"
+  echo "- node_modules, __pycache__, logs, Git metadata, and release artifacts"
   echo "- The required Rasa runtime model under \`chatbot/rasa/models/\` is retained because the repository does not include a rebuildable training set."
   echo
   echo "## Guided Install"
   echo
   echo "1. Extract the archive"
   echo "2. Run \`./setup.sh\`"
-  echo "3. Run \`./scripts/verify-wasabi-release.sh --skip-shop\`"
+  echo "3. Run \`./verify-release.sh\`"
   echo "4. Optional Qwen fallback: set \`INSTALL_LLM_FALLBACK=true\`, place the GGUF in"
   echo "   \`ovos-stack/enms-ovos-skill/models/\`, and rebuild the OVOS image"
   echo

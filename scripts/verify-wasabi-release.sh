@@ -8,7 +8,7 @@ HUMANERDIA_BASE_URL="${HUMANERDIA_BASE_URL:-http://localhost:8080}"
 ANALYTICS_BASE_URL="${ANALYTICS_BASE_URL:-http://localhost:8001}"
 OVOS_BASE_URL="${OVOS_BASE_URL:-http://localhost:5000}"
 WASABI_BASE_URL="${WASABI_BASE_URL:-http://10.33.10.104:18080}"
-SKIP_SHOP=false
+SKIP_SHOP=true
 
 checksum_or_default() {
   local checksum_file="$1"
@@ -25,8 +25,11 @@ OVOS_ARTIFACT_SHA256="${OVOS_ARTIFACT_SHA256:-$(checksum_or_default "/home/ubunt
 FULL_STACK_ARTIFACT_SHA256="${FULL_STACK_ARTIFACT_SHA256:-$(checksum_or_default "$ROOT_DIR/releases/HumanEnerDIA-full-stack-v1.0.0.tar.gz.sha256" "5d3a2ba1689ab34c61b9045fdf44db7aeb29c0359134ed311829a39d7db67bfd")}"
 
 usage() {
-  cat <<'EOF'
-Usage: scripts/verify-wasabi-release.sh [--skip-shop] [--shop-url URL]
+  cat <<EOF
+Usage: $(basename "$0") [--skip-shop] [--shop-url URL]
+
+By default, this verifies only the local HumanEnerDIA deployment. Pass
+--shop-url to include WASABI shop product-page checks.
 
 Environment overrides:
   HUMANERDIA_BASE_URL  default http://localhost:8080
@@ -44,6 +47,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --shop-url)
       WASABI_BASE_URL="${2:?--shop-url requires a URL}"
+      SKIP_SHOP=false
       shift 2
       ;;
     -h|--help)

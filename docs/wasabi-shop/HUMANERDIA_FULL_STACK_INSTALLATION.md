@@ -23,7 +23,7 @@ After extraction, the bundle root contains:
 - `docker-compose.ovos.yml` for the embedded OVOS service
 - `ovos-stack/` with the OVOS runtime and skill source
 - `setup.sh`
-- `scripts/verify-wasabi-release.sh`
+- `verify-release.sh`
 - `INSTALL.md` and `PRODUCT.md`
 - `.env.example`
 
@@ -63,7 +63,7 @@ Generated first-run credentials are stored in `.env`. Keep that file private.
 Run the bundled verifier:
 
 ```bash
-./scripts/verify-wasabi-release.sh --skip-shop
+./verify-release.sh
 ```
 
 Manual checks:
@@ -118,5 +118,3 @@ lighter. If you want Tier-3 local LLM fallback:
 - Review exposed ports, firewall rules, backup policy, and host monitoring.
 - The bundle excludes live `.env` files, Docker volumes, analytics saved
   models, OVOS GGUF model files, caches, and logs.
-- The `query-service` container is a reserved placeholder and is not part of
-  release health expectations.

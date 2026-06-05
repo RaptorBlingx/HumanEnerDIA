@@ -51,11 +51,8 @@ The HumanEnerDIA backend/full-stack repository is distributed under the MIT
 License. The bundled OVOS component remains `Apache-2.0 OR GPL-3.0-or-later`.
 Third-party services keep their own upstream licenses.
 
-## Known Limitations
+## Production Notes
 
 This artifact is designed as a zero-touch evaluation bundle and a guided
 production starting point. Production hardening still requires buyer-specific
 DNS, TLS, backup policy, secret rotation, and infrastructure review.
-
-The `query-service` container is currently a reserved placeholder and is not
-part of release health expectations.
