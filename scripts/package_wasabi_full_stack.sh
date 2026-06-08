@@ -146,7 +146,6 @@ copy_humanergy_dir "$APP_ROOT/chatbot/" "$BUNDLE_DIR/chatbot/" \
   --exclude '/rasa/models/components/' \
   --exclude '/rasa/models/metadata.json' \
   --exclude '/rasa/tests/' \
-  --exclude '/models/' \
   --exclude 'dist/'
 
 mkdir -p "$BUNDLE_DIR/database"
