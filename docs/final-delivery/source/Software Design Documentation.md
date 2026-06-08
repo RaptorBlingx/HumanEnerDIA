@@ -95,7 +95,6 @@ The Rasa custom action loads qa_data.json and retrieves knowledge/help answers u
 
 | Gap or caution | Evidence-based status |
 | --- | --- |
-| query-service | Only Dockerfile and empty route/schema/service folders observed; compose healthcheck disabled. |
 | Report V2 semantics | V2 routes and generator exist, but some service values are proportional or placeholder-derived, such as efficiency sparkline and estimated baseline cost. |
 | Simulator machine list inconsistency | Code supports boiler; simulator info endpoint text still lists five machine types. |
 | Direct public exposure | Several internal service ports are externally mapped for development/ops; production hardening requires operator firewall/TLS review. |
@@ -113,4 +112,4 @@ The table below lists the main local evidence used for this document. It is not 
 | Node-RED | nodered/data/flows.json; nodered/settings.js; nodered/package.json |
 | Auth | auth-service/app.py; auth-service/auth_service.py; database/init/05-auth-schema.sql |
 | Chatbot/Rasa | chatbot/server/index.js; chatbot/rasa/actions/actions.py; chatbot/rasa/qa_data.json |
-| Tests | analytics/tests/test_*.py; /home/ubuntu/ovos-llm/enms-ovos-skill/tests/test_*.py |
+| Tests | analytics/tests/test_*.py; OVOS-EnMS repository: enms-ovos-skill/tests/test_*.py |

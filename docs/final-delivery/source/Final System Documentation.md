@@ -30,7 +30,7 @@ For a local or evaluation deployment, use the guided setup script from the repos
 | Analytics API docs | http://<host>:8080/api/analytics/docs | Nginx proxy to analytics OpenAPI docs |
 | Simulator docs | http://<host>:8080/api/simulator/docs | Nginx proxy to simulator OpenAPI docs |
 | Node-RED | http://<host>:1881 or http://<host>:8080/nodered/ | Admin UI protected by Node-RED credentials |
-| OVOS bridge | http://<host>:5000/health | Available when OVOS stack/overlay is deployed |
+| OVOS bridge | http://<host>:5000/health | Available when the separate OVOS-EnMS stack or release-bundle component is deployed |
 
 ## Main Workflows
 
@@ -50,7 +50,7 @@ For a local or evaluation deployment, use the guided setup script from the repos
 - Use docker compose ps and service health endpoints for daily status checks.
 - Check Nginx first for browser routing issues, then the owning upstream service.
 - Inspect simulator, MQTT, Node-RED, and PostgreSQL together for data-ingestion issues.
-- Use scripts/backup-grafana-dashboards.sh for tracked Grafana dashboard JSON backups.
+- Use the tracked JSON files under grafana/dashboards and Grafana provisioning files for dashboard review and controlled updates.
 - Use pg_dump or platform backup tooling for PostgreSQL; no generic tracked database backup script exists.
 - Avoid docker compose down -v unless the purpose is deliberate persistent data deletion.
 
@@ -82,11 +82,9 @@ Maintenance should focus on credential rotation, backup verification, dashboard 
 
 ## Final Delivery Notes
 
-- Product 1 is the OVOS skill artifact; Product 2 is the full-stack HumanEnerDIA artifact according to docs/DELIVERY_READINESS.md.
-- SHA256 checksums are expected for release artifacts.
+- The full-stack release notes identify the HumanEnerDIA archive, SHA256 checksum, licensing notes, and embedded OVOS runtime/skill directory under ovos-stack.
 - .env is not shipped and must not be disclosed.
-- The optional Qwen GGUF model is not bundled in the main release artifacts according to delivery readiness notes.
-- query-service is intentionally excluded from release readiness expectations.
+- The optional Qwen GGUF model is not bundled in the main release artifacts according to the release notes.
 - Runtime health must be verified on the actual target deployment before stakeholder demonstration or handover.
 
 ## Limitations And Assumptions
@@ -95,9 +93,9 @@ The following items should be reviewed before stakeholder distribution. They are
 
 | Item | Status |
 | --- | --- |
-| query-service | Placeholder only; Docker service exists, healthcheck disabled, and it is excluded from release readiness expectations. |
 | Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
-| OVOS release artifact | The OVOS source tree may contain local GGUF model files, but release notes state optional GGUF weights are not bundled by default. |
+| OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and as an embedded component in the full-stack release archive. |
+| OVOS release artifact | Release notes state optional GGUF model weights are not bundled by default. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
 | Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
@@ -109,9 +107,9 @@ The table below lists the main local evidence used for this document. It is not 
 
 | Topic | Evidence |
 | --- | --- |
-| Overview/docs | README.md; docs/README.md; docs/TECHNICAL_ARCHITECTURE_GUIDE.md; docs/OPERATIONS_RUNBOOK.md |
-| Deployment | docker-compose.yml; setup.sh; scripts/verify-wasabi-release.sh |
+| Overview/docs | README.md; releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md |
+| Deployment | docker-compose.yml; setup.sh; verify.sh |
 | Analytics/database | analytics/main.py; database/init/02-schema.sql; database/init/03-timescaledb-setup.sql; database/init/04-functions.sql |
 | Dashboards and reports | grafana/provisioning/; grafana/dashboards/; analytics/api/routes/reports.py; analytics/reports/; analytics/reports_v2/ |
-| OVOS-EnMS | /home/ubuntu/ovos-llm/README.md; /home/ubuntu/ovos-llm/enms-ovos-skill/README.md; /home/ubuntu/ovos-llm/enms-ovos-skill/bridge/ovos_rest_bridge.py; /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/__init__.py |
-| Delivery readiness | docs/DELIVERY_READINESS.md; releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md |
+| OVOS-EnMS | OVOS-EnMS repository: README.md; enms-ovos-skill/README.md; enms-ovos-skill/bridge/ovos_rest_bridge.py; enms-ovos-skill/enms_ovos_skill/__init__.py |
+| Release artifact notes | releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md |

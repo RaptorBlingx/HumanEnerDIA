@@ -104,7 +104,7 @@ Important caution: the V2 generator is implemented, but some values are derived 
 | Node-RED ingestion | Configured and implemented | Flow nodes and settings are tracked; runtime execution not verified in this pass. |
 | Sample factories and machines | Demo/sample data | Seed SQL inserts named sample facilities and machines. |
 | V2 report polish/semantic completeness | Partially implemented | Routes/templates exist, but some data calculations are placeholders or estimates. |
-| query-service reports | Out of scope | query-service is a placeholder. |
+| Standalone query API service | Out of scope | No separate natural-language query API service is defined in the GitHub production docker-compose.yml. |
 
 ## Limitations And Assumptions
 
@@ -112,9 +112,9 @@ The following items should be reviewed before stakeholder distribution. They are
 
 | Item | Status |
 | --- | --- |
-| query-service | Placeholder only; Docker service exists, healthcheck disabled, and it is excluded from release readiness expectations. |
 | Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
-| OVOS release artifact | The OVOS source tree may contain local GGUF model files, but release notes state optional GGUF weights are not bundled by default. |
+| OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and as an embedded component in the full-stack release archive. |
+| OVOS release artifact | Release notes state optional GGUF model weights are not bundled by default. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
 | Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |

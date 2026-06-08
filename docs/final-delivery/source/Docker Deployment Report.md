@@ -14,15 +14,15 @@ Evidence rule: Deployment claims are based on compose files, Dockerfiles, setup 
 
 ![Figure 1. Deployment preparation, setup, validation, build, start, and verification flow.](../assets/deployment-startup-flow.png)
 
-The deployment target described by the repository is a Linux host running Docker Engine and Docker Compose v2. The base stack is defined by docker-compose.yml. Full-stack release bundles can include docker-compose.ovos.yml to add the OVOS runtime and skill.
+The deployment target described by the repository is a Linux host running Docker Engine and Docker Compose v2. The GitHub production base stack is defined by docker-compose.yml. The full-stack release notes describe an embedded OVOS runtime/skill directory under ovos-stack; the separate OVOS-EnMS repository provides its own Compose file.
 
-The setup helper is the intended guided path. It creates .env from .env.example when needed, generates first-run secrets for placeholders, validates Docker Compose, builds images, and starts the stack. It also adjusts OVOS_BRIDGE_HOST when an OVOS overlay is present.
+The setup helper is the intended guided path. It creates .env from .env.example when needed, generates first-run secrets for placeholders, validates Docker Compose, builds images, and starts the stack. It also adjusts OVOS_BRIDGE_HOST when an optional OVOS compose file is present.
 
 ## Compose Service Topology
 
 ![Figure 2. Docker Compose service topology and optional OVOS attachment.](../assets/docker-service-topology.png)
 
-The base deployment uses one Docker bridge network for HumanEnerDIA services. Nginx is the browser/API gateway; analytics, auth-service, chatbot/Rasa, simulator, Node-RED, Grafana, PostgreSQL/TimescaleDB, MQTT, and Redis communicate on the internal network. OVOS can be added as a separate service joined to the same network.
+The base deployment uses one Docker bridge network for HumanEnerDIA services. Nginx is the browser/API gateway; analytics, auth-service, chatbot/Rasa, simulator, Node-RED, Grafana, PostgreSQL/TimescaleDB, MQTT, and Redis communicate on the internal network. OVOS-EnMS remains a separate assistant runtime in the GitHub production evidence and connects through the HumanEnerDIA-compatible API.
 
 ## Docker Compose Services
 
@@ -36,7 +36,6 @@ The base deployment uses one Docker bridge network for HumanEnerDIA services. Ng
 | nodered | build ./nodered | 1881 | MQTT-to-database ingestion and automation flow runtime | Yes |
 | grafana | grafana/grafana:10.2.0 | 3001, /grafana | Provisioned dashboards backed by PostgreSQL/TimescaleDB | Yes |
 | analytics | build ./analytics | 8001, /api/analytics | FastAPI analytics, KPI, reports, ISO 50001, and OVOS proxy APIs | Yes |
-| query-service | build ./query-service | 8002 | Reserved placeholder; healthcheck disabled and not a readiness signal | No |
 | auth-service | build ./auth-service | 5500 | Flask auth, admin, contact, pilot/application APIs | Yes |
 | rasa-actions | build ./chatbot/rasa | 5055 | Rasa custom action server | Yes |
 | rasa | build ./chatbot/rasa | 5005 | Rasa NLU text chatbot server | Yes |
@@ -44,9 +43,9 @@ The base deployment uses one Docker bridge network for HumanEnerDIA services. Ng
 
 ## Networks, Volumes, And Ports
 
-All core services join the Docker bridge network named by ENMS_NETWORK_NAME, defaulting to enms-network. The OVOS overlay also joins that network and depends on analytics service health.
+All HumanEnerDIA production Compose services join the Docker bridge network named by ENMS_NETWORK_NAME, defaulting to enms-network. OVOS-EnMS is documented as a separate assistant runtime and release-bundle component rather than a service in the GitHub production base docker-compose.yml.
 
-Persistent named volumes include PostgreSQL data, MQTT data/logs, Redis data, Node-RED data, Grafana data, and OVOS/supervisor logs when the OVOS overlay is used.
+Persistent named volumes in the production Compose file include PostgreSQL data, MQTT data/logs, Redis data, Node-RED data, and Grafana data.
 
 | Resource | Configured name/default | Purpose |
 | --- | --- | --- |
@@ -55,7 +54,6 @@ Persistent named volumes include PostgreSQL data, MQTT data/logs, Redis data, No
 | grafana-data | ${VOLUME_PREFIX:-enms}-grafana-data | Grafana runtime data |
 | redis-data | ${VOLUME_PREFIX:-enms}-redis-data | Redis append-only persistence |
 | mqtt-data/logs | ${VOLUME_PREFIX:-enms}-mqtt-data and -mqtt-logs | Mosquitto runtime data and logs |
-| ovos-logs | ${VOLUME_PREFIX:-enms}-ovos-logs | OVOS runtime logs when overlay deployed |
 
 ## Environment Variables And Configuration
 
@@ -87,10 +85,10 @@ The repository provides release and API verification scripts. These scripts are 
 | Check | Purpose | Evidence/status |
 | --- | --- | --- |
 | docker compose config --quiet | Validate Compose syntax/resolution | Ran successfully for base HumanEnerDIA stack. |
-| docker compose -f /home/ubuntu/ovos-llm/docker-compose.yml config --quiet | Validate OVOS-only compose | Ran successfully. |
-| scripts/verify-wasabi-release.sh --skip-shop | Checks Nginx, analytics, OVOS bridge, OVOS smoke query when services are running | Script inspected; not run because runtime stack health was not established. |
-| scripts/validate_api_documentation.sh | Checks critical analytics/API documentation endpoints against a running service | Script inspected; not run because it requires live analytics and test data. |
-| Service healthchecks | Container-level checks for most services | Configured in docker-compose.yml; query-service disabled. |
+| OVOS-EnMS repository docker-compose.yml | Validate OVOS assistant Compose configuration separately | Ran successfully during documentation review. |
+| verify.sh | Checks Compose config and live Nginx, analytics, and optional OVOS endpoints when a stack is running | Script exists in production repository; live checks were not run in this pass. |
+| scripts/test_chatbot_comprehensive.sh | Exercises chatbot/Rasa behavior when services are running | Script exists; not run because it requires live services. |
+| Service healthchecks | Container-level checks for all production Compose services | Configured in docker-compose.yml. |
 
 ## Production Hardening And Troubleshooting
 
@@ -104,7 +102,6 @@ The repository provides release-oriented defaults, placeholders, health checks, 
 | Grafana unavailable | Grafana or database | Grafana health endpoint; credentials and volume status |
 | Auth errors | auth-service, database, SMTP | /api/auth/health; auth-service logs |
 | OVOS voice path unavailable | OVOS bridge/messagebus or analytics proxy | OVOS /health; analytics /api/v1/ovos/voice/health |
-| query-service health missing | Expected placeholder state | Do not use query-service as readiness blocker. |
 
 ## Limitations And Assumptions
 
@@ -112,9 +109,9 @@ The following items should be reviewed before stakeholder distribution. They are
 
 | Item | Status |
 | --- | --- |
-| query-service | Placeholder only; Docker service exists, healthcheck disabled, and it is excluded from release readiness expectations. |
 | Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
-| OVOS release artifact | The OVOS source tree may contain local GGUF model files, but release notes state optional GGUF weights are not bundled by default. |
+| OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and as an embedded component in the full-stack release archive. |
+| OVOS release artifact | Release notes state optional GGUF model weights are not bundled by default. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
 | Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
@@ -127,8 +124,7 @@ The table below lists the main local evidence used for this document. It is not 
 | Topic | Evidence |
 | --- | --- |
 | Base compose | docker-compose.yml |
-| OVOS overlay | scripts/release/docker-compose.ovos.yml |
 | Setup helper | setup.sh |
-| Verifier | scripts/verify-wasabi-release.sh |
-| Operations | docs/OPERATIONS_RUNBOOK.md; docs/DELIVERY_READINESS.md |
-| OVOS Docker | /home/ubuntu/ovos-llm/Dockerfile; /home/ubuntu/ovos-llm/docker-compose.yml |
+| Verifier | verify.sh |
+| Release notes | releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md |
+| OVOS Docker | OVOS-EnMS repository: docker-compose.yml; Dockerfile; enms-ovos-skill/config.yaml.template; enms-ovos-skill/settings.docker.json; enms-ovos-skill/settingsmeta.yaml |

@@ -23,8 +23,7 @@ from docx.shared import Inches, Pt, RGBColor
 from PIL import Image, ImageDraw, ImageFont
 
 
-ROOT = Path("/home/ubuntu/humanergy")
-OVOS_ROOT = Path("/home/ubuntu/ovos-llm")
+ROOT = Path(__file__).resolve().parents[3]
 OUT_DIR = ROOT / "docs" / "final-delivery"
 ASSET_DIR = OUT_DIR / "assets"
 SOURCE_DIR = OUT_DIR / "source"
@@ -63,9 +62,9 @@ def safe_path(path: Path) -> str:
 
 EVIDENCE = {
     "compose": "docker-compose.yml",
-    "compose_ovos_overlay": "scripts/release/docker-compose.ovos.yml",
     "setup": "setup.sh",
-    "verify_release": "scripts/verify-wasabi-release.sh",
+    "verifier": "verify.sh",
+    "release_notes": "releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md",
     "nginx": "nginx/nginx.conf; nginx/conf.d/default.conf",
     "database_schema": "database/init/02-schema.sql; database/init/03-timescaledb-setup.sql; database/init/04-functions.sql",
     "seed_data": "database/init/06-seed-data.sql",
@@ -79,14 +78,14 @@ EVIDENCE = {
     "simulator": "simulator/main.py; simulator/api/routes.py; simulator/simulator_manager.py; simulator/mqtt_publisher.py",
     "auth": "auth-service/app.py; auth-service/auth_service.py; database/init/05-auth-schema.sql",
     "chatbot": "chatbot/server/index.js; chatbot/rasa/actions/actions.py; chatbot/rasa/qa_data.json",
-    "ovos_readme": "/home/ubuntu/ovos-llm/README.md; /home/ubuntu/ovos-llm/enms-ovos-skill/README.md",
-    "ovos_bridge": "/home/ubuntu/ovos-llm/enms-ovos-skill/bridge/ovos_rest_bridge.py",
-    "ovos_skill": "/home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/__init__.py",
-    "ovos_parser": "/home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/intent_parser.py; lib/adapt_parser.py; lib/llm_parser.py",
-    "ovos_validator": "/home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/validator.py",
-    "ovos_client": "/home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/api_client.py",
-    "ovos_formatter": "/home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/response_formatter.py",
-    "ovos_config": "/home/ubuntu/ovos-llm/docker-compose.yml; Dockerfile; enms-ovos-skill/config.yaml.template; settings.docker.json; settingsmeta.yaml",
+    "ovos_readme": "OVOS-EnMS repository: README.md; enms-ovos-skill/README.md",
+    "ovos_bridge": "OVOS-EnMS repository: enms-ovos-skill/bridge/ovos_rest_bridge.py",
+    "ovos_skill": "OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/__init__.py",
+    "ovos_parser": "OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/intent_parser.py; lib/adapt_parser.py; lib/llm_parser.py",
+    "ovos_validator": "OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/validator.py",
+    "ovos_client": "OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py",
+    "ovos_formatter": "OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/response_formatter.py",
+    "ovos_config": "OVOS-EnMS repository: docker-compose.yml; Dockerfile; enms-ovos-skill/config.yaml.template; enms-ovos-skill/settings.docker.json; enms-ovos-skill/settingsmeta.yaml",
 }
 
 
@@ -99,7 +98,6 @@ SERVICE_ROWS = [
     ["nodered", "build ./nodered", "1881", "MQTT-to-database ingestion and automation flow runtime", "Yes"],
     ["grafana", "grafana/grafana:10.2.0", "3001, /grafana", "Provisioned dashboards backed by PostgreSQL/TimescaleDB", "Yes"],
     ["analytics", "build ./analytics", "8001, /api/analytics", "FastAPI analytics, KPI, reports, ISO 50001, and OVOS proxy APIs", "Yes"],
-    ["query-service", "build ./query-service", "8002", "Reserved placeholder; healthcheck disabled and not a readiness signal", "No"],
     ["auth-service", "build ./auth-service", "5500", "Flask auth, admin, contact, pilot/application APIs", "Yes"],
     ["rasa-actions", "build ./chatbot/rasa", "5055", "Rasa custom action server", "Yes"],
     ["rasa", "build ./chatbot/rasa", "5005", "Rasa NLU text chatbot server", "Yes"],
@@ -114,7 +112,7 @@ ACCESS_ROWS = [
     ["Analytics API docs", "http://<host>:8080/api/analytics/docs", "Nginx proxy to analytics OpenAPI docs"],
     ["Simulator docs", "http://<host>:8080/api/simulator/docs", "Nginx proxy to simulator OpenAPI docs"],
     ["Node-RED", "http://<host>:1881 or http://<host>:8080/nodered/", "Admin UI protected by Node-RED credentials"],
-    ["OVOS bridge", "http://<host>:5000/health", "Available when OVOS stack/overlay is deployed"],
+    ["OVOS bridge", "http://<host>:5000/health", "Available when the separate OVOS-EnMS stack or release-bundle component is deployed"],
 ]
 
 
@@ -177,9 +175,9 @@ INTENT_ROWS = [
 
 
 LIMITATION_ROWS = [
-    ["query-service", "Placeholder only; Docker service exists, healthcheck disabled, and it is excluded from release readiness expectations."],
     ["Runtime verification", "This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately."],
-    ["OVOS release artifact", "The OVOS source tree may contain local GGUF model files, but release notes state optional GGUF weights are not bundled by default."],
+    ["OVOS deployment boundary", "The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and as an embedded component in the full-stack release archive."],
+    ["OVOS release artifact", "Release notes state optional GGUF model weights are not bundled by default."],
     ["Third-party EnMS support", "OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs."],
     ["Reports V2", "V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use."],
     ["Simulator inventory", "The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types."],
@@ -279,7 +277,7 @@ def generate_diagrams() -> dict:
         [
             ((70, 150, 360, 310), "Users and Operators", "Portal, Grafana, analytics UI, Rasa chatbot, and OVOS voice/text queries"),
             ((470, 130, 780, 330), "Nginx Gateway", "Public HTTP gateway. Routes portal, APIs, Grafana, Node-RED, auth, chatbot, and OVOS proxy paths. TLS block is optional/commented"),
-            ((880, 100, 1240, 250), "HumanEnerDIA Core", "Analytics, simulator, Node-RED, auth-service, chatbot/Rasa, Grafana, query-service placeholder"),
+            ((880, 100, 1240, 250), "HumanEnerDIA Core", "Analytics, simulator, Node-RED, auth-service, chatbot/Rasa, Grafana"),
             ((880, 330, 1240, 500), "Data and Messaging", "TimescaleDB/PostgreSQL, Mosquitto MQTT, Redis, Grafana provisioning, persistent volumes"),
             ((470, 520, 780, 710), "OVOS-EnMS Layer", "OVOS REST bridge, messagebus, EnMS skill, parser, validator, API client, response formatter"),
         ],
@@ -334,8 +332,8 @@ def generate_diagrams() -> dict:
         "Deployment Startup Flow",
         [
             ((70, 150, 360, 310), "Prepare Host", "Docker Engine and Compose v2, repository or release bundle, .env.example available"),
-            ((470, 150, 760, 330), "setup.sh", "Creates .env if needed, generates first-run secrets, updates URLs, selects OVOS overlay when present"),
-            ((870, 150, 1160, 330), "Compose Validation", "docker compose config validates base stack and optional OVOS overlay"),
+            ((470, 150, 760, 330), "setup.sh", "Creates .env if needed, generates first-run secrets, updates URLs, detects optional OVOS compose file"),
+            ((870, 150, 1160, 330), "Compose Validation", "docker compose config validates base stack and optional compose files"),
             ((470, 510, 760, 690), "Build and Start", "docker compose build and up -d, optionally with --wait"),
             ((870, 510, 1160, 690), "Verify", "Health endpoints, release verifier, smoke query when OVOS is deployed"),
         ],
@@ -352,7 +350,7 @@ def generate_diagrams() -> dict:
         [
             ((60, 150, 330, 310), "Host Access", "Browser/API users reach Nginx on 8080. Direct ports are mapped for selected operations services"),
             ((420, 130, 700, 330), "Nginx", "Routes portal, analytics, Grafana, Node-RED, auth, chatbot, simulator, and OVOS proxy paths"),
-            ((790, 130, 1090, 330), "App Services", "analytics, auth-service, chatbot, Rasa, rasa-actions, simulator, query-service placeholder"),
+            ((790, 130, 1090, 330), "App Services", "analytics, auth-service, chatbot, Rasa, rasa-actions, simulator"),
             ((1180, 130, 1460, 330), "Data Services", "PostgreSQL/TimescaleDB, MQTT broker, Redis, named persistent volumes"),
             ((420, 500, 700, 680), "Operator UIs", "Grafana dashboards, Node-RED editor, analytics UI, static portal"),
             ((790, 500, 1090, 680), "Optional OVOS", "OVOS bridge, messagebus, EnMS skill joined to enms-network"),
@@ -568,7 +566,7 @@ def build_system_architecture(diagrams: dict) -> DocSpec:
                 paragraphs=[
                     "HumanEnerDIA is implemented as a Docker Compose based industrial energy management stack. It combines an Nginx gateway, a static portal, FastAPI analytics APIs, PostgreSQL/TimescaleDB storage, MQTT telemetry, Node-RED ingestion, Grafana dashboards, a simulator, authentication services, a Rasa text chatbot path, and an optional OVOS-EnMS voice/natural-language assistant layer.",
                     "The OVOS-EnMS component is a separate assistant runtime that connects to the HumanEnerDIA-compatible analytics API. Its REST bridge does not calculate energy answers by itself; it forwards user queries to the OVOS messagebus, where the EnMS skill parses, validates, executes API calls, and formats responses.",
-                    ("Observed in code/config: ", "The base stack is defined in docker-compose.yml. The full-stack release can add OVOS through scripts/release/docker-compose.ovos.yml or the OVOS repository compose file under /home/ubuntu/ovos-llm."),
+                    ("Observed in code/config: ", "The GitHub production base stack is defined in docker-compose.yml. The full-stack release notes describe an embedded OVOS runtime/skill directory under ovos-stack, while the separate OVOS-EnMS repository provides its own Compose and skill source."),
                 ],
             ),
             Section(
@@ -582,7 +580,7 @@ def build_system_architecture(diagrams: dict) -> DocSpec:
                     [
                         ["HumanEnerDIA / EnMS", "Nginx, portal, analytics, PostgreSQL/TimescaleDB, MQTT, Node-RED, Grafana, simulator, auth-service, Rasa/chatbot services", EVIDENCE["compose"]],
                         ["OVOS-EnMS", "OVOS runtime, REST bridge, messagebus, EnMS skill, parser, validator, API client, response formatter", EVIDENCE["ovos_skill"]],
-                        ["External users/integrators", "Browser users, API clients, OVOS clients, operators, WASABI release reviewers", "README.md; docs/README.md; docs/OPERATIONS_RUNBOOK.md"],
+                        ["External users/integrators", "Browser users, API clients, OVOS clients, operators, WASABI release reviewers", "README.md; verify.sh; releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md"],
                     ],
                 ),
             ),
@@ -646,12 +644,12 @@ def build_system_architecture(diagrams: dict) -> DocSpec:
             common_limitations_section(),
             section_evidence([
                 ["Runtime topology", EVIDENCE["compose"]],
-                ["OVOS overlay", EVIDENCE["compose_ovos_overlay"]],
+                ["OVOS deployment boundary", EVIDENCE["release_notes"]],
                 ["Routing", EVIDENCE["nginx"]],
                 ["Database and KPIs", EVIDENCE["database_schema"]],
                 ["Analytics API", EVIDENCE["analytics_main"]],
                 ["OVOS bridge and skill", f"{EVIDENCE['ovos_bridge']}; {EVIDENCE['ovos_skill']}"],
-                ["Compose validation", "docker compose config --quiet returned success for /home/ubuntu/humanergy and /home/ubuntu/ovos-llm"],
+                ["Compose validation", "docker compose config --quiet returned success for the HumanEnerDIA production tree and the OVOS-EnMS repository compose file"],
             ]),
         ],
     )
@@ -750,7 +748,6 @@ def build_software_design() -> DocSpec:
             Section(
                 "Known Design Gaps And Placeholders",
                 table=(["Gap or caution", "Evidence-based status"], [
-                    ["query-service", "Only Dockerfile and empty route/schema/service folders observed; compose healthcheck disabled."],
                     ["Report V2 semantics", "V2 routes and generator exist, but some service values are proportional or placeholder-derived, such as efficiency sparkline and estimated baseline cost."],
                     ["Simulator machine list inconsistency", "Code supports boiler; simulator info endpoint text still lists five machine types."],
                     ["Direct public exposure", "Several internal service ports are externally mapped for development/ops; production hardening requires operator firewall/TLS review."],
@@ -764,7 +761,7 @@ def build_software_design() -> DocSpec:
                 ["Node-RED", EVIDENCE["nodered"]],
                 ["Auth", EVIDENCE["auth"]],
                 ["Chatbot/Rasa", EVIDENCE["chatbot"]],
-                ["Tests", "analytics/tests/test_*.py; /home/ubuntu/ovos-llm/enms-ovos-skill/tests/test_*.py"],
+                ["Tests", "analytics/tests/test_*.py; OVOS-EnMS repository: enms-ovos-skill/tests/test_*.py"],
             ]),
         ],
     )
@@ -776,7 +773,7 @@ def build_skill_doc(diagrams: dict) -> DocSpec:
         title="Skill Documentation",
         purpose="Document the OVOS-EnMS skill, REST bridge, parser, validation, API client, and response behavior.",
         audience="OVOS integrators, WASABI technical reviewers, backend maintainers, and external partners.",
-        evidence_note="OVOS-EnMS evidence comes from /home/ubuntu/ovos-llm, with HumanEnerDIA API integration evidence from /home/ubuntu/humanergy.",
+        evidence_note="OVOS-EnMS evidence comes from the separate OVOS-EnMS source repository, with HumanEnerDIA API integration evidence from the HumanEnerDIA production tree.",
         sections=[
             Section(
                 "Purpose And Boundaries",
@@ -788,16 +785,16 @@ def build_skill_doc(diagrams: dict) -> DocSpec:
             Section(
                 "Deployment And Configuration",
                 paragraphs=[
-                    "The OVOS repository provides a Docker Compose service that exposes the REST bridge on port 5000 and the OVOS messagebus on port 8181. The full-stack HumanEnerDIA release can include an OVOS overlay that builds from ./ovos-stack and joins the enms-network.",
+                    "The separate OVOS-EnMS repository provides a Docker Compose service that exposes the REST bridge on port 5000 and the OVOS messagebus on port 8181. The HumanEnerDIA production base docker-compose.yml does not define an OVOS service; the full-stack release notes describe an embedded OVOS runtime/skill directory under ovos-stack.",
                     "Key configuration includes ENMS_API_URL, OVOS_BRIDGE_PORT, STRUCTURED_RESPONSE_GRACE_SECONDS, OVOS_TTS_ENABLED, LOG_LEVEL, OVOS_CONFIG_PATH, and XDG_CONFIG_HOME. Skill-level settings include enms_api_base_url, llm_model_path, confidence_threshold, and progress feedback options.",
                 ],
                 table=(
                     ["Configuration item", "Observed default or behavior", "Evidence"],
                     [
-                        ["ENMS_API_URL", "Docker default points at a HumanEnerDIA-compatible /api/v1 backend", "/home/ubuntu/ovos-llm/docker-compose.yml"],
+                        ["ENMS_API_URL", "Docker default points at a HumanEnerDIA-compatible /api/v1 backend", "OVOS-EnMS repository: docker-compose.yml"],
                         ["enms_api_base_url", "Skill setting for backend API URL", "settings.docker.json; settingsmeta.yaml"],
                         ["confidence_threshold", "Default 0.85 in settings and validator configuration", "settings.docker.json; lib/validator.py"],
-                        ["INSTALL_LLM_FALLBACK", "Build argument for installing optional LLM dependencies in the Dockerfile", "/home/ubuntu/ovos-llm/Dockerfile"],
+                        ["INSTALL_LLM_FALLBACK", "Build argument for installing optional LLM dependencies in the Dockerfile", "OVOS-EnMS repository: Dockerfile"],
                     ],
                 ),
             ),
@@ -995,7 +992,7 @@ def build_kpi_doc(diagrams: dict) -> DocSpec:
                         ["Node-RED ingestion", "Configured and implemented", "Flow nodes and settings are tracked; runtime execution not verified in this pass."],
                         ["Sample factories and machines", "Demo/sample data", "Seed SQL inserts named sample facilities and machines."],
                         ["V2 report polish/semantic completeness", "Partially implemented", "Routes/templates exist, but some data calculations are placeholders or estimates."],
-                        ["query-service reports", "Out of scope", "query-service is a placeholder."],
+                        ["Standalone query API service", "Out of scope", "No separate natural-language query API service is defined in the GitHub production docker-compose.yml."],
                     ],
                 ),
             ),
@@ -1025,15 +1022,15 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
                 "Deployment Overview",
                 figure=("deployment-startup-flow.png", "Figure 1. Deployment preparation, setup, validation, build, start, and verification flow."),
                 paragraphs=[
-                    "The deployment target described by the repository is a Linux host running Docker Engine and Docker Compose v2. The base stack is defined by docker-compose.yml. Full-stack release bundles can include docker-compose.ovos.yml to add the OVOS runtime and skill.",
-                    "The setup helper is the intended guided path. It creates .env from .env.example when needed, generates first-run secrets for placeholders, validates Docker Compose, builds images, and starts the stack. It also adjusts OVOS_BRIDGE_HOST when an OVOS overlay is present.",
+                    "The deployment target described by the repository is a Linux host running Docker Engine and Docker Compose v2. The GitHub production base stack is defined by docker-compose.yml. The full-stack release notes describe an embedded OVOS runtime/skill directory under ovos-stack; the separate OVOS-EnMS repository provides its own Compose file.",
+                    "The setup helper is the intended guided path. It creates .env from .env.example when needed, generates first-run secrets for placeholders, validates Docker Compose, builds images, and starts the stack. It also adjusts OVOS_BRIDGE_HOST when an optional OVOS compose file is present.",
                 ],
             ),
             Section(
                 "Compose Service Topology",
                 figure=("docker-service-topology.png", "Figure 2. Docker Compose service topology and optional OVOS attachment."),
                 paragraphs=[
-                    "The base deployment uses one Docker bridge network for HumanEnerDIA services. Nginx is the browser/API gateway; analytics, auth-service, chatbot/Rasa, simulator, Node-RED, Grafana, PostgreSQL/TimescaleDB, MQTT, and Redis communicate on the internal network. OVOS can be added as a separate service joined to the same network."
+                    "The base deployment uses one Docker bridge network for HumanEnerDIA services. Nginx is the browser/API gateway; analytics, auth-service, chatbot/Rasa, simulator, Node-RED, Grafana, PostgreSQL/TimescaleDB, MQTT, and Redis communicate on the internal network. OVOS-EnMS remains a separate assistant runtime in the GitHub production evidence and connects through the HumanEnerDIA-compatible API."
                 ],
             ),
             Section(
@@ -1043,8 +1040,8 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
             Section(
                 "Networks, Volumes, And Ports",
                 paragraphs=[
-                    "All core services join the Docker bridge network named by ENMS_NETWORK_NAME, defaulting to enms-network. The OVOS overlay also joins that network and depends on analytics service health.",
-                    "Persistent named volumes include PostgreSQL data, MQTT data/logs, Redis data, Node-RED data, Grafana data, and OVOS/supervisor logs when the OVOS overlay is used.",
+                    "All HumanEnerDIA production Compose services join the Docker bridge network named by ENMS_NETWORK_NAME, defaulting to enms-network. OVOS-EnMS is documented as a separate assistant runtime and release-bundle component rather than a service in the GitHub production base docker-compose.yml.",
+                    "Persistent named volumes in the production Compose file include PostgreSQL data, MQTT data/logs, Redis data, Node-RED data, and Grafana data.",
                 ],
                 table=(
                     ["Resource", "Configured name/default", "Purpose"],
@@ -1054,7 +1051,6 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
                         ["grafana-data", "${VOLUME_PREFIX:-enms}-grafana-data", "Grafana runtime data"],
                         ["redis-data", "${VOLUME_PREFIX:-enms}-redis-data", "Redis append-only persistence"],
                         ["mqtt-data/logs", "${VOLUME_PREFIX:-enms}-mqtt-data and -mqtt-logs", "Mosquitto runtime data and logs"],
-                        ["ovos-logs", "${VOLUME_PREFIX:-enms}-ovos-logs", "OVOS runtime logs when overlay deployed"],
                     ],
                 ),
             ),
@@ -1096,10 +1092,10 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
                     ["Check", "Purpose", "Evidence/status"],
                     [
                         ["docker compose config --quiet", "Validate Compose syntax/resolution", "Ran successfully for base HumanEnerDIA stack."],
-                        ["docker compose -f /home/ubuntu/ovos-llm/docker-compose.yml config --quiet", "Validate OVOS-only compose", "Ran successfully."],
-                        ["scripts/verify-wasabi-release.sh --skip-shop", "Checks Nginx, analytics, OVOS bridge, OVOS smoke query when services are running", "Script inspected; not run because runtime stack health was not established."],
-                        ["scripts/validate_api_documentation.sh", "Checks critical analytics/API documentation endpoints against a running service", "Script inspected; not run because it requires live analytics and test data."],
-                        ["Service healthchecks", "Container-level checks for most services", "Configured in docker-compose.yml; query-service disabled."],
+                        ["OVOS-EnMS repository docker-compose.yml", "Validate OVOS assistant Compose configuration separately", "Ran successfully during documentation review."],
+                        ["verify.sh", "Checks Compose config and live Nginx, analytics, and optional OVOS endpoints when a stack is running", "Script exists in production repository; live checks were not run in this pass."],
+                        ["scripts/test_chatbot_comprehensive.sh", "Exercises chatbot/Rasa behavior when services are running", "Script exists; not run because it requires live services."],
+                        ["Service healthchecks", "Container-level checks for all production Compose services", "Configured in docker-compose.yml."],
                     ],
                 ),
             ),
@@ -1117,18 +1113,16 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
                         ["Grafana unavailable", "Grafana or database", "Grafana health endpoint; credentials and volume status"],
                         ["Auth errors", "auth-service, database, SMTP", "/api/auth/health; auth-service logs"],
                         ["OVOS voice path unavailable", "OVOS bridge/messagebus or analytics proxy", "OVOS /health; analytics /api/v1/ovos/voice/health"],
-                        ["query-service health missing", "Expected placeholder state", "Do not use query-service as readiness blocker."],
                     ],
                 ),
             ),
             common_limitations_section(),
             section_evidence([
                 ["Base compose", EVIDENCE["compose"]],
-                ["OVOS overlay", EVIDENCE["compose_ovos_overlay"]],
                 ["Setup helper", EVIDENCE["setup"]],
-                ["Verifier", EVIDENCE["verify_release"]],
-                ["Operations", "docs/OPERATIONS_RUNBOOK.md; docs/DELIVERY_READINESS.md"],
-                ["OVOS Docker", "/home/ubuntu/ovos-llm/Dockerfile; /home/ubuntu/ovos-llm/docker-compose.yml"],
+                ["Verifier", EVIDENCE["verifier"]],
+                ["Release notes", EVIDENCE["release_notes"]],
+                ["OVOS Docker", EVIDENCE["ovos_config"]],
             ]),
         ],
     )
@@ -1179,7 +1173,7 @@ def build_final_system(diagrams: dict) -> DocSpec:
                     "Use docker compose ps and service health endpoints for daily status checks.",
                     "Check Nginx first for browser routing issues, then the owning upstream service.",
                     "Inspect simulator, MQTT, Node-RED, and PostgreSQL together for data-ingestion issues.",
-                    "Use scripts/backup-grafana-dashboards.sh for tracked Grafana dashboard JSON backups.",
+                    "Use the tracked JSON files under grafana/dashboards and Grafana provisioning files for dashboard review and controlled updates.",
                     "Use pg_dump or platform backup tooling for PostgreSQL; no generic tracked database backup script exists.",
                     "Avoid docker compose down -v unless the purpose is deliberate persistent data deletion.",
                 ],
@@ -1217,22 +1211,20 @@ def build_final_system(diagrams: dict) -> DocSpec:
             Section(
                 "Final Delivery Notes",
                 bullets=[
-                    "Product 1 is the OVOS skill artifact; Product 2 is the full-stack HumanEnerDIA artifact according to docs/DELIVERY_READINESS.md.",
-                    "SHA256 checksums are expected for release artifacts.",
+                    "The full-stack release notes identify the HumanEnerDIA archive, SHA256 checksum, licensing notes, and embedded OVOS runtime/skill directory under ovos-stack.",
                     ".env is not shipped and must not be disclosed.",
-                    "The optional Qwen GGUF model is not bundled in the main release artifacts according to delivery readiness notes.",
-                    "query-service is intentionally excluded from release readiness expectations.",
+                    "The optional Qwen GGUF model is not bundled in the main release artifacts according to the release notes.",
                     "Runtime health must be verified on the actual target deployment before stakeholder demonstration or handover.",
                 ],
             ),
             common_limitations_section(),
             section_evidence([
-                ["Overview/docs", "README.md; docs/README.md; docs/TECHNICAL_ARCHITECTURE_GUIDE.md; docs/OPERATIONS_RUNBOOK.md"],
-                ["Deployment", f"{EVIDENCE['compose']}; {EVIDENCE['setup']}; {EVIDENCE['verify_release']}"],
+                ["Overview/docs", f"README.md; {EVIDENCE['release_notes']}"],
+                ["Deployment", f"{EVIDENCE['compose']}; {EVIDENCE['setup']}; {EVIDENCE['verifier']}"],
                 ["Analytics/database", f"{EVIDENCE['analytics_main']}; {EVIDENCE['database_schema']}"],
                 ["Dashboards and reports", f"{EVIDENCE['grafana']}; {EVIDENCE['reports']}"],
-                ["OVOS-EnMS", f"{EVIDENCE['ovos_readme']}; {EVIDENCE['ovos_bridge']}; {EVIDENCE['ovos_skill']}"],
-                ["Delivery readiness", "docs/DELIVERY_READINESS.md; releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md"],
+                ["OVOS-EnMS", "OVOS-EnMS repository: README.md; enms-ovos-skill/README.md; enms-ovos-skill/bridge/ovos_rest_bridge.py; enms-ovos-skill/enms_ovos_skill/__init__.py"],
+                ["Release artifact notes", EVIDENCE["release_notes"]],
             ]),
         ],
     )
@@ -1309,8 +1301,8 @@ def write_sources(specs: Sequence[DocSpec]) -> None:
         "",
         "## Validation Performed",
         "",
-        "- `docker compose config --quiet` in `/home/ubuntu/humanergy`: passed.",
-        "- `docker compose -f /home/ubuntu/ovos-llm/docker-compose.yml config --quiet`: passed.",
+        "- `docker compose config --quiet` in the HumanEnerDIA production tree: passed.",
+        "- `docker compose -f <OVOS-EnMS repository>/docker-compose.yml config --quiet`: passed.",
         "- Runtime health checks were not run by this generator; they require a running deployment.",
     ])
     (SOURCE_DIR / "evidence-map.md").write_text("\n".join(evidence_lines) + "\n", encoding="utf-8")

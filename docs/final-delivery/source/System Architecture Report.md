@@ -16,7 +16,7 @@ HumanEnerDIA is implemented as a Docker Compose based industrial energy manageme
 
 The OVOS-EnMS component is a separate assistant runtime that connects to the HumanEnerDIA-compatible analytics API. Its REST bridge does not calculate energy answers by itself; it forwards user queries to the OVOS messagebus, where the EnMS skill parses, validates, executes API calls, and formats responses.
 
-**Observed in code/config:** The base stack is defined in docker-compose.yml. The full-stack release can add OVOS through scripts/release/docker-compose.ovos.yml or the OVOS repository compose file under /home/ubuntu/ovos-llm.
+**Observed in code/config:** The GitHub production base stack is defined in docker-compose.yml. The full-stack release notes describe an embedded OVOS runtime/skill directory under ovos-stack, while the separate OVOS-EnMS repository provides its own Compose and skill source.
 
 ## System Context
 
@@ -27,8 +27,8 @@ The system has three boundaries that must remain distinct in delivery documentat
 | Boundary | Included components | Evidence |
 | --- | --- | --- |
 | HumanEnerDIA / EnMS | Nginx, portal, analytics, PostgreSQL/TimescaleDB, MQTT, Node-RED, Grafana, simulator, auth-service, Rasa/chatbot services | docker-compose.yml |
-| OVOS-EnMS | OVOS runtime, REST bridge, messagebus, EnMS skill, parser, validator, API client, response formatter | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/__init__.py |
-| External users/integrators | Browser users, API clients, OVOS clients, operators, WASABI release reviewers | README.md; docs/README.md; docs/OPERATIONS_RUNBOOK.md |
+| OVOS-EnMS | OVOS runtime, REST bridge, messagebus, EnMS skill, parser, validator, API client, response formatter | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/__init__.py |
+| External users/integrators | Browser users, API clients, OVOS clients, operators, WASABI release reviewers | README.md; verify.sh; releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md |
 
 ## Runtime Services
 
@@ -44,7 +44,6 @@ The base runtime service inventory below is taken from docker-compose.yml and ve
 | nodered | build ./nodered | 1881 | MQTT-to-database ingestion and automation flow runtime | Yes |
 | grafana | grafana/grafana:10.2.0 | 3001, /grafana | Provisioned dashboards backed by PostgreSQL/TimescaleDB | Yes |
 | analytics | build ./analytics | 8001, /api/analytics | FastAPI analytics, KPI, reports, ISO 50001, and OVOS proxy APIs | Yes |
-| query-service | build ./query-service | 8002 | Reserved placeholder; healthcheck disabled and not a readiness signal | No |
 | auth-service | build ./auth-service | 5500 | Flask auth, admin, contact, pilot/application APIs | Yes |
 | rasa-actions | build ./chatbot/rasa | 5055 | Rasa custom action server | Yes |
 | rasa | build ./chatbot/rasa | 5005 | Rasa NLU text chatbot server | Yes |
@@ -78,10 +77,10 @@ External browser access normally enters through Nginx. Direct service ports are 
 | Analytics API docs | http://<host>:8080/api/analytics/docs | Nginx proxy to analytics OpenAPI docs |
 | Simulator docs | http://<host>:8080/api/simulator/docs | Nginx proxy to simulator OpenAPI docs |
 | Node-RED | http://<host>:1881 or http://<host>:8080/nodered/ | Admin UI protected by Node-RED credentials |
-| OVOS bridge | http://<host>:5000/health | Available when OVOS stack/overlay is deployed |
+| OVOS bridge | http://<host>:5000/health | Available when the separate OVOS-EnMS stack or release-bundle component is deployed |
 | Analytics health | Direct service path /api/v1/health; through Nginx analytics proxy /api/analytics/api/v1/health | analytics/main.py; nginx/conf.d/default.conf |
 | OVOS proxy via EnMS | /api/ovos/* -> /api/v1/ovos/* | nginx/conf.d/default.conf; analytics/api/routes/ovos_voice.py |
-| OVOS direct bridge | POST /query, POST /query/voice, GET /health | /home/ubuntu/ovos-llm/enms-ovos-skill/bridge/ovos_rest_bridge.py |
+| OVOS direct bridge | POST /query, POST /query/voice, GET /health | OVOS-EnMS repository: enms-ovos-skill/bridge/ovos_rest_bridge.py |
 
 ## OVOS-EnMS Integration
 
@@ -108,9 +107,9 @@ The following items should be reviewed before stakeholder distribution. They are
 
 | Item | Status |
 | --- | --- |
-| query-service | Placeholder only; Docker service exists, healthcheck disabled, and it is excluded from release readiness expectations. |
 | Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
-| OVOS release artifact | The OVOS source tree may contain local GGUF model files, but release notes state optional GGUF weights are not bundled by default. |
+| OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and as an embedded component in the full-stack release archive. |
+| OVOS release artifact | Release notes state optional GGUF model weights are not bundled by default. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
 | Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
@@ -123,9 +122,9 @@ The table below lists the main local evidence used for this document. It is not 
 | Topic | Evidence |
 | --- | --- |
 | Runtime topology | docker-compose.yml |
-| OVOS overlay | scripts/release/docker-compose.ovos.yml |
+| OVOS deployment boundary | releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md |
 | Routing | nginx/nginx.conf; nginx/conf.d/default.conf |
 | Database and KPIs | database/init/02-schema.sql; database/init/03-timescaledb-setup.sql; database/init/04-functions.sql |
 | Analytics API | analytics/main.py |
-| OVOS bridge and skill | /home/ubuntu/ovos-llm/enms-ovos-skill/bridge/ovos_rest_bridge.py; /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/__init__.py |
-| Compose validation | docker compose config --quiet returned success for /home/ubuntu/humanergy and /home/ubuntu/ovos-llm |
+| OVOS bridge and skill | OVOS-EnMS repository: enms-ovos-skill/bridge/ovos_rest_bridge.py; OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/__init__.py |
+| Compose validation | docker compose config --quiet returned success for the HumanEnerDIA production tree and the OVOS-EnMS repository compose file |

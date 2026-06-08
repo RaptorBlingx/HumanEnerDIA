@@ -8,7 +8,7 @@ Status: Final delivery documentation package
 Purpose: Document the OVOS-EnMS skill, REST bridge, parser, validation, API client, and response behavior.
 Audience: OVOS integrators, WASABI technical reviewers, backend maintainers, and external partners.
 
-Evidence rule: OVOS-EnMS evidence comes from /home/ubuntu/ovos-llm, with HumanEnerDIA API integration evidence from /home/ubuntu/humanergy.
+Evidence rule: OVOS-EnMS evidence comes from the separate OVOS-EnMS source repository, with HumanEnerDIA API integration evidence from the HumanEnerDIA production tree.
 
 ## Purpose And Boundaries
 
@@ -18,16 +18,16 @@ The production integration boundary is the HumanEnerDIA-compatible REST API. The
 
 ## Deployment And Configuration
 
-The OVOS repository provides a Docker Compose service that exposes the REST bridge on port 5000 and the OVOS messagebus on port 8181. The full-stack HumanEnerDIA release can include an OVOS overlay that builds from ./ovos-stack and joins the enms-network.
+The separate OVOS-EnMS repository provides a Docker Compose service that exposes the REST bridge on port 5000 and the OVOS messagebus on port 8181. The HumanEnerDIA production base docker-compose.yml does not define an OVOS service; the full-stack release notes describe an embedded OVOS runtime/skill directory under ovos-stack.
 
 Key configuration includes ENMS_API_URL, OVOS_BRIDGE_PORT, STRUCTURED_RESPONSE_GRACE_SECONDS, OVOS_TTS_ENABLED, LOG_LEVEL, OVOS_CONFIG_PATH, and XDG_CONFIG_HOME. Skill-level settings include enms_api_base_url, llm_model_path, confidence_threshold, and progress feedback options.
 
 | Configuration item | Observed default or behavior | Evidence |
 | --- | --- | --- |
-| ENMS_API_URL | Docker default points at a HumanEnerDIA-compatible /api/v1 backend | /home/ubuntu/ovos-llm/docker-compose.yml |
+| ENMS_API_URL | Docker default points at a HumanEnerDIA-compatible /api/v1 backend | OVOS-EnMS repository: docker-compose.yml |
 | enms_api_base_url | Skill setting for backend API URL | settings.docker.json; settingsmeta.yaml |
 | confidence_threshold | Default 0.85 in settings and validator configuration | settings.docker.json; lib/validator.py |
-| INSTALL_LLM_FALLBACK | Build argument for installing optional LLM dependencies in the Dockerfile | /home/ubuntu/ovos-llm/Dockerfile |
+| INSTALL_LLM_FALLBACK | Build argument for installing optional LLM dependencies in the Dockerfile | OVOS-EnMS repository: Dockerfile |
 
 ## Query Lifecycle
 
@@ -87,10 +87,10 @@ Client methods cover health, stats, machines, time series, top consumers, anomal
 
 | Client area | Representative methods | Evidence |
 | --- | --- | --- |
-| System and machines | health_check, system_stats, factory_summary, list_machines, get_machine_status | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
-| Telemetry | get_energy_timeseries, get_power_timeseries, get_latest_reading, get_multi_machine_energy | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
-| Analytics | detect_anomalies, get_all_kpis, analyze_performance, forecast_demand, predict_baseline | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
-| Reports and ISO | get_enpi_report, list_action_plans, get_report_types, preview_report, generate_report | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
+| System and machines | health_check, system_stats, factory_summary, list_machines, get_machine_status | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
+| Telemetry | get_energy_timeseries, get_power_timeseries, get_latest_reading, get_multi_machine_energy | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
+| Analytics | detect_anomalies, get_all_kpis, analyze_performance, forecast_demand, predict_baseline | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
+| Reports and ISO | get_enpi_report, list_action_plans, get_report_types, preview_report, generate_report | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
 
 ## Response Formatting
 
@@ -122,9 +122,9 @@ The following items should be reviewed before stakeholder distribution. They are
 
 | Item | Status |
 | --- | --- |
-| query-service | Placeholder only; Docker service exists, healthcheck disabled, and it is excluded from release readiness expectations. |
 | Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
-| OVOS release artifact | The OVOS source tree may contain local GGUF model files, but release notes state optional GGUF weights are not bundled by default. |
+| OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and as an embedded component in the full-stack release archive. |
+| OVOS release artifact | Release notes state optional GGUF model weights are not bundled by default. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
 | Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
@@ -136,10 +136,10 @@ The table below lists the main local evidence used for this document. It is not 
 
 | Topic | Evidence |
 | --- | --- |
-| REST bridge | /home/ubuntu/ovos-llm/enms-ovos-skill/bridge/ovos_rest_bridge.py |
-| Skill lifecycle and handlers | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/__init__.py |
-| Intent parser tiers | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/intent_parser.py; lib/adapt_parser.py; lib/llm_parser.py |
-| Validation | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/validator.py |
-| API client | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
-| Response formatter | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/lib/response_formatter.py |
-| Configuration and deployment | /home/ubuntu/ovos-llm/docker-compose.yml; Dockerfile; enms-ovos-skill/config.yaml.template; settings.docker.json; settingsmeta.yaml |
+| REST bridge | OVOS-EnMS repository: enms-ovos-skill/bridge/ovos_rest_bridge.py |
+| Skill lifecycle and handlers | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/__init__.py |
+| Intent parser tiers | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/intent_parser.py; lib/adapt_parser.py; lib/llm_parser.py |
+| Validation | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/validator.py |
+| API client | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
+| Response formatter | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/response_formatter.py |
+| Configuration and deployment | OVOS-EnMS repository: docker-compose.yml; Dockerfile; enms-ovos-skill/config.yaml.template; enms-ovos-skill/settings.docker.json; enms-ovos-skill/settingsmeta.yaml |
