@@ -1,0 +1,131 @@
+# System Architecture Report
+
+Project: WASABI / HumanEnerDIA / OVOS-EnMS
+Version: 1.0
+Date: 2026-06-08
+Status: Final delivery documentation package
+
+Purpose: Describe the implemented HumanEnerDIA / EnMS architecture and the OVOS-EnMS integration boundary.
+Audience: Project managers, technical reviewers, deployment stakeholders, and external partners.
+
+Evidence rule: Claims are tied to local source code, Docker configuration, SQL initialization files, and verified compose validation.
+
+## Executive Summary
+
+HumanEnerDIA is implemented as a Docker Compose based industrial energy management stack. It combines an Nginx gateway, a static portal, FastAPI analytics APIs, PostgreSQL/TimescaleDB storage, MQTT telemetry, Node-RED ingestion, Grafana dashboards, a simulator, authentication services, a Rasa text chatbot path, and an optional OVOS-EnMS voice/natural-language assistant layer.
+
+The OVOS-EnMS component is a separate assistant runtime that connects to the HumanEnerDIA-compatible analytics API. Its REST bridge does not calculate energy answers by itself; it forwards user queries to the OVOS messagebus, where the EnMS skill parses, validates, executes API calls, and formats responses.
+
+**Observed in code/config:** The base stack is defined in docker-compose.yml. The full-stack release can add OVOS through scripts/release/docker-compose.ovos.yml or the OVOS repository compose file under /home/ubuntu/ovos-llm.
+
+## System Context
+
+![Figure 1. System context and product boundaries.](../assets/system-context.png)
+
+The system has three boundaries that must remain distinct in delivery documentation. HumanEnerDIA / EnMS is the energy management backend and visualization stack. OVOS-EnMS is the voice/natural-language assistant layer that integrates with the analytics API. The Rasa chatbot is a text-oriented help and knowledge path, not the same runtime as the OVOS skill.
+
+| Boundary | Included components | Evidence |
+| --- | --- | --- |
+| HumanEnerDIA / EnMS | Nginx, portal, analytics, PostgreSQL/TimescaleDB, MQTT, Node-RED, Grafana, simulator, auth-service, Rasa/chatbot services | docker-compose.yml |
+| OVOS-EnMS | OVOS runtime, REST bridge, messagebus, EnMS skill, parser, validator, API client, response formatter | /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/__init__.py |
+| External users/integrators | Browser users, API clients, OVOS clients, operators, WASABI release reviewers | README.md; docs/README.md; docs/OPERATIONS_RUNBOOK.md |
+
+## Runtime Services
+
+The base runtime service inventory below is taken from docker-compose.yml and verified by docker compose config --quiet during this documentation pass.
+
+| Service | Image or build context | External port/path | Responsibility | Healthcheck |
+| --- | --- | --- | --- | --- |
+| nginx | nginx:1.25-alpine | 8080; 8443 mapped but HTTPS server block is optional/commented until certificates are configured | Public gateway, portal/static hosting, reverse proxy | Yes |
+| postgres | timescale/timescaledb:latest-pg16 | 5433 | PostgreSQL with TimescaleDB extension and persistent data volume | Yes |
+| mqtt | build ./mqtt | 1883, 9001 | Mosquitto telemetry broker with configured credentials | Yes |
+| redis | redis:7-alpine | 6380 | Redis cache and Pub/Sub support for analytics event paths | Yes |
+| simulator | build ./simulator | internal 8003 | FastAPI synthetic telemetry generator loaded from database machines | Yes |
+| nodered | build ./nodered | 1881 | MQTT-to-database ingestion and automation flow runtime | Yes |
+| grafana | grafana/grafana:10.2.0 | 3001, /grafana | Provisioned dashboards backed by PostgreSQL/TimescaleDB | Yes |
+| analytics | build ./analytics | 8001, /api/analytics | FastAPI analytics, KPI, reports, ISO 50001, and OVOS proxy APIs | Yes |
+| query-service | build ./query-service | 8002 | Reserved placeholder; healthcheck disabled and not a readiness signal | No |
+| auth-service | build ./auth-service | 5500 | Flask auth, admin, contact, pilot/application APIs | Yes |
+| rasa-actions | build ./chatbot/rasa | 5055 | Rasa custom action server | Yes |
+| rasa | build ./chatbot/rasa | 5005 | Rasa NLU text chatbot server | Yes |
+| chatbot | build ./chatbot | 5006 | Express backend and built chatbot frontend proxying to Rasa and OVOS | Yes |
+
+## Data And Message Flow
+
+![Figure 2. Telemetry ingestion and analytics data flow.](../assets/telemetry-data-flow.png)
+
+Synthetic factory data or external device data enters through MQTT. Node-RED subscribes to factory/#, parses the topic structure, routes by payload type, validates required fields, and writes energy, production, environmental, and status data into PostgreSQL.
+
+TimescaleDB hypertables and continuous aggregates provide raw and aggregated time-series views. The analytics service reads from those tables and aggregate views to support KPIs, baselines, forecasts, anomalies, reports, Grafana dashboards, and OVOS-facing responses.
+
+| Stage | Observed implementation | Evidence |
+| --- | --- | --- |
+| Telemetry source | simulator loads active machines from PostgreSQL and publishes MQTT messages for energy, production, environmental, status, and multi-energy boiler topics | simulator/main.py; simulator/api/routes.py; simulator/simulator_manager.py; simulator/mqtt_publisher.py |
+| Broker | mqtt service exposes 1883 and websocket 9001 with credentials supplied through environment variables | docker-compose.yml |
+| Ingestion | Node-RED flow includes Subscribe: factory/#, Parse Topic, Route by Type, Process Energy/Production/Environmental/Status, and PostgreSQL output nodes | nodered/data/flows.json; nodered/settings.js; nodered/package.json |
+| Storage | energy_readings, production_data, and environmental_data are converted to TimescaleDB hypertables with continuous aggregates | database/init/02-schema.sql; database/init/03-timescaledb-setup.sql; database/init/04-functions.sql |
+| Consumption | Analytics API, Grafana dashboards, portal, chatbot, and OVOS integration consume database-backed data | analytics/main.py |
+
+## External And Internal Interfaces
+
+External browser access normally enters through Nginx. Direct service ports are exposed for operations and development; production exposure should be restricted by firewall or reverse proxy policy.
+
+| Interface | Route or endpoint | Evidence/notes |
+| --- | --- | --- |
+| Unified portal | http://<host>:8080 | Served by Nginx from portal/public |
+| Grafana | http://<host>:8080/grafana | Sub-path proxy to Grafana with provisioned dashboards |
+| Analytics UI | http://<host>:8080/analytics/ui/ | FastAPI-rendered analytics templates |
+| Analytics API docs | http://<host>:8080/api/analytics/docs | Nginx proxy to analytics OpenAPI docs |
+| Simulator docs | http://<host>:8080/api/simulator/docs | Nginx proxy to simulator OpenAPI docs |
+| Node-RED | http://<host>:1881 or http://<host>:8080/nodered/ | Admin UI protected by Node-RED credentials |
+| OVOS bridge | http://<host>:5000/health | Available when OVOS stack/overlay is deployed |
+| Analytics health | Direct service path /api/v1/health; through Nginx analytics proxy /api/analytics/api/v1/health | analytics/main.py; nginx/conf.d/default.conf |
+| OVOS proxy via EnMS | /api/ovos/* -> /api/v1/ovos/* | nginx/conf.d/default.conf; analytics/api/routes/ovos_voice.py |
+| OVOS direct bridge | POST /query, POST /query/voice, GET /health | /home/ubuntu/ovos-llm/enms-ovos-skill/bridge/ovos_rest_bridge.py |
+
+## OVOS-EnMS Integration
+
+![Figure 3. OVOS request and response lifecycle.](../assets/ovos-query-lifecycle.png)
+
+The OVOS bridge receives text queries through /query or /query/voice. It emits recognizer_loop:utterance to the OVOS messagebus and listens for speak and enms.skill.response events. The skill handles intent routing, context, validation, backend API calls, and deterministic response formatting.
+
+HumanEnerDIA also exposes /api/v1/ovos/voice/query and /api/v1/ovos/voice/health as a proxy route from the analytics service to the OVOS bridge. This supports portal-side integration without making the portal responsible for OVOS messagebus details.
+
+## Security And Operational Considerations
+
+The repository supports several operational controls, but public production hardening remains an operator responsibility. The setup helper creates .env from .env.example when needed and generates first-run secrets for database, Grafana, Node-RED, Redis, MQTT, JWT, and API key values.
+
+Authentication is implemented by auth-service using bcrypt password hashing, JWT sessions, email verification and password reset flows, admin allow-listing from environment variables, session tracking, and audit tables. Node-RED has admin authentication configured through environment-provided credentials.
+
+- Do not commit .env, generated secrets, runtime logs, database dumps, model caches, or Docker volumes.
+- Restrict direct exposure of PostgreSQL, Redis, MQTT, Grafana, Node-RED, and service debug ports in production.
+- Terminate TLS at Nginx or an upstream reverse proxy before internet-facing deployment.
+- Rotate credentials before public use, especially any generated first-run secrets.
+
+## Limitations And Assumptions
+
+The following items should be reviewed before stakeholder distribution. They are documented to avoid overstating the current implementation.
+
+| Item | Status |
+| --- | --- |
+| query-service | Placeholder only; Docker service exists, healthcheck disabled, and it is excluded from release readiness expectations. |
+| Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
+| OVOS release artifact | The OVOS source tree may contain local GGUF model files, but release notes state optional GGUF weights are not bundled by default. |
+| Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
+| Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
+| Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
+| Security posture | The codebase provides secret placeholders, generated first-run credentials, JWT/bcrypt auth, health checks, and hardening guidance. Public production exposure still requires operator DNS/TLS/firewall/credential work. |
+
+## Evidence References
+
+The table below lists the main local evidence used for this document. It is not a full file inventory; it identifies the sources behind the material claims.
+
+| Topic | Evidence |
+| --- | --- |
+| Runtime topology | docker-compose.yml |
+| OVOS overlay | scripts/release/docker-compose.ovos.yml |
+| Routing | nginx/nginx.conf; nginx/conf.d/default.conf |
+| Database and KPIs | database/init/02-schema.sql; database/init/03-timescaledb-setup.sql; database/init/04-functions.sql |
+| Analytics API | analytics/main.py |
+| OVOS bridge and skill | /home/ubuntu/ovos-llm/enms-ovos-skill/bridge/ovos_rest_bridge.py; /home/ubuntu/ovos-llm/enms-ovos-skill/enms_ovos_skill/__init__.py |
+| Compose validation | docker compose config --quiet returned success for /home/ubuntu/humanergy and /home/ubuntu/ovos-llm |
