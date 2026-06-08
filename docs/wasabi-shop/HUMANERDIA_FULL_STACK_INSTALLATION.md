@@ -84,6 +84,44 @@ Expected result:
 - the OVOS bridge reports `messagebus_connected: true`
 - the smoke query returns `success: true` and a response about `Compressor-1`
 
+## Clean Reinstall
+
+Use this before retesting on a machine that already ran HumanEnerDIA.
+
+From the extracted bundle directory:
+
+```bash
+cd /path/to/HumanEnerDIA-full-stack-v1.0.0
+docker compose -f docker-compose.yml -f docker-compose.ovos.yml down -v --remove-orphans || true
+docker rm -f enms-nginx enms-postgres enms-mqtt enms-redis enms-simulator enms-nodered enms-grafana enms-analytics enms-auth-service enms-rasa-actions enms-rasa enms-chatbot enms-ovos ovos-enms enms-query-service 2>/dev/null || true
+docker volume rm enms-postgres-data enms-grafana-data enms-mqtt-data enms-mqtt-logs enms-redis-data enms-nodered-data enms-ovos-logs enms-ovos-supervisor-logs postgres-data grafana-data mqtt-data mqtt-logs redis-data nodered-data ovos-logs supervisor-logs 2>/dev/null || true
+docker network rm enms-network 2>/dev/null || true
+docker builder prune -af
+```
+
+For a completely clean Docker state on a dedicated test laptop, remove all
+unused Docker containers, images, volumes, networks, and build cache:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.ovos.yml down -v --remove-orphans || true
+docker system prune -af --volumes
+docker builder prune -af
+```
+
+`docker system prune -af --volumes` is global Docker cleanup. Do not run it on
+a host that has other Docker projects or volumes you need to keep.
+
+After cleanup, extract the archive again and rerun:
+
+```bash
+cd /path/to/download-directory
+rm -rf HumanEnerDIA-full-stack-v1.0.0
+tar -xzf HumanEnerDIA-full-stack-v1.0.0.tar.gz
+cd HumanEnerDIA-full-stack-v1.0.0
+./setup.sh
+./verify-release.sh
+```
+
 ## Manual Equivalent
 
 Use this only when you intentionally want to bypass `setup.sh`:

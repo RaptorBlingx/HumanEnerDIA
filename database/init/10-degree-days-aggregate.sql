@@ -43,7 +43,7 @@ CREATE INDEX IF NOT EXISTS idx_env_dd_daily_machine_day
     ON environmental_degree_days_daily (machine_id, day DESC);
 
 -- Add comment
-COMMENT ON MATERIALIZED VIEW environmental_degree_days_daily IS 
+COMMENT ON VIEW environmental_degree_days_daily IS 
 'Continuous aggregate for daily degree-days (ISO 50006 standard). 
 Base temperatures: 18°C (ASHRAE commercial), 15.5°C (European residential). 
 Refreshes hourly for last 7 days.';

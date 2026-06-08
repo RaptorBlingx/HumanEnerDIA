@@ -151,6 +151,11 @@ copy_humanergy_dir "$APP_ROOT/chatbot/" "$BUNDLE_DIR/chatbot/" \
 
 mkdir -p "$BUNDLE_DIR/database"
 copy_humanergy_dir "$APP_ROOT/database/init/" "$BUNDLE_DIR/database/init/"
+copy_humanergy_dir "$APP_ROOT/database/migrations/" "$BUNDLE_DIR/database/migrations/" \
+  --exclude '001_create_pilot_factory_applications.sql'
+copy_humanergy_dir "$APP_ROOT/database/functions/" "$BUNDLE_DIR/database/functions/"
+copy_humanergy_dir "$APP_ROOT/database/views/" "$BUNDLE_DIR/database/views/"
+copy_humanergy_dir "$APP_ROOT/database/optimizations/" "$BUNDLE_DIR/database/optimizations/"
 install -m 644 "$APP_ROOT/database/postgresql.conf" "$BUNDLE_DIR/database/postgresql.conf"
 
 copy_humanergy_dir "$APP_ROOT/grafana/" "$BUNDLE_DIR/grafana/"
@@ -193,7 +198,7 @@ sha256sum "$ARTIFACT_PATH" > "$CHECKSUM_PATH"
   echo "## Bundle Contents"
   echo
   echo "The archive contains the EnMS backend stack, portal, analytics services,"
-  echo "database initialization, dashboards, MQTT pipeline, authentication service,"
+  echo "database initialization and migration SQL, dashboards, MQTT pipeline, authentication service,"
   echo "a production verifier, and an embedded OVOS runtime/skill directory under"
   echo "\`ovos-stack/\`."
   echo

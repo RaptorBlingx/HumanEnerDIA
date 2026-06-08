@@ -273,8 +273,8 @@ BEGIN
     RAISE NOTICE '═══════════════════════════════════════════════════════';
     RAISE NOTICE '';
     
-    IF v_electricity_count != 7 THEN
-        RAISE EXCEPTION 'Expected 7 electricity SEUs, found %', v_electricity_count;
+    IF v_electricity_count != 8 THEN
+        RAISE EXCEPTION 'Expected 8 electricity SEUs, found %', v_electricity_count;
     END IF;
 END $$;
 
