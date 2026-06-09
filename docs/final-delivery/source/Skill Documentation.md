@@ -22,6 +22,8 @@ The separate OVOS-EnMS repository provides a Docker Compose service that exposes
 
 Key configuration includes ENMS_API_URL, OVOS_BRIDGE_PORT, STRUCTURED_RESPONSE_GRACE_SECONDS, OVOS_TTS_ENABLED, LOG_LEVEL, OVOS_CONFIG_PATH, and XDG_CONFIG_HOME. Skill-level settings include enms_api_base_url, llm_model_path, confidence_threshold, and progress feedback options.
 
+The table below summarizes the runtime configuration points that determine how OVOS connects to the EnMS backend.
+
 | Configuration item | Observed default or behavior | Evidence |
 | --- | --- | --- |
 | ENMS_API_URL | Docker default points at a HumanEnerDIA-compatible /api/v1 backend | OVOS-EnMS repository: docker-compose.yml |
@@ -29,9 +31,13 @@ Key configuration includes ENMS_API_URL, OVOS_BRIDGE_PORT, STRUCTURED_RESPONSE_G
 | confidence_threshold | Default 0.85 in settings and validator configuration | settings.docker.json; lib/validator.py |
 | INSTALL_LLM_FALLBACK | Build argument for installing optional LLM dependencies in the Dockerfile | OVOS-EnMS repository: Dockerfile |
 
+Correct backend URL configuration is central to OVOS readiness: the assistant can answer operational questions only when it can reach the EnMS-compatible API.
+
 ## Configuration Reference
 
 The configuration items below are taken from the OVOS-EnMS Dockerfile, Compose file, settings files, bridge, and validator. They are operational settings, not secrets; actual runtime values should still be reviewed in the deployed environment.
+
+The configuration table groups environment-driven settings without exposing private runtime values.
 
 | Setting | Location | Purpose |
 | --- | --- | --- |
@@ -44,6 +50,8 @@ The configuration items below are taken from the OVOS-EnMS Dockerfile, Compose f
 | confidence_threshold | Skill/validator setting | Minimum confidence for accepted parsed intents; default observed value is 0.85. |
 | enable_fuzzy_matching | Skill/validator setting | Allows fuzzy machine-name matching and suggestions. |
 | api_timeout_seconds / api_max_retries | Skill settings | Backend request timeout and retry behavior. |
+
+Together, these settings define how the assistant connects, listens, validates, and optionally uses fallback parsing. Runtime values should be controlled by the deployment owner.
 
 ## Query Lifecycle
 
@@ -58,6 +66,8 @@ The EnMS skill receives the utterance through OVOS intent handlers or fallback h
 ## Supported Intent And Query Families
 
 The active IntentType enum and skill handlers show the supported query families below. This table is not a guarantee that every phrasing is understood; it identifies implemented categories in the skill code.
+
+The intent family table explains the categories of operational questions represented in the skill code.
 
 | Intent family | Purpose |
 | --- | --- |
@@ -77,17 +87,23 @@ The active IntentType enum and skill handlers show the supported query families 
 | report | Report type, preview, and generation workflows |
 | help, health | Capability help and system health checks |
 
+The intent families show broad operational coverage while still depending on parser confidence, backend data, and machine names present in the target system.
+
 ## Intent Parsing And Routing
 
 The parser is hybrid. Tier 1 is regex-based heuristic routing for common operational queries. Tier 2 uses Adapt pattern matching and registered vocabulary. Tier 3 is an optional local Qwen GGUF LLM parser used as fallback when dependencies and model files are available.
 
 The active parser code includes patterns for production, anomaly detection, forecasts, KPIs, performance, baselines, driver analysis, SEUs, rankings, factory overview, status, power, and related query types. Adapt vocabulary registers machine names, spoken number variants, energy/power/status/cost/KPI/factory/comparison/time/forecast/anomaly/help terms and more.
 
+The parser table shows the ordered routing strategy from fast deterministic handling to optional fallback parsing.
+
 | Tier | Implementation | Important note |
 | --- | --- | --- |
 | Heuristic | Regex patterns in lib/intent_parser.py | Fast path for common operational wording. |
 | Adapt | IntentDeterminationEngine in lib/adapt_parser.py | Pattern/vocabulary matching with registered machine and domain terms. |
 | LLM | Qwen3Parser in lib/llm_parser.py | Optional fallback requiring llama-cpp-python and a GGUF model file. |
+
+This layered routing model keeps common questions fast and deterministic, while optional fallback parsing expands coverage when properly configured.
 
 ## Validation And Fuzzy Matching
 
@@ -101,6 +117,8 @@ The ENMSClient wraps async HTTP calls to the configured backend. It uses connect
 
 Client methods cover health, stats, machines, time series, top consumers, anomalies, KPIs, performance opportunities, action plans, forecasts, baseline models/explanations, SEU/energy-source data, reports, and ISO 50001 EnPI/action-plan endpoints. The production path remains HumanEnerDIA-compatible API usage.
 
+The backend-client table shows the EnMS API areas the skill can call after parsing and validation.
+
 | Client area | Representative methods | Evidence |
 | --- | --- | --- |
 | System and machines | health_check, system_stats, factory_summary, list_machines, get_machine_status | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
@@ -108,9 +126,13 @@ Client methods cover health, stats, machines, time series, top consumers, anomal
 | Analytics | detect_anomalies, get_all_kpis, analyze_performance, forecast_demand, predict_baseline | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
 | Reports and ISO | get_enpi_report, list_action_plans, get_report_types, preview_report, generate_report | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
 
+The client layer is the bridge between language understanding and EnMS data. Its retry behavior helps with transient backend issues without hiding persistent configuration errors.
+
 ## Backend Method Mapping
 
-This mapping connects natural-language intent families to backend client methods and the HumanEnerDIA-compatible API areas they use. It should be used as an implementation map, not as a promise that every possible natural-language phrasing is accepted.
+This mapping connects natural-language intent families to backend client methods and the HumanEnerDIA-compatible API areas they use. It defines implementation traceability; accepted phrasing still depends on parser coverage, validation, backend data, and deployment health.
+
+This mapping connects natural-language categories to backend methods and API areas for implementation traceability.
 
 | Intent family | Primary backend method(s) | API area | Returned information |
 | --- | --- | --- | --- |
@@ -125,6 +147,8 @@ This mapping connects natural-language intent families to backend client methods
 | Baselines/drivers | predict_baseline, list_baseline_models, get_baseline_drivers | /baseline/* | Baseline prediction, models, and energy-driver explanations. |
 | Reports | get_report_types, preview_report, generate_report | /reports/types, /reports/preview, /reports/generate | Report discovery, preview, and generation. |
 
+The mapping gives integrators a practical checklist for adapter compatibility when connecting OVOS to another EnMS backend.
+
 ## Response Formatting
 
 The response formatter uses Jinja2 templates and custom number/unit/time filters. The formatter documentation and code explicitly state that final responses should come from API data and templates rather than free-form LLM generation.
@@ -134,6 +158,8 @@ Additional enrichment exists for anomaly responses, including severity grouping,
 ## Example Supported Queries
 
 The examples below are representative of implemented intent categories and handler/parser coverage. Exact results depend on available machines, backend data, current telemetry, and deployment health.
+
+The example table provides representative phrases that illustrate supported query families and expected usage patterns.
 
 | Category | Example query |
 | --- | --- |
@@ -151,6 +177,8 @@ The examples below are representative of implemented intent categories and handl
 | Reports | Generate a monthly energy report. |
 | Health/help | What can you do? Is the system healthy? |
 
+The examples should be used as smoke-test and training phrases, with expected answers determined by the data currently available in the EnMS backend.
+
 ## Optional LLM Fallback
 
 Fast heuristic and Adapt routing are the normal path. The OVOS-EnMS Dockerfile installs LLM fallback dependencies only when INSTALL_LLM_FALLBACK=true, and the skill settings point to a configurable GGUF model path. Model-file availability must be verified in the OVOS-EnMS runtime; the HumanEnerDIA production Compose file does not bundle or start OVOS.
@@ -160,6 +188,8 @@ The LLM parser uses llama-cpp-python when installed, loads a configured GGUF mod
 ## Failure Behavior
 
 The assistant layer should be represented as conservative. Parser/validator failures, missing machines, backend errors, and missing optional LLM dependencies should result in clarification or failure responses rather than fabricated energy data.
+
+The failure table explains how the assistant should behave when parsing, validation, backend connectivity, or optional components are unavailable.
 
 | Failure case | Observed behavior |
 | --- | --- |
@@ -171,23 +201,31 @@ The assistant layer should be represented as conservative. Parser/validator fail
 | Template failure | Skill has fallback response generation for several intent/data shapes. |
 | LLM dependencies/model missing | Hybrid parser continues with heuristic/Adapt tiers and clarification fallback; LLM fallback is optional. |
 
+The failure behavior supports trustworthy operation: unclear or unsupported inputs should lead to clarification or explicit failure rather than fabricated operational values.
+
 ## Limitations And Assumptions
 
-The following items should be reviewed before stakeholder distribution. They are documented to avoid overstating the current implementation.
+This section summarizes the current validation status, scope boundaries, and operational considerations for the delivered system.
+
+The limitations table defines scope boundaries that affect validation, audit use, optional assistant behavior, and production readiness.
 
 | Item | Status |
 | --- | --- |
-| Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
+| Runtime verification | Compose validation is confirmed where stated. Live health checks are deployment-specific and require a running target environment. |
 | OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and companion assistant runtime. |
 | OVOS optional LLM fallback | The OVOS-EnMS Dockerfile installs LLM fallback dependencies only when INSTALL_LLM_FALLBACK=true. Model availability must be verified in the OVOS-EnMS repository/runtime. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
-| Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
+| Reports V2 | V2 report code is implemented, but some service calculations use derived, proportional, or placeholder values. Formal audit use requires independent validation of formulas, source data, tariff factors, carbon factors, and generated report semantics. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
 | Security posture | The codebase provides secret placeholders, generated first-run credentials, JWT/bcrypt auth, health checks, and hardening guidance. Public production exposure still requires operator DNS/TLS/firewall/credential work. |
+
+Together, these points define the verified scope of the current delivery and the operational responsibilities required before production use. They preserve a clear distinction between implemented capability, deployment configuration, and assurance activities that belong to the target operating environment.
 
 ## Source References
 
 The table below lists the main source material used for this document. It is not a full file inventory; it identifies the sources behind the material claims.
+
+The source reference table links the document's major claims to the tracked files or validation evidence used to support them.
 
 | Topic | Source material |
 | --- | --- |
@@ -198,3 +236,5 @@ The table below lists the main source material used for this document. It is not
 | API client | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/api_client.py |
 | Response formatter | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/response_formatter.py |
 | Configuration and deployment | OVOS-EnMS repository: docker-compose.yml; Dockerfile; enms-ovos-skill/config.yaml.template; enms-ovos-skill/settings.docker.json; enms-ovos-skill/settingsmeta.yaml |
+
+These references provide traceability for technical claims. They are intended to support maintenance and verification without exposing secrets or local runtime state.

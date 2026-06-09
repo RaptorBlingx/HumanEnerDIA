@@ -42,6 +42,7 @@ class Section:
     paragraphs: List[TextBlock] = field(default_factory=list)
     bullets: List[str] = field(default_factory=list)
     table: Optional[Tuple[List[str], List[List[str]]]] = None
+    table_followup: List[TextBlock] = field(default_factory=list)
     figure: Optional[Tuple[str, str]] = None
     subsections: List["Section"] = field(default_factory=list)
 
@@ -175,11 +176,11 @@ INTENT_ROWS = [
 
 
 LIMITATION_ROWS = [
-    ["Runtime verification", "This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately."],
+    ["Runtime verification", "Compose validation is confirmed where stated. Live health checks are deployment-specific and require a running target environment."],
     ["OVOS deployment boundary", "The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and companion assistant runtime."],
     ["OVOS optional LLM fallback", "The OVOS-EnMS Dockerfile installs LLM fallback dependencies only when INSTALL_LLM_FALLBACK=true. Model availability must be verified in the OVOS-EnMS repository/runtime."],
     ["Third-party EnMS support", "OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs."],
-    ["Reports V2", "V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use."],
+    ["Reports V2", "V2 report code is implemented, but some service calculations use derived, proportional, or placeholder values. Formal audit use requires independent validation of formulas, source data, tariff factors, carbon factors, and generated report semantics."],
     ["Simulator inventory", "The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types."],
     ["Security posture", "The codebase provides secret placeholders, generated first-run credentials, JWT/bcrypt auth, health checks, and hardening guidance. Public production exposure still requires operator DNS/TLS/firewall/credential work."],
 ]
@@ -212,7 +213,7 @@ DEPENDENCY_FLOW_ROWS = [
 DEPLOYMENT_VARIANT_ROWS = [
     ["Base production Compose", "docker-compose.yml in GitHub production", "HumanEnerDIA services only. No OVOS service appears in the current production service list."],
     ["Separate OVOS-EnMS runtime", "OVOS-EnMS repository docker-compose.yml", "Companion assistant runtime exposing bridge/messagebus ports and connecting to a HumanEnerDIA-compatible API."],
-    ["Evaluation/demo deployment", "setup.sh with generated first-run secrets and simulator auto-start", "Suitable for review and demonstration after health checks pass; not a substitute for production hardening."],
+    ["Evaluation/demo deployment", "setup.sh with generated first-run secrets and simulator auto-start", "Suitable for review and demonstration after health checks pass; production hardening remains a separate deployment responsibility."],
     ["Production-hardened deployment", "Operator-controlled DNS/TLS/firewall/backups/monitoring", "Supported by configuration hooks but not automatically completed by the repository."],
 ]
 
@@ -221,7 +222,7 @@ OPERATIONAL_RISK_ROWS = [
     ["Directly mapped internal ports", "PostgreSQL, MQTT, Redis, Grafana, Node-RED, analytics, auth, Rasa, chatbot, simulator ports are mapped for access/operations.", "Restrict with firewall or upstream network policy before public exposure."],
     ["Runtime data persistence", "Named Docker volumes retain database, Grafana, MQTT, Redis, and Node-RED data.", "Back up before destructive redeployments or volume removal."],
     ["Credentials", ".env is generated locally and ignored; .env.example contains placeholders.", "Rotate generated credentials and never disclose .env values."],
-    ["Report semantics", "Some V2 report calculations use estimates/placeholders.", "Label audit-grade use as requiring review and validation."],
+    ["Report semantics", "Some V2 report calculations use estimates/placeholders.", "Formal audit use requires independent formula, source-data, tariff-factor, and carbon-factor validation."],
     ["OVOS availability", "Production base Compose does not start OVOS.", "Deploy and verify OVOS-EnMS separately when assistant access is in scope."],
 ]
 
@@ -270,9 +271,9 @@ KPI_CATALOG_ROWS = [
     ["Load factor", "Supported by implementation", "calculate_load_factor SQL function and route", "Depends on average/max power availability."],
     ["Energy cost", "Supported by implementation", "calculate_energy_cost SQL function and service wrapper", "Uses active tariff rows when present and default fallback in SQL."],
     ["Carbon intensity/emissions", "Supported by implementation", "calculate_carbon_intensity SQL function and carbon route", "Uses carbon_factors with fallback factor; not independent emissions assurance."],
-    ["Factory KPI rollups", "Implemented/configured", "/api/v1/kpi/factory/{factory_id} and /api/v1/kpi/factories", "Some route-level estimates use constants or aggregate assumptions; review before audit use."],
+    ["Factory KPI rollups", "Implemented/configured", "/api/v1/kpi/factory/{factory_id} and /api/v1/kpi/factories", "Some route-level estimates use constants or aggregate assumptions; formal audit use requires independent validation."],
     ["Model performance KPIs", "Implemented/configured", "model_performance routes and dashboards", "R2/RMSE/MAPE-style metrics depend on recorded model history."],
-    ["Operational efficiency/OEE", "Configured dashboard/reporting view", "Grafana operational-efficiency dashboards and production route", "Dashboard SQL should be reviewed before formal operational reporting."],
+    ["Operational efficiency/OEE", "Configured dashboard/reporting view", "Grafana operational-efficiency dashboards and production route", "Formal operational reporting requires validation of the dashboard SQL, source data, and reporting definitions."],
 ]
 
 
@@ -282,7 +283,7 @@ REPORT_WORKFLOW_ROWS = [
     ["Legacy output", "ReportLab PDF is returned by the route.", "analytics/reports/base_report.py; analytics/api/routes/reports.py"],
     ["V2 report request", "Client calls /api/v1/reports/v2/generate and later /v2/download/{report_id}.", "analytics/api/routes/reports.py"],
     ["V2 generation", "ReportService coordinates data fetch, components, charts, HTML/PDF generation, and temporary output path.", "analytics/reports_v2/services/report_service.py"],
-    ["V2 caution", "Some data fetcher/service values are estimated or placeholder-like.", "analytics/reports_v2/services/data_fetcher.py; report_service.py"],
+    ["V2 scope boundary", "Some data fetcher/service values are estimated or placeholder-like.", "analytics/reports_v2/services/data_fetcher.py; report_service.py"],
 ]
 
 
@@ -297,10 +298,10 @@ DATA_QUALITY_ROWS = [
 
 
 AUDIT_CAUTION_ROWS = [
-    ["Audit-grade KPI use", "Do not treat generated reports as audited energy statements without validating formulas, data sources, tariff/factor records, and reporting period boundaries."],
+    ["Audit-grade KPI use", "Generated reports are operational outputs. Formal audit use requires validation of formulas, data sources, tariff/factor records, and reporting period boundaries."],
     ["Carbon reporting", "Carbon/emissions values are implemented where functions/routes/dashboards exist, but formal emissions reporting requires verified factors, scope definitions, and governance outside this codebase."],
     ["Demo seed data", "Seeded factories and machines should be labeled as demonstration data unless replaced by real facility data."],
-    ["Placeholder calculations", "Where V2 reports or dashboard panels derive estimates, identify them in stakeholder review rather than presenting them as certified calculations."],
+    ["Estimated calculations", "Where V2 reports or dashboard panels derive estimates, classify them as operational estimates rather than certified calculations."],
 ]
 
 
@@ -424,11 +425,11 @@ FINAL_ARTIFACT_ROWS = [
 
 ACCEPTANCE_CHECK_ROWS = [
     ["Documentation files exist", "All six required DOCX files are present under docs/final-delivery/."],
-    ["Source alignment", "No references to untracked release artifacts, missing release scripts, absent Compose services, or local absolute paths."],
+    ["Traceability", "Source references point to tracked delivery files, implementation code, configuration, and validation evidence."],
     ["Compose validation", "docker compose config --quiet passes for HumanEnerDIA production; OVOS-EnMS Compose validates separately."],
     ["DOCX integrity", "All DOCX files open as valid ZIP/DOCX packages and contain embedded media where expected."],
     ["Secrets hygiene", "Generated docs and sources are scanned for sensitive placeholders and private values."],
-    ["Stakeholder limitations", "Runtime, audit, OVOS boundary, and production-hardening limitations remain visible."],
+    ["Scope boundaries", "Runtime validation, audit use, OVOS deployment, and production hardening are clearly defined."],
 ]
 
 
@@ -792,7 +793,15 @@ def add_section(doc: Document, section: Section, level: int = 1) -> None:
     for bullet in section.bullets:
         doc.add_paragraph(bullet, style="List Bullet")
     if section.table:
+        intro = table_intro_for(section.title)
+        if intro:
+            p = doc.add_paragraph()
+            add_text_block(p, intro)
         add_table(doc, section.table[0], section.table[1])
+    followup_blocks = section.table_followup or ([table_followup_for(section.title)] if section.table else [])
+    for para in followup_blocks:
+        p = doc.add_paragraph()
+        add_text_block(p, para)
     for sub in section.subsections:
         add_section(doc, sub, level=min(level + 1, 3))
 
@@ -809,6 +818,150 @@ def build_document(spec: DocSpec) -> None:
     doc.save(output)
 
 
+TABLE_INTROS = {
+    "System Context": "The table below defines the delivery boundaries so readers can distinguish the EnMS platform, the companion OVOS runtime, and the external users or integrators that interact with them.",
+    "Component Responsibilities": "Read this table as a responsibility map: each row identifies the architectural owner for a capability and the source material that supports that assignment.",
+    "Runtime Services": "The service inventory explains what runs in the base Compose deployment and what role each service plays in the operational stack.",
+    "Dependency And Request Flow": "The dependency flows show how requests and data move through the stack from the point of entry to storage, analytics, dashboards, and assistant responses.",
+    "Data And Message Flow": "This table follows telemetry through each processing stage, from publication to storage and then to downstream consumers.",
+    "External And Internal Interfaces": "The interface list identifies the main access routes and clarifies which paths are intended for browsers, APIs, operations tools, or the optional assistant bridge.",
+    "Deployment Variants And Boundaries": "The deployment variants table separates evaluation, base production, companion OVOS, and hardened production responsibilities.",
+    "Operational Risks": "The operational risk table summarizes deployment choices that require operator governance in a production environment.",
+    "Limitations And Assumptions": "The limitations table defines scope boundaries that affect validation, audit use, optional assistant behavior, and production readiness.",
+    "Source References": "The source reference table links the document's major claims to the tracked files or validation evidence used to support them.",
+    "Module Responsibility Matrix": "This matrix maps software areas to implementation responsibilities so maintainers can quickly identify the owning subsystem for each capability.",
+    "Analytics Service Design": "The endpoint table groups the analytics API by domain capability and points to the router modules that implement each area.",
+    "API Design Details": "The API design table explains how routes, models, database access, compatibility paths, and UI-serving routes are structured.",
+    "Database And Schema Design": "This table summarizes the first-start schema groups and shows how each database area supports the EnMS domain model.",
+    "Database Object Catalog": "The object catalog gives a stakeholder-level view of database groups without reproducing every column definition.",
+    "Service-Layer Design": "The service-layer table highlights where calculation, modeling, reporting, and event behavior live beyond the route handlers.",
+    "Simulator And Ingestion Design": "This table connects simulator behavior, MQTT publication, and Node-RED ingestion into one implementation view.",
+    "Authentication And Authorization Design": "The authentication table identifies the implemented account, session, verification, admin, and audit capabilities.",
+    "Configuration Reference": "The configuration table groups environment-driven settings without exposing private runtime values.",
+    "Error Handling And Logging": "The error-handling table describes how the main services surface failures and logs at runtime.",
+    "Known Design Gaps And Placeholders": "This table states known design gaps in external delivery language so the current scope is clear without overstating completeness.",
+    "Deployment And Configuration": "The table below summarizes the runtime configuration points that determine how OVOS connects to the EnMS backend.",
+    "Supported Intent And Query Families": "The intent family table explains the categories of operational questions represented in the skill code.",
+    "Intent Parsing And Routing": "The parser table shows the ordered routing strategy from fast deterministic handling to optional fallback parsing.",
+    "Backend API Client And Adapter Behavior": "The backend-client table shows the EnMS API areas the skill can call after parsing and validation.",
+    "Backend Method Mapping": "This mapping connects natural-language categories to backend methods and API areas for implementation traceability.",
+    "Example Supported Queries": "The example table provides representative phrases that illustrate supported query families and expected usage patterns.",
+    "Failure Behavior": "The failure table explains how the assistant should behave when parsing, validation, backend connectivity, or optional components are unavailable.",
+    "Energy Data Model": "The data model table identifies the key records used for energy management, reporting, analytics, and ISO 50001-oriented workflows.",
+    "KPI Formula Evidence": "The formula table separates implemented KPI calculations from higher-level dashboard or report presentation.",
+    "KPI Catalog And Classification": "The classification table helps readers distinguish calculation-backed KPIs, configured views, and measures that require governance for formal use.",
+    "Analytics Endpoints And Modules": "This table groups the reporting and analytics routes by capability area so readers can connect dashboard/report features to API implementation.",
+    "Grafana Dashboard Capabilities": "The dashboard table summarizes the configured Grafana views and the operational themes each view is designed to support.",
+    "Node-RED Ingestion Pipeline": "The ingestion table explains how MQTT payloads are routed, validated, transformed, and written into PostgreSQL.",
+    "Report Generation Capabilities": "The report table distinguishes the legacy EnPI report path from the newer V2 PDF workflow.",
+    "Report Workflow": "The workflow table follows a report request from API entry point through data assembly, rendering, and output.",
+    "Data-Quality Assumptions": "This table identifies the assumptions that determine whether KPI, dashboard, and report outputs are meaningful.",
+    "Audit-Use Cautions": "The audit-use table defines the additional validation needed before using outputs for formal regulatory, financial, or assurance purposes.",
+    "Implemented, Configured, Partial, And Demo Data Distinctions": "The distinction table classifies capabilities by evidence level so readers can separate implemented behavior from configured views and demo data.",
+    "Deployment Prerequisites": "The prerequisite table defines the host and tooling conditions needed before installation or startup.",
+    "Docker Compose Services": "The service table is the operator's runtime inventory for base HumanEnerDIA deployment.",
+    "Networks, Volumes, And Ports": "This table identifies the persistent and network resources that influence backup, firewall, and redeployment planning.",
+    "Environment Variable Groups": "The environment table groups configuration by operational concern while avoiding private runtime values.",
+    "Step-By-Step Deployment": "The deployment table gives a controlled sequence for preparing, validating, building, starting, and verifying the stack.",
+    "Startup, Shutdown, And Clean Reinstall Procedures": "This procedure table separates routine operations from destructive reinstall actions.",
+    "Verification Scripts And Health Checks": "The verification table clarifies which checks are static validation and which require live services.",
+    "Healthcheck Details": "The healthcheck table explains what each container health signal proves and what it does not prove.",
+    "Backup And Recovery": "The backup table identifies the assets that must be protected before upgrades, destructive cleanup, or production use.",
+    "Upgrade And Redeployment": "The redeployment table describes a controlled operator sequence for updating the system.",
+    "Troubleshooting Commands": "The troubleshooting command table lists safe inspection commands for diagnosing a running deployment.",
+    "Production Hardening Checklist": "The hardening table converts deployment risk areas into operator actions for production readiness.",
+    "Troubleshooting Scenarios": "The scenario table connects common symptoms to the first services and checks operators should inspect.",
+    "Handover Summary": "The handover table explains how the six documents work together as a final delivery set.",
+    "Delivery Artifact List": "The artifact table identifies the maintained deliverables and the source materials that keep them reproducible.",
+    "Quick-Start Summary": "The quick-start table condenses installation and verification into a high-level sequence for orientation.",
+    "Installation And Access": "The access table shows the default endpoints readers can use after deployment and verification.",
+    "Main Workflows": "The workflow table summarizes the operational paths users and operators will exercise most often.",
+    "Analytics, Dashboards, Reports, And Assistants": "This table distinguishes dashboards, analytics UI, text chatbot behavior, and OVOS operational assistant behavior.",
+    "Maintenance And Troubleshooting": "The maintenance table summarizes recurring operator responsibilities after installation.",
+    "Acceptance Checklist": "The acceptance table records the deliverable and traceability checks used to confirm the documentation set.",
+    "Demo-Readiness Checklist": "The demo-readiness table lists live checks that must be completed on the actual target deployment before a demonstration.",
+}
+
+
+TABLE_FOLLOWUPS = {
+    "System Context": "Operationally, this boundary view prevents the EnMS platform, text chatbot, and OVOS assistant from being described as one inseparable runtime. That distinction matters when deploying only EnMS, only OVOS, or the full stack.",
+    "Component Responsibilities": "The responsibilities show that HumanEnerDIA is modular: gateway, storage, ingestion, analytics, visualization, authentication, chatbot, and assistant functions can be discussed and verified separately.",
+    "Runtime Services": "This inventory confirms that the base EnMS deployment is a multi-service stack. Operators should use it to plan resource allocation, health checks, firewall policy, and troubleshooting ownership.",
+    "Dependency And Request Flow": "The flow relationships show where failures will propagate. For example, stale telemetry affects dashboards and assistant answers, while gateway routing issues can affect multiple browser-facing paths.",
+    "Data And Message Flow": "The data flow emphasizes that KPIs and reports depend on successful ingestion, storage, and aggregate refresh. It also clarifies where external device integration would connect.",
+    "External And Internal Interfaces": "The interface list supports access planning. Public deployments should prefer controlled gateway routes and restrict direct service ports unless an operational need is approved.",
+    "Deployment Variants And Boundaries": "These variants allow WASABI stakeholders and operators to choose the correct package without assuming that OVOS is always bundled into the EnMS runtime.",
+    "Operational Risks": "The listed risks are manageable with normal production controls: firewalling, credential rotation, backups, monitoring, and explicit assistant deployment.",
+    "Source References": "These references provide traceability for technical claims. They are intended to support maintenance and verification without exposing secrets or local runtime state.",
+    "Module Responsibility Matrix": "The matrix also gives maintainers a change-impact map: API changes, schema changes, ingestion changes, and authentication changes have different owners and test surfaces.",
+    "Analytics Service Design": "The route grouping shows that analytics is the main domain API. Changes to these routes can affect dashboards, reports, portal views, and assistant answers.",
+    "API Design Details": "The design details show a pragmatic API surface: typed routes and service-backed routes coexist with compatibility paths and UI-serving endpoints.",
+    "Database And Schema Design": "The schema design supports both operational telemetry and higher-level energy management concepts. It is the foundation for dashboards, KPIs, reports, and assistant responses.",
+    "Database Object Catalog": "This catalog is useful for handover because it shows where core records, time-series facts, ISO 50001 concepts, and model tracking are stored.",
+    "Service-Layer Design": "The service layer reduces duplication and keeps complex behavior closer to domain modules, while some legacy routes still contain direct SQL or local calculations.",
+    "Simulator And Ingestion Design": "This design enables repeatable demonstrations and also shows the expected integration pattern for real telemetry producers.",
+    "Authentication And Authorization Design": "The authentication design provides practical account and admin controls, while enterprise identity integration remains a target-environment responsibility.",
+    "Configuration Reference": "These groups help operators plan configuration review without exposing the deployed values themselves.",
+    "Error Handling And Logging": "The error-handling view supports operational diagnosis. It also shows where callers can expect structured errors versus log-based investigation.",
+    "Known Design Gaps And Placeholders": "These gaps define current scope boundaries. They should guide future hardening and validation work rather than obscure the implemented capabilities.",
+    "Deployment And Configuration": "Correct backend URL configuration is central to OVOS readiness: the assistant can answer operational questions only when it can reach the EnMS-compatible API.",
+    "Configuration Reference": "Together, these settings define how the assistant connects, listens, validates, and optionally uses fallback parsing. Runtime values should be controlled by the deployment owner.",
+    "Supported Intent And Query Families": "The intent families show broad operational coverage while still depending on parser confidence, backend data, and machine names present in the target system.",
+    "Intent Parsing And Routing": "This layered routing model keeps common questions fast and deterministic, while optional fallback parsing expands coverage when properly configured.",
+    "Backend API Client And Adapter Behavior": "The client layer is the bridge between language understanding and EnMS data. Its retry behavior helps with transient backend issues without hiding persistent configuration errors.",
+    "Backend Method Mapping": "The mapping gives integrators a practical checklist for adapter compatibility when connecting OVOS to another EnMS backend.",
+    "Example Supported Queries": "The examples should be used as smoke-test and training phrases, with expected answers determined by the data currently available in the EnMS backend.",
+    "Failure Behavior": "The failure behavior supports trustworthy operation: unclear or unsupported inputs should lead to clarification or explicit failure rather than fabricated operational values.",
+    "Energy Data Model": "This model shows that useful energy reporting depends on aligned factory, machine, telemetry, tariff, carbon, and production records.",
+    "KPI Formula Evidence": "The formulas provide traceable calculation evidence for key metrics. They also identify which metrics depend on production counts, tariff records, carbon factors, or aggregate freshness.",
+    "KPI Catalog And Classification": "The classification helps stakeholders interpret dashboards and reports with the appropriate confidence level for each measure.",
+    "Analytics Endpoints And Modules": "The endpoint grouping shows that KPI and reporting capabilities are API-backed, not only dashboard screenshots or static content.",
+    "Grafana Dashboard Capabilities": "The dashboards provide operational visibility and review workflows. Formal reporting still depends on validated source data and query semantics.",
+    "Node-RED Ingestion Pipeline": "The ingestion flow is the operational link between telemetry producers and the database; failures here affect every downstream analytic output.",
+    "Report Generation Capabilities": "The report paths demonstrate implemented PDF generation capability while preserving the distinction between operational reports and formally audited statements.",
+    "Report Workflow": "This workflow helps operators and maintainers troubleshoot report generation by separating API, data, template, rendering, and download responsibilities.",
+    "Data-Quality Assumptions": "These assumptions should be treated as operational controls. When they are not met, KPI and report outputs can be technically generated but less meaningful.",
+    "Audit-Use Cautions": "The cautions support responsible use of the system outputs. They define the additional governance needed for formal assurance contexts.",
+    "Implemented, Configured, Partial, And Demo Data Distinctions": "These distinctions help readers understand what is ready for evaluation, what is configured for visualization, and what needs validation before production or audit use.",
+    "Deployment Prerequisites": "Meeting these prerequisites reduces avoidable installation failures and gives operators the minimum environment needed for a clean first run.",
+    "Docker Compose Services": "The service inventory is also the troubleshooting map: when a function fails, operators can locate the owning service and supporting dependencies.",
+    "Networks, Volumes, And Ports": "These resources define the main persistence and exposure points. They require careful handling during backup, cleanup, and public deployment.",
+    "Environment Variable Groups": "The grouped variables make configuration review manageable while keeping sensitive deployed values out of stakeholder documentation.",
+    "Step-By-Step Deployment": "Following this sequence keeps installation reproducible and gives operators clear checkpoints before exposing the system to users.",
+    "Startup, Shutdown, And Clean Reinstall Procedures": "The procedure split protects persistent data. Routine restarts should preserve volumes, while clean reinstalls require deliberate data-removal decisions.",
+    "Verification Scripts And Health Checks": "The verification model separates configuration validity from live service readiness. Both are needed for a credible deployment handover.",
+    "Healthcheck Details": "Healthchecks are early indicators, not full business validation. They should be combined with data freshness, dashboard, API, and workflow checks.",
+    "Backup And Recovery": "The backup view identifies where durable operational state lives. Production use should include tested restoration, not only backup creation.",
+    "Upgrade And Redeployment": "The redeployment sequence reduces risk by pairing source changes with backup, rebuild, smoke-test, and rollback planning.",
+    "Troubleshooting Commands": "These commands let operators inspect runtime state without deleting data or changing configuration.",
+    "Production Hardening Checklist": "The hardening items convert the repository's configuration hooks into production operating controls.",
+    "Troubleshooting Scenarios": "The scenarios help operators start diagnosis in the correct service area rather than treating the stack as a single opaque process.",
+    "Handover Summary": "The document set is complementary: architecture explains boundaries, design explains implementation, deployment explains operation, and final documentation ties the delivery together.",
+    "Delivery Artifact List": "The artifact list confirms that both final DOCX deliverables and maintainable source material are part of the handover.",
+    "Quick-Start Summary": "The quick-start provides orientation only. Operators should still use the deployment report for detailed configuration, hardening, and recovery decisions.",
+    "Installation And Access": "Access endpoints should be verified after startup and adjusted for DNS, TLS, firewall, and target-host configuration in production.",
+    "Main Workflows": "The workflows show how data and users move through the system, which is useful for demonstrations, support planning, and acceptance testing.",
+    "Analytics, Dashboards, Reports, And Assistants": "The table clarifies that dashboards, API views, Rasa help, and OVOS operational queries serve different user needs and have different validation requirements.",
+    "Maintenance And Troubleshooting": "These responsibilities form the ongoing operating model after initial installation.",
+    "Acceptance Checklist": "The checklist confirms document completeness and traceability. Live runtime acceptance still depends on checks performed against the target deployment.",
+    "Demo-Readiness Checklist": "These checks help ensure a demonstration uses current data, healthy services, and verified assistant behavior where OVOS is included.",
+}
+
+
+def table_intro_for(title: str) -> str:
+    return TABLE_INTROS.get(
+        title,
+        "The table below organizes the key details for this section so readers can connect the documented capability to its operational meaning.",
+    )
+
+
+def table_followup_for(title: str) -> str:
+    return TABLE_FOLLOWUPS.get(
+        title,
+        "Operationally, this table should be read as a concise evidence-backed summary. The surrounding narrative explains how the listed items affect deployment, operation, or validation.",
+    )
+
+
 def section_evidence(rows: Sequence[Sequence[str]]) -> Section:
     return Section(
         "Source References",
@@ -823,9 +976,12 @@ def common_limitations_section() -> Section:
     return Section(
         "Limitations And Assumptions",
         paragraphs=[
-            "The following items should be reviewed before stakeholder distribution. They are documented to avoid overstating the current implementation."
+            "This section summarizes the current validation status, scope boundaries, and operational considerations for the delivered system."
         ],
         table=(["Item", "Status"], LIMITATION_ROWS),
+        table_followup=[
+            "Together, these points define the verified scope of the current delivery and the operational responsibilities required before production use. They preserve a clear distinction between implemented capability, deployment configuration, and assurance activities that belong to the target operating environment."
+        ],
     )
 
 
@@ -835,7 +991,7 @@ def build_system_architecture(diagrams: dict) -> DocSpec:
         title="System Architecture Report",
         purpose="Describe the implemented HumanEnerDIA / EnMS architecture and the OVOS-EnMS integration boundary.",
         audience="Project managers, technical reviewers, deployment stakeholders, and external partners.",
-        evidence_note="Claims are tied to local source code, Docker configuration, SQL initialization files, and verified compose validation.",
+        evidence_note="Claims are tied to tracked source code, Docker configuration, SQL initialization files, and verified compose validation.",
         sections=[
             Section(
                 "Executive Summary",
@@ -870,7 +1026,7 @@ def build_system_architecture(diagrams: dict) -> DocSpec:
             Section(
                 "Runtime Services",
                 paragraphs=[
-                    "The base runtime service inventory below is taken from docker-compose.yml and verified by docker compose config --quiet during this documentation pass."
+                    "The base runtime service inventory below is taken from docker-compose.yml and validated with docker compose config --quiet for the current delivery state."
                 ],
                 table=(["Service", "Image or build context", "External port/path", "Responsibility", "Healthcheck"], SERVICE_ROWS),
             ),
@@ -965,7 +1121,7 @@ def build_software_design() -> DocSpec:
         title="Software Design Documentation",
         purpose="Document the implemented software modules, interfaces, data model, and design constraints.",
         audience="Developers, maintainers, technical reviewers, and integration engineers.",
-        evidence_note="Claims prefer route registration, service code, SQL schema, compose files, and tests over README-level descriptions.",
+        evidence_note="Evidence is based on route registration, service code, SQL schema, compose files, and tests rather than README-level descriptions alone.",
         sections=[
             Section(
                 "Design Overview",
@@ -1068,14 +1224,14 @@ def build_software_design() -> DocSpec:
                 paragraphs=[
                     "auth-service is a Flask application backed by demo_users, demo_sessions, demo_audit_log, and pilot_factory_applications tables. It implements registration, login, JWT verification, email verification, password reset, admin user management, CSV export, pilot factory application workflows, and contact form handling.",
                     "The portal is static HTML/CSS/JS served by Nginx. It includes general pages, authentication pages, admin pages, report pages, and an OVOS voice widget script. The chatbot backend is an Express service that serves the built frontend and proxies to Rasa and OVOS endpoints.",
-                    "The Rasa custom action loads qa_data.json and retrieves knowledge/help answers using exact match, special cases, keyword routing, abbreviation expansion, misspelling correction, and fuzzy-style matching logic. This is a text help path; it should not be confused with live OVOS operational queries.",
+                    "The Rasa custom action loads qa_data.json and retrieves knowledge/help answers using exact match, special cases, keyword routing, abbreviation expansion, misspelling correction, and fuzzy-style matching logic. This text help path is separate from live OVOS operational queries.",
                 ],
             ),
             Section(
                 "Authentication And Authorization Design",
                 paragraphs=[
                     "Authentication is implemented in a separate Flask service rather than inside the analytics FastAPI application. The service stores users, sessions, and audit records in PostgreSQL auth tables and exposes login/registration/admin/contact workflows through Nginx-routed endpoints.",
-                    "Authorization is strongest on the auth-service admin endpoints, where a decorator verifies bearer JWTs, checks the configured admin email allowlist, and confirms the active/verified admin role in the database. Analytics middleware includes JWT support, but the final documentation should not imply a complete cross-service enterprise IAM layer."
+                    "Authorization is strongest on the auth-service admin endpoints, where a decorator verifies bearer JWTs, checks the configured admin email allowlist, and confirms the active/verified admin role in the database. Analytics middleware includes JWT support; the implemented scope is best described as service-level authentication and admin authorization rather than a complete cross-service enterprise IAM layer."
                 ],
                 table=(
                     ["Auth feature", "Observed implementation", "Source basis"],
@@ -1102,9 +1258,12 @@ def build_software_design() -> DocSpec:
             Section(
                 "Configuration Reference",
                 paragraphs=[
-                    "Configuration is intentionally environment-driven. Stakeholder documentation should discuss configuration groups and operational responsibility, not disclose actual .env values."
+                    "Configuration is intentionally environment-driven. The delivery documentation describes configuration groups and operational responsibility without disclosing actual .env values."
                 ],
                 table=(["Configuration group", "Representative variables", "Source basis"], CONFIG_GROUP_ROWS),
+                table_followup=[
+                    "These configuration groups describe the main runtime controls across database access, service ports, security, telemetry, analytics behavior, and optional OVOS proxying. Deployment owners should manage the actual values in the target environment."
+                ],
             ),
             Section(
                 "Error Handling And Logging",
@@ -1230,7 +1389,7 @@ def build_skill_doc(diagrams: dict) -> DocSpec:
             Section(
                 "Backend Method Mapping",
                 paragraphs=[
-                    "This mapping connects natural-language intent families to backend client methods and the HumanEnerDIA-compatible API areas they use. It should be used as an implementation map, not as a promise that every possible natural-language phrasing is accepted."
+                    "This mapping connects natural-language intent families to backend client methods and the HumanEnerDIA-compatible API areas they use. It defines implementation traceability; accepted phrasing still depends on parser coverage, validation, backend data, and deployment health."
                 ],
                 table=(["Intent family", "Primary backend method(s)", "API area", "Returned information"], SKILL_BACKEND_MAPPING_ROWS),
             ),
@@ -1282,7 +1441,7 @@ def build_kpi_doc(diagrams: dict) -> DocSpec:
         title="Energy Management System Reports and KPI Reports",
         purpose="Document implemented energy data, KPI, dashboard, and report capabilities with formulas and evidence.",
         audience="Energy managers, project reviewers, operators, analytics maintainers, and external partners.",
-        evidence_note="KPI formulas are included only where defined in SQL functions, code, dashboard queries, or existing local documentation.",
+        evidence_note="KPI formulas are included only where defined in SQL functions, code, dashboard queries, or tracked documentation.",
         sections=[
             Section(
                 "Energy Data Model",
@@ -1335,7 +1494,7 @@ def build_kpi_doc(diagrams: dict) -> DocSpec:
             Section(
                 "Grafana Dashboard Capabilities",
                 paragraphs=[
-                    "Grafana provisioning and dashboard JSON files are present. The dashboard inventory below is based on the tracked JSON dashboard titles and panel names. Dashboard presence is evidence of configured reporting views, while exact metric correctness should be reviewed against each panel SQL query for audit-grade use."
+                    "Grafana provisioning and dashboard JSON files are present. The dashboard inventory below is based on the tracked JSON dashboard titles and panel names. Dashboard presence is evidence of configured reporting views, while formal audit use requires validation of panel SQL, source tables, time filters, tariff/factor assumptions, and data freshness."
                 ],
                 table=(["Dashboard", "Panel themes"], DASHBOARD_ROWS),
             ),
@@ -1380,7 +1539,7 @@ def build_kpi_doc(diagrams: dict) -> DocSpec:
             Section(
                 "Report Workflow",
                 paragraphs=[
-                    "The report workflow separates API request handling, data gathering, chart/template generation, PDF creation, and download/preview behavior. The workflow is implemented, but report semantics must still be reviewed before audit-grade distribution."
+                    "The report workflow separates API request handling, data gathering, chart/template generation, PDF creation, and download/preview behavior. Formal audit use requires validation of report semantics, formulas, source data, tariff factors, carbon factors, and period boundaries."
                 ],
                 table=(["Step", "Observed behavior", "Source basis"], REPORT_WORKFLOW_ROWS),
             ),
@@ -1406,7 +1565,7 @@ def build_kpi_doc(diagrams: dict) -> DocSpec:
                         ["TimescaleDB energy/production/environmental storage", "Supported by implementation", "Tables, hypertables, and aggregate views are created by SQL init scripts."],
                         ["SEC, peak demand, load factor, cost, carbon KPI functions", "Supported by implementation", "SQL functions and service wrappers exist."],
                         ["Grafana dashboards", "Configured", "Dashboard JSON and provisioning are tracked."],
-                        ["Node-RED ingestion", "Configured and implemented", "Flow nodes and settings are tracked; runtime execution not verified in this pass."],
+                        ["Node-RED ingestion", "Configured and implemented", "Flow nodes and settings are tracked; live execution requires validation on the target deployment."],
                         ["Sample factories and machines", "Demo/sample data", "Seed SQL inserts named sample facilities and machines."],
                         ["V2 report polish/semantic completeness", "Partially implemented", "Routes/templates exist, but some data calculations are placeholders or estimates."],
                         ["Standalone query API service", "Out of scope", "No separate natural-language query API service is defined in the GitHub production docker-compose.yml."],
@@ -1433,7 +1592,7 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
         title="Docker Deployment Report",
         purpose="Document Docker Compose deployment, configuration, startup, verification, health checks, and operational troubleshooting.",
         audience="Operators, deployment engineers, technical reviewers, and external partner infrastructure teams.",
-        evidence_note="Deployment claims are based on compose files, Dockerfiles, setup and verification scripts, and local compose validation.",
+        evidence_note="Deployment claims are based on compose files, Dockerfiles, setup and verification scripts, and compose validation.",
         sections=[
             Section(
                 "Deployment Overview",
@@ -1465,7 +1624,7 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
                 "Compose Service Topology",
                 figure=("docker-service-topology.png", "Figure 2. Docker Compose service topology and optional OVOS attachment."),
                 paragraphs=[
-                    "The base deployment uses one Docker bridge network for HumanEnerDIA services. Nginx is the browser/API gateway; analytics, auth-service, chatbot/Rasa, simulator, Node-RED, Grafana, PostgreSQL/TimescaleDB, MQTT, and Redis communicate on the internal network. OVOS-EnMS remains a separate assistant runtime in the GitHub production evidence and connects through the HumanEnerDIA-compatible API."
+                    "The base deployment uses one Docker bridge network for HumanEnerDIA services. Nginx is the browser/API gateway; analytics, auth-service, chatbot/Rasa, simulator, Node-RED, Grafana, PostgreSQL/TimescaleDB, MQTT, and Redis communicate on the internal network. OVOS-EnMS remains a separate assistant runtime in the tracked production source and connects through the HumanEnerDIA-compatible API."
                 ],
             ),
             Section(
@@ -1534,7 +1693,7 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
                     ["Procedure", "Command or source", "Notes"],
                     [
                         ["Guided setup", "./setup.sh [--server-ip HOST] [--no-build] [--no-start]", "Creates/updates .env, validates compose, builds and starts by default."],
-                        ["Manual validation", "docker compose config", "Base validation succeeded in this documentation pass."],
+                        ["Manual validation", "docker compose config", "Base validation succeeded for the current delivery state."],
                         ["Manual start", "docker compose build; docker compose up -d", "Use after .env has no placeholders."],
                         ["Restart service", "docker compose restart analytics", "Use service-specific logs to confirm recovery."],
                         ["Stop without deleting data", "docker compose down", "Keeps persistent volumes."],
@@ -1552,7 +1711,7 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
                     [
                         ["docker compose config --quiet", "Validate Compose syntax/resolution", "Ran successfully for base HumanEnerDIA stack."],
                         ["OVOS-EnMS repository docker-compose.yml", "Validate OVOS assistant Compose configuration separately", "Ran successfully during documentation review."],
-                        ["verify.sh", "Checks Compose config and live Nginx, analytics, and optional OVOS endpoints when a stack is running", "Script exists in production repository; live checks were not run in this pass."],
+                        ["verify.sh", "Checks Compose config and live Nginx, analytics, and optional OVOS endpoints when a stack is running", "Script exists in the production repository; live checks require a running target deployment."],
                         ["Chatbot/Rasa live checks", "Use Compose healthchecks, service logs, and chatbot/Rasa endpoints when services are running", "No production-tracked standalone chatbot verification script is cited."],
                         ["Service healthchecks", "Container-level checks for all production Compose services", "Configured in docker-compose.yml."],
                     ],
@@ -1596,7 +1755,7 @@ def build_docker_doc(diagrams: dict) -> DocSpec:
             Section(
                 "Troubleshooting Scenarios",
                 paragraphs=[
-                    "The repository provides deployment-oriented defaults, placeholders, health checks, and hardening notes, but it should not be represented as automatically production-hardened. Operator action is required for DNS, TLS, firewall restrictions, credential rotation, backups, and monitoring policy.",
+                    "The repository provides deployment-oriented defaults, placeholders, health checks, and hardening notes. Production hardening is completed through operator-managed DNS, TLS, firewall restrictions, credential rotation, backups, and monitoring policy.",
                 ],
                 table=(
                     ["Symptom", "Likely area", "First checks"],
@@ -1627,7 +1786,7 @@ def build_final_system(diagrams: dict) -> DocSpec:
         title="Final System Documentation",
         purpose="Provide a stakeholder-ready end-to-end overview, installation/operation guide, workflows, and final delivery notes.",
         audience="Managers, reviewers, operators, users, integrators, and external WASABI partners.",
-        evidence_note="This document summarizes the evidence-backed content of the technical documents and points readers to implemented local sources.",
+        evidence_note="This document summarizes the evidence-backed content of the technical documents and points readers to implemented sources.",
         sections=[
             Section(
                 "Project Overview",
@@ -1640,7 +1799,7 @@ def build_final_system(diagrams: dict) -> DocSpec:
             Section(
                 "Handover Summary",
                 paragraphs=[
-                    "The six-document package is intended to let managers, reviewers, operators, and external partners understand what has been delivered, how the parts fit together, how to deploy and verify the stack, and which items still require runtime validation or production hardening."
+                    "The six-document package gives managers, reviewers, operators, and external partners a clear view of what has been delivered, how the parts fit together, how to deploy and verify the stack, and which responsibilities apply to runtime validation and production hardening."
                 ],
                 table=(["Document", "Primary use"], [
                     ["System Architecture Report", "Architecture, service responsibilities, boundaries, data/message flow, security/network posture, and operational risks."],
@@ -1755,20 +1914,20 @@ def build_final_system(diagrams: dict) -> DocSpec:
                     "The documentation package relies on the GitHub production source tree and the separate OVOS-EnMS repository, not on untracked local release artifacts.",
                     ".env is not shipped and must not be disclosed.",
                     "The optional Qwen GGUF model path and LLM fallback controls are documented from the OVOS-EnMS code/config; model availability must be verified in the deployed OVOS-EnMS runtime.",
-                    "Runtime health must be verified on the actual target deployment before stakeholder demonstration or handover.",
+                    "Runtime health verification belongs to the actual target deployment used for demonstration or handover.",
                 ],
             ),
             Section(
                 "Acceptance Checklist",
                 paragraphs=[
-                    "The following checks define the final documentation package acceptance state for stakeholder review."
+                    "The following checks summarize the deliverable acceptance state for the documentation set."
                 ],
                 table=(["Check", "Expected result"], ACCEPTANCE_CHECK_ROWS),
             ),
             Section(
                 "Demo-Readiness Checklist",
                 paragraphs=[
-                    "Before a live stakeholder demonstration, use this checklist alongside the deployment report and verify.sh. These checks are operational and must be performed on the actual target deployment."
+                    "For a live demonstration, use this checklist alongside the deployment report and verify.sh. These checks are operational and must be performed on the actual target deployment."
                 ],
                 table=(["Area", "Readiness action"], DEMO_READINESS_ROWS),
             ),
@@ -1823,11 +1982,25 @@ def render_markdown_section(lines: List[str], section: Section, level: int) -> N
     if section.bullets:
         lines.append("")
     if section.table:
+        intro = table_intro_for(section.title)
+        if intro:
+            if isinstance(intro, tuple):
+                lines.append(f"**{intro[0].rstrip()}** {intro[1].lstrip()}")
+            else:
+                lines.append(intro)
+            lines.append("")
         headers, rows = section.table
         lines.append("| " + " | ".join(headers) + " |")
         lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
         for row in rows:
             lines.append("| " + " | ".join(str(cell).replace("\n", " ") for cell in row) + " |")
+        lines.append("")
+    followup_blocks = section.table_followup or ([table_followup_for(section.title)] if section.table else [])
+    for para in followup_blocks:
+        if isinstance(para, tuple):
+            lines.append(f"**{para[0].rstrip()}** {para[1].lstrip()}")
+        else:
+            lines.append(para)
         lines.append("")
     for sub in section.subsections:
         render_markdown_section(lines, sub, level + 1)

@@ -8,7 +8,7 @@ Status: Final stakeholder-ready documentation package
 Purpose: Document Docker Compose deployment, configuration, startup, verification, health checks, and operational troubleshooting.
 Audience: Operators, deployment engineers, technical reviewers, and external partner infrastructure teams.
 
-Source basis: Deployment claims are based on compose files, Dockerfiles, setup and verification scripts, and local compose validation.
+Source basis: Deployment claims are based on compose files, Dockerfiles, setup and verification scripts, and compose validation.
 
 ## Deployment Overview
 
@@ -22,6 +22,8 @@ The setup helper is the intended guided path. It creates .env from .env.example 
 
 The repository does not install host Docker itself. Operators should prepare the host and confirm prerequisite tooling before running setup or Compose commands.
 
+The prerequisite table defines the host and tooling conditions needed before installation or startup.
+
 | Prerequisite | Source basis / action |
 | --- | --- |
 | Linux host or compatible container host | Deployment scripts assume a shell environment with Docker available. |
@@ -32,13 +34,17 @@ The repository does not install host Docker itself. Operators should prepare the
 | Optional python3-bcrypt or Docker | setup.sh needs one path to generate the Node-RED bcrypt password hash. |
 | Ports available | Default external ports include 8080, 8443, 5433, 1883, 9001, 3001, 1881, 8001, 8003, 5500, 5005, 5006, 5055, 6380, 5000, and 8181. |
 
+Meeting these prerequisites reduces avoidable installation failures and gives operators the minimum environment needed for a clean first run.
+
 ## Compose Service Topology
 
 ![Figure 2. Docker Compose service topology and optional OVOS attachment.](../assets/docker-service-topology.png)
 
-The base deployment uses one Docker bridge network for HumanEnerDIA services. Nginx is the browser/API gateway; analytics, auth-service, chatbot/Rasa, simulator, Node-RED, Grafana, PostgreSQL/TimescaleDB, MQTT, and Redis communicate on the internal network. OVOS-EnMS remains a separate assistant runtime in the GitHub production evidence and connects through the HumanEnerDIA-compatible API.
+The base deployment uses one Docker bridge network for HumanEnerDIA services. Nginx is the browser/API gateway; analytics, auth-service, chatbot/Rasa, simulator, Node-RED, Grafana, PostgreSQL/TimescaleDB, MQTT, and Redis communicate on the internal network. OVOS-EnMS remains a separate assistant runtime in the tracked production source and connects through the HumanEnerDIA-compatible API.
 
 ## Docker Compose Services
+
+The service table is the operator's runtime inventory for base HumanEnerDIA deployment.
 
 | Service | Image or build context | External port/path | Responsibility | Healthcheck |
 | --- | --- | --- | --- | --- |
@@ -55,11 +61,15 @@ The base deployment uses one Docker bridge network for HumanEnerDIA services. Ng
 | rasa | build ./chatbot/rasa | 5005 | Rasa NLU text chatbot server | Yes |
 | chatbot | build ./chatbot | 5006 | Express backend and built chatbot frontend proxying to Rasa and OVOS | Yes |
 
+The service inventory is also the troubleshooting map: when a function fails, operators can locate the owning service and supporting dependencies.
+
 ## Networks, Volumes, And Ports
 
 All HumanEnerDIA production Compose services join the Docker bridge network named by ENMS_NETWORK_NAME, defaulting to enms-network. OVOS-EnMS is documented as a separate assistant runtime rather than a service in the GitHub production base docker-compose.yml.
 
 Persistent named volumes in the production Compose file include PostgreSQL data, MQTT data/logs, Redis data, Node-RED data, and Grafana data.
+
+This table identifies the persistent and network resources that influence backup, firewall, and redeployment planning.
 
 | Resource | Configured name/default | Purpose |
 | --- | --- | --- |
@@ -68,6 +78,8 @@ Persistent named volumes in the production Compose file include PostgreSQL data,
 | grafana-data | ${VOLUME_PREFIX:-enms}-grafana-data | Grafana runtime data |
 | redis-data | ${VOLUME_PREFIX:-enms}-redis-data | Redis append-only persistence |
 | mqtt-data/logs | ${VOLUME_PREFIX:-enms}-mqtt-data and -mqtt-logs | Mosquitto runtime data and logs |
+
+These resources define the main persistence and exposure points. They require careful handling during backup, cleanup, and public deployment.
 
 ## Environment Variables And Configuration
 
@@ -83,6 +95,8 @@ Important configuration groups include database credentials, Redis password, MQT
 
 The table below summarizes configuration groups without reproducing private runtime values. Use .env.example and setup.sh as the source for expected keys.
 
+The environment table groups configuration by operational concern while avoiding private runtime values.
+
 | Group | Representative variables | Source basis |
 | --- | --- | --- |
 | Database | POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT | .env.example; docker-compose.yml; analytics/config.py |
@@ -92,9 +106,13 @@ The table below summarizes configuration groups without reproducing private runt
 | Analytics behavior | LOG_LEVEL, scheduler settings, model storage, anomaly thresholds, cost/carbon defaults | analytics/config.py; .env.example |
 | OVOS proxy/runtime | OVOS_BRIDGE_HOST, OVOS_BRIDGE_PORT, OVOS_BRIDGE_TIMEOUT, OVOS external ports | .env.example; analytics/api/routes/ovos_voice.py; OVOS-EnMS repository compose |
 
+The grouped variables make configuration review manageable while keeping sensitive deployed values out of stakeholder documentation.
+
 ## Step-By-Step Deployment
 
 The guided setup path should be used for normal evaluation deployment. Manual commands are appropriate when operators have already prepared .env and want explicit control over build/start timing.
+
+The deployment table gives a controlled sequence for preparing, validating, building, starting, and verifying the stack.
 
 | Step | Command / action | Expected result |
 | --- | --- | --- |
@@ -105,34 +123,46 @@ The guided setup path should be used for normal evaluation deployment. Manual co
 | 5. Start stack | docker compose up -d or setup.sh default start path. | Containers start on the configured network and volumes. |
 | 6. Verify | docker compose ps, health endpoints, verify.sh when services are running. | Operator confirms live readiness before demo/handover. |
 
+Following this sequence keeps installation reproducible and gives operators clear checkpoints before exposing the system to users.
+
 ## Startup, Shutdown, And Clean Reinstall Procedures
 
 Supported startup paths are ./setup.sh or manual Docker Compose commands after .env is prepared. Supported stop/start procedures use docker compose down/up or docker compose restart without deleting volumes. Destructive volume deletion is not part of routine operations.
 
+This procedure table separates routine operations from destructive reinstall actions.
+
 | Procedure | Command or source | Notes |
 | --- | --- | --- |
 | Guided setup | ./setup.sh [--server-ip HOST] [--no-build] [--no-start] | Creates/updates .env, validates compose, builds and starts by default. |
-| Manual validation | docker compose config | Base validation succeeded in this documentation pass. |
+| Manual validation | docker compose config | Base validation succeeded for the current delivery state. |
 | Manual start | docker compose build; docker compose up -d | Use after .env has no placeholders. |
 | Restart service | docker compose restart analytics | Use service-specific logs to confirm recovery. |
 | Stop without deleting data | docker compose down | Keeps persistent volumes. |
 | Clean reinstall | Only when data removal is intended; do not use down -v casually | Back up data first. |
 
+The procedure split protects persistent data. Routine restarts should preserve volumes, while clean reinstalls require deliberate data-removal decisions.
+
 ## Verification Scripts And Health Checks
 
 The repository provides verification scripts. These scripts are source material for intended operational checks, but their success depends on a running stack and reachable services. In this documentation run, compose validation was executed; live health checks were not implied.
+
+The verification table clarifies which checks are static validation and which require live services.
 
 | Check | Purpose | Source/status |
 | --- | --- | --- |
 | docker compose config --quiet | Validate Compose syntax/resolution | Ran successfully for base HumanEnerDIA stack. |
 | OVOS-EnMS repository docker-compose.yml | Validate OVOS assistant Compose configuration separately | Ran successfully during documentation review. |
-| verify.sh | Checks Compose config and live Nginx, analytics, and optional OVOS endpoints when a stack is running | Script exists in production repository; live checks were not run in this pass. |
+| verify.sh | Checks Compose config and live Nginx, analytics, and optional OVOS endpoints when a stack is running | Script exists in the production repository; live checks require a running target deployment. |
 | Chatbot/Rasa live checks | Use Compose healthchecks, service logs, and chatbot/Rasa endpoints when services are running | No production-tracked standalone chatbot verification script is cited. |
 | Service healthchecks | Container-level checks for all production Compose services | Configured in docker-compose.yml. |
+
+The verification model separates configuration validity from live service readiness. Both are needed for a credible deployment handover.
 
 ## Healthcheck Details
 
 Compose healthchecks are present for the production service inventory. A healthy container does not prove business data quality, but it is the first operational signal for deployment readiness.
+
+The healthcheck table explains what each container health signal proves and what it does not prove.
 
 | Service | Healthcheck focus | Interpretation |
 | --- | --- | --- |
@@ -147,9 +177,13 @@ Compose healthchecks are present for the production service inventory. A healthy
 | auth-service | HTTP /api/auth/health | Confirms Flask auth service responds. |
 | rasa/rasa-actions/chatbot | HTTP health or root checks from Compose healthcheck | Confirms chatbot components respond. |
 
+Healthchecks are early indicators, not full business validation. They should be combined with data freshness, dashboard, API, and workflow checks.
+
 ## Backup And Recovery
 
 The production tree provides persistent volumes and tracked dashboard/flow configuration, but it does not provide a complete universal backup/restore automation. Operators should implement tested backup procedures before production data is at risk.
+
+The backup table identifies the assets that must be protected before upgrades, destructive cleanup, or production use.
 
 | Area | Recommended handling | Caution |
 | --- | --- | --- |
@@ -159,9 +193,13 @@ The production tree provides persistent volumes and tracked dashboard/flow confi
 | Docker volumes | postgres-data, grafana-data, mqtt data/logs, redis-data, Node-RED data | Volume deletion is destructive. |
 | Documentation package | Regenerate DOCX from docs/final-delivery/source/generate_delivery_docs.py and source Markdown/assets. | Keeps source and deliverables reproducible. |
 
+The backup view identifies where durable operational state lives. Production use should include tested restoration, not only backup creation.
+
 ## Upgrade And Redeployment
 
 Redeployment should be treated as a controlled change. Take backups, rebuild images, restart services, and run smoke checks. If schema/data changes are introduced in future versions, rollback must include database/volume strategy, not only Git checkout.
+
+The redeployment table describes a controlled operator sequence for updating the system.
 
 | Phase | Action |
 | --- | --- |
@@ -171,9 +209,13 @@ Redeployment should be treated as a controlled change. Take backups, rebuild ima
 | Smoke test | Run docker compose ps, service logs, /health endpoints, analytics /api/v1/health, and verify.sh when services are running. |
 | Rollback | Return to the previous commit or approved delivery version and restore volumes/database backup if schema/data changed. |
 
+The redeployment sequence reduces risk by pairing source changes with backup, rebuild, smoke-test, and rollback planning.
+
 ## Troubleshooting Commands
 
 These commands are safe static/live inspection commands when run by an operator with Docker access. They should not delete volumes or modify runtime state.
+
+The troubleshooting command table lists safe inspection commands for diagnosing a running deployment.
 
 | Purpose | Command | Use |
 | --- | --- | --- |
@@ -184,9 +226,13 @@ These commands are safe static/live inspection commands when run by an operator 
 | Analytics health | curl -fsS http://localhost:8001/api/v1/health | Checks analytics service directly. |
 | Verification script | HUMANERDIA_BASE_URL=... ANALYTICS_BASE_URL=... OVOS_BASE_URL=... ./verify.sh | Runs live checks; skips OVOS if bridge is unreachable. |
 
+These commands let operators inspect runtime state without deleting data or changing configuration.
+
 ## Production Hardening Checklist
 
 The checklist below is intentionally phrased as operator action. The repository provides hooks and configuration, but production hardening is not complete until these actions are performed in the target environment.
+
+The hardening table converts deployment risk areas into operator actions for production readiness.
 
 | Area | Required action |
 | --- | --- |
@@ -198,9 +244,13 @@ The checklist below is intentionally phrased as operator action. The repository 
 | Monitoring | Add external monitoring/log collection for health endpoints, disk usage, restart counts, and data freshness. |
 | Secrets hygiene | Never publish .env, runtime credential files, tokens, database dumps, or logs containing credentials. |
 
+The hardening items convert the repository's configuration hooks into production operating controls.
+
 ## Troubleshooting Scenarios
 
-The repository provides deployment-oriented defaults, placeholders, health checks, and hardening notes, but it should not be represented as automatically production-hardened. Operator action is required for DNS, TLS, firewall restrictions, credential rotation, backups, and monitoring policy.
+The repository provides deployment-oriented defaults, placeholders, health checks, and hardening notes. Production hardening is completed through operator-managed DNS, TLS, firewall restrictions, credential rotation, backups, and monitoring policy.
+
+The scenario table connects common symptoms to the first services and checks operators should inspect.
 
 | Symptom | Likely area | First checks |
 | --- | --- | --- |
@@ -211,23 +261,31 @@ The repository provides deployment-oriented defaults, placeholders, health check
 | Auth errors | auth-service, database, SMTP | /api/auth/health; auth-service logs |
 | OVOS voice path unavailable | OVOS bridge/messagebus or analytics proxy | OVOS /health; analytics /api/v1/ovos/voice/health |
 
+The scenarios help operators start diagnosis in the correct service area rather than treating the stack as a single opaque process.
+
 ## Limitations And Assumptions
 
-The following items should be reviewed before stakeholder distribution. They are documented to avoid overstating the current implementation.
+This section summarizes the current validation status, scope boundaries, and operational considerations for the delivered system.
+
+The limitations table defines scope boundaries that affect validation, audit use, optional assistant behavior, and production readiness.
 
 | Item | Status |
 | --- | --- |
-| Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
+| Runtime verification | Compose validation is confirmed where stated. Live health checks are deployment-specific and require a running target environment. |
 | OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and companion assistant runtime. |
 | OVOS optional LLM fallback | The OVOS-EnMS Dockerfile installs LLM fallback dependencies only when INSTALL_LLM_FALLBACK=true. Model availability must be verified in the OVOS-EnMS repository/runtime. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
-| Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
+| Reports V2 | V2 report code is implemented, but some service calculations use derived, proportional, or placeholder values. Formal audit use requires independent validation of formulas, source data, tariff factors, carbon factors, and generated report semantics. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
 | Security posture | The codebase provides secret placeholders, generated first-run credentials, JWT/bcrypt auth, health checks, and hardening guidance. Public production exposure still requires operator DNS/TLS/firewall/credential work. |
+
+Together, these points define the verified scope of the current delivery and the operational responsibilities required before production use. They preserve a clear distinction between implemented capability, deployment configuration, and assurance activities that belong to the target operating environment.
 
 ## Source References
 
 The table below lists the main source material used for this document. It is not a full file inventory; it identifies the sources behind the material claims.
+
+The source reference table links the document's major claims to the tracked files or validation evidence used to support them.
 
 | Topic | Source material |
 | --- | --- |
@@ -235,3 +293,5 @@ The table below lists the main source material used for this document. It is not
 | Setup helper | setup.sh |
 | Verifier | verify.sh |
 | OVOS Docker | OVOS-EnMS repository: docker-compose.yml; Dockerfile; enms-ovos-skill/config.yaml.template; enms-ovos-skill/settings.docker.json; enms-ovos-skill/settingsmeta.yaml |
+
+These references provide traceability for technical claims. They are intended to support maintenance and verification without exposing secrets or local runtime state.

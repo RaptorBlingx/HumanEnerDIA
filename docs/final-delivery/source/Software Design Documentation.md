@@ -8,7 +8,7 @@ Status: Final stakeholder-ready documentation package
 Purpose: Document the implemented software modules, interfaces, data model, and design constraints.
 Audience: Developers, maintainers, technical reviewers, and integration engineers.
 
-Source basis: Claims prefer route registration, service code, SQL schema, compose files, and tests over README-level descriptions.
+Source basis: Evidence is based on route registration, service code, SQL schema, compose files, and tests rather than README-level descriptions alone.
 
 ## Design Overview
 
@@ -17,6 +17,8 @@ HumanEnerDIA uses a service-oriented design. Nginx centralizes browser and API r
 The repository favors explicit route modules and service modules rather than a single monolithic backend. The analytics service mounts routers for baselines, anomalies, KPIs, machines, forecasts, time series, visualization data, model performance, production, SEU/ISO 50001 features, reports, and OVOS-facing integration.
 
 ## Module Responsibility Matrix
+
+This matrix maps software areas to implementation responsibilities so maintainers can quickly identify the owning subsystem for each capability.
 
 | Subsystem | Responsibilities | Primary evidence |
 | --- | --- | --- |
@@ -29,11 +31,15 @@ The repository favors explicit route modules and service modules rather than a s
 | auth-service | Registration, login, JWT verification, admin APIs, email verification/reset, pilot/contact forms | auth-service/app.py; auth-service/auth_service.py; database/init/05-auth-schema.sql |
 | chatbot/rasa | Text help chatbot, QA retrieval actions, Rasa runtime, Express proxy backend | chatbot/server/index.js; chatbot/rasa/actions/actions.py; chatbot/rasa/qa_data.json |
 
+The matrix also gives maintainers a change-impact map: API changes, schema changes, ingestion changes, and authentication changes have different owners and test surfaces.
+
 ## Analytics Service Design
 
 The analytics service is a FastAPI application with lifespan-managed database connection, optional Redis event subscriber, scheduler startup, route registration, CORS middleware, request logging, timeout handling, and generic exception handling.
 
 Router registration in analytics/main.py shows the implemented surface: baseline, anomaly, KPI, machines, forecast, time series, sankey, heatmap, comparison, model performance, stats, production, SEU/factory/performance/ISO 50001/multi-energy, OVOS, OVOS voice proxy, and reports.
+
+The endpoint table groups the analytics API by domain capability and points to the router modules that implement each area.
 
 | API area | Representative endpoints | Evidence |
 | --- | --- | --- |
@@ -48,9 +54,13 @@ Router registration in analytics/main.py shows the implemented surface: baseline
 | OVOS integration | /api/v1/ovos/*, /api/v1/ovos/voice/query, /voice/health, /voice/config | analytics/api/routes/ovos.py; ovos_voice.py |
 | Visualization data | /api/v1/sankey/data, /heatmap/hourly, /comparison/machines, /compare/machines | analytics/api/routes/sankey.py; heatmap.py; comparison.py; compare.py |
 
+The route grouping shows that analytics is the main domain API. Changes to these routes can affect dashboards, reports, portal views, and assistant answers.
+
 ## API Design Details
 
 The API design is organized by domain routers rather than by a single generic endpoint. The production tree exposes both operational APIs and UI-serving routes, and some compatibility routes remain mounted for OVOS-oriented integrations.
+
+The API design table explains how routes, models, database access, compatibility paths, and UI-serving routes are structured.
 
 | Design aspect | Observed implementation | Source basis |
 | --- | --- | --- |
@@ -60,11 +70,15 @@ The API design is organized by domain routers rather than by a single generic en
 | Legacy/deprecated routes | OVOS and OVOS training routes remain mounted with comments noting newer factory/analytics/baseline paths. | Document as compatibility surface, not a separate service. |
 | UI route surface | analytics/api/routes/ui_routes.py serves analytics UI pages for dashboard/baseline/anomaly/KPI/forecast/Sankey/heatmap/comparison/model-performance paths. | These are FastAPI-rendered pages, distinct from Grafana dashboards. |
 
+The design details show a pragmatic API surface: typed routes and service-backed routes coexist with compatibility paths and UI-serving endpoints.
+
 ## Database And Schema Design
 
 The database initialization files create core dimensions, time-series facts, current-state tables, baseline/anomaly/tariff/carbon/audit tables, auth tables, ISO 50001 tables, model-performance tables, forecast output tables, and action-plan workflow tables.
 
 TimescaleDB is used for high-frequency time-series storage. The initialization scripts create hypertables for energy_readings, production_data, environmental_data, and energy_forecasts, plus continuous aggregates at 1 minute, 15 minutes, 1 hour, and 1 day where implemented.
+
+This table summarizes the first-start schema groups and shows how each database area supports the EnMS domain model.
 
 | Database object group | Implemented objects | Evidence |
 | --- | --- | --- |
@@ -74,9 +88,13 @@ TimescaleDB is used for high-frequency time-series storage. The initialization s
 | Aggregates | energy, production, and environmental aggregate materialized views | database/init/03-timescaledb-setup.sql |
 | KPI functions | calculate_sec, calculate_peak_demand, calculate_load_factor, calculate_energy_cost, calculate_carbon_intensity, calculate_all_kpis | database/init/04-functions.sql |
 
+The schema design supports both operational telemetry and higher-level energy management concepts. It is the foundation for dashboards, KPIs, reports, and assistant responses.
+
 ## Database Object Catalog
 
 The following catalog is intended as a stakeholder-level data-design view. It avoids column-by-column schema reproduction while identifying the functional database groups that support the application.
+
+The object catalog gives a stakeholder-level view of database groups without reproducing every column definition.
 
 | Object group | Representative objects | Design role |
 | --- | --- | --- |
@@ -87,11 +105,15 @@ The following catalog is intended as a stakeholder-level data-design view. It av
 | ISO 50001 structures | energy_sources, seus, seu_energy_performance, enpi_baselines, enpi_performance, energy_targets, action_plans | Energy-source, significant-energy-use, EnPI, target, and action-plan concepts. |
 | Model/forecast tracking | model_performance tables, energy_forecasts, model_training_history, model_alerts | Forecast output and model lifecycle/performance observations. |
 
+This catalog is useful for handover because it shows where core records, time-series facts, ISO 50001 concepts, and model tracking are stored.
+
 ## Service-Layer Design
 
 The analytics service layer centralizes most non-trivial domain logic. KPIService wraps SQL KPI functions; baseline and forecast services coordinate model training/prediction and storage; anomaly services detect and record anomalies; report services assemble data and output files; event publisher/subscriber modules integrate Redis Pub/Sub where enabled.
 
 This design keeps route handlers closer to request/response orchestration while delegating calculation, modeling, report assembly, and event behavior to domain services. Some older routes still contain direct SQL or route-level calculations, so the design is pragmatic rather than fully uniform.
+
+The service-layer table highlights where calculation, modeling, reporting, and event behavior live beyond the route handlers.
 
 | Service area | Implementation responsibility | Source basis |
 | --- | --- | --- |
@@ -102,11 +124,15 @@ This design keeps route handlers closer to request/response orchestration while 
 | Report services | Generate legacy monthly EnPI PDFs and V2 report outputs through report components and generators. | analytics/reports/; analytics/reports_v2/ |
 | Event services | Publish and subscribe to Redis channels for anomaly, metric, training, and system alert events when enabled. | analytics/services/event_publisher.py; event_subscriber.py; redis_manager.py |
 
+The service layer reduces duplication and keeps complex behavior closer to domain modules, while some legacy routes still contain direct SQL or local calculations.
+
 ## Simulator And Ingestion Design
 
 The simulator is a FastAPI service with lifecycle initialization. It connects to PostgreSQL, connects to MQTT, loads active machines from the database, creates simulator instances by machine type, and can auto-start based on configuration.
 
 Machine implementations generate energy, production, environmental, and status payloads. The boiler path supports multi-energy publication for electricity, natural gas, and steam style payloads. Node-RED processes subscribed MQTT traffic and writes normalized records into the database.
+
+This table connects simulator behavior, MQTT publication, and Node-RED ingestion into one implementation view.
 
 | Area | Design details | Evidence |
 | --- | --- | --- |
@@ -115,19 +141,23 @@ Machine implementations generate energy, production, environmental, and status p
 | MQTT publishing | Publishes energy, multi-energy, production, environmental, and retained status messages | simulator/mqtt_publisher.py |
 | Node-RED flow | Subscribe: factory/#, Parse Topic, Route by Type, Process Energy/Production/Environmental/Status | nodered/data/flows.json |
 
+This design enables repeatable demonstrations and also shows the expected integration pattern for real telemetry producers.
+
 ## Authentication, Portal, And Chatbot Design
 
 auth-service is a Flask application backed by demo_users, demo_sessions, demo_audit_log, and pilot_factory_applications tables. It implements registration, login, JWT verification, email verification, password reset, admin user management, CSV export, pilot factory application workflows, and contact form handling.
 
 The portal is static HTML/CSS/JS served by Nginx. It includes general pages, authentication pages, admin pages, report pages, and an OVOS voice widget script. The chatbot backend is an Express service that serves the built frontend and proxies to Rasa and OVOS endpoints.
 
-The Rasa custom action loads qa_data.json and retrieves knowledge/help answers using exact match, special cases, keyword routing, abbreviation expansion, misspelling correction, and fuzzy-style matching logic. This is a text help path; it should not be confused with live OVOS operational queries.
+The Rasa custom action loads qa_data.json and retrieves knowledge/help answers using exact match, special cases, keyword routing, abbreviation expansion, misspelling correction, and fuzzy-style matching logic. This text help path is separate from live OVOS operational queries.
 
 ## Authentication And Authorization Design
 
 Authentication is implemented in a separate Flask service rather than inside the analytics FastAPI application. The service stores users, sessions, and audit records in PostgreSQL auth tables and exposes login/registration/admin/contact workflows through Nginx-routed endpoints.
 
-Authorization is strongest on the auth-service admin endpoints, where a decorator verifies bearer JWTs, checks the configured admin email allowlist, and confirms the active/verified admin role in the database. Analytics middleware includes JWT support, but the final documentation should not imply a complete cross-service enterprise IAM layer.
+Authorization is strongest on the auth-service admin endpoints, where a decorator verifies bearer JWTs, checks the configured admin email allowlist, and confirms the active/verified admin role in the database. Analytics middleware includes JWT support; the implemented scope is best described as service-level authentication and admin authorization rather than a complete cross-service enterprise IAM layer.
+
+The authentication table identifies the implemented account, session, verification, admin, and audit capabilities.
 
 | Auth feature | Observed implementation | Source basis |
 | --- | --- | --- |
@@ -137,6 +167,8 @@ Authorization is strongest on the auth-service admin endpoints, where a decorato
 | Password reset | Reset token and timestamp fields with one-hour expiry logic. | auth-service/auth_service.py; database/init/05-auth-schema.sql |
 | Admin controls | Admin allowlist from ADMIN_EMAILS plus database role/is_active/email_verified checks. | auth-service/auth_service.py |
 | Audit trail | REGISTER, LOGIN, EMAIL_VERIFY and related actions are inserted into demo_audit_log. | auth-service/auth_service.py; database/init/05-auth-schema.sql |
+
+The authentication design provides practical account and admin controls, while enterprise identity integration remains a target-environment responsibility.
 
 ## Configuration, Validation, Logging, And Error Handling
 
@@ -148,7 +180,9 @@ Authorization is strongest on the auth-service admin endpoints, where a decorato
 
 ## Configuration Reference
 
-Configuration is intentionally environment-driven. Stakeholder documentation should discuss configuration groups and operational responsibility, not disclose actual .env values.
+Configuration is intentionally environment-driven. The delivery documentation describes configuration groups and operational responsibility without disclosing actual .env values.
+
+The configuration table groups environment-driven settings without exposing private runtime values.
 
 | Configuration group | Representative variables | Source basis |
 | --- | --- | --- |
@@ -159,9 +193,13 @@ Configuration is intentionally environment-driven. Stakeholder documentation sho
 | Analytics behavior | LOG_LEVEL, scheduler settings, model storage, anomaly thresholds, cost/carbon defaults | analytics/config.py; .env.example |
 | OVOS proxy/runtime | OVOS_BRIDGE_HOST, OVOS_BRIDGE_PORT, OVOS_BRIDGE_TIMEOUT, OVOS external ports | .env.example; analytics/api/routes/ovos_voice.py; OVOS-EnMS repository compose |
 
+These configuration groups describe the main runtime controls across database access, service ports, security, telemetry, analytics behavior, and optional OVOS proxying. Deployment owners should manage the actual values in the target environment.
+
 ## Error Handling And Logging
 
 The codebase includes explicit error handling in key services, but behavior is not completely uniform across every route. This should be represented as implemented service-level error handling rather than a single formal enterprise error contract.
+
+The error-handling table describes how the main services surface failures and logs at runtime.
 
 | Area | Observed behavior |
 | --- | --- |
@@ -171,7 +209,11 @@ The codebase includes explicit error handling in key services, but behavior is n
 | Simulator | Lifecycle startup/shutdown, MQTT/database connection handling, and route-level start/stop/status errors are implemented. |
 | OVOS bridge/client | Bridge returns structured failure responses on messagebus/query errors; ENMSClient avoids retrying ordinary 4xx errors and retries transient/timeouts/5xx. |
 
+The error-handling view supports operational diagnosis. It also shows where callers can expect structured errors versus log-based investigation.
+
 ## Known Design Gaps And Placeholders
+
+This table states known design gaps in external delivery language so the current scope is clear without overstating completeness.
 
 | Gap or caution | Source-backed status |
 | --- | --- |
@@ -180,9 +222,13 @@ The codebase includes explicit error handling in key services, but behavior is n
 | Direct public exposure | Several internal service ports are externally mapped for development/ops; production hardening requires operator firewall/TLS review. |
 | README claims | Root README contains high-level feature claims; final documents use code/config evidence where details differ. |
 
+These gaps define current scope boundaries. They should guide future hardening and validation work rather than obscure the implemented capabilities.
+
 ## Source References
 
 The table below lists the main source material used for this document. It is not a full file inventory; it identifies the sources behind the material claims.
+
+The source reference table links the document's major claims to the tracked files or validation evidence used to support them.
 
 | Topic | Source material |
 | --- | --- |
@@ -193,3 +239,5 @@ The table below lists the main source material used for this document. It is not
 | Auth | auth-service/app.py; auth-service/auth_service.py; database/init/05-auth-schema.sql |
 | Chatbot/Rasa | chatbot/server/index.js; chatbot/rasa/actions/actions.py; chatbot/rasa/qa_data.json |
 | Validation performed | docker compose config --quiet for HumanEnerDIA production; docker compose -f <OVOS-EnMS repository>/docker-compose.yml config --quiet |
+
+These references provide traceability for technical claims. They are intended to support maintenance and verification without exposing secrets or local runtime state.

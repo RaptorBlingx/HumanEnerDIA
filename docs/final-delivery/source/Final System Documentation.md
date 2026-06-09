@@ -8,7 +8,7 @@ Status: Final stakeholder-ready documentation package
 Purpose: Provide a stakeholder-ready end-to-end overview, installation/operation guide, workflows, and final delivery notes.
 Audience: Managers, reviewers, operators, users, integrators, and external WASABI partners.
 
-Source basis: This document summarizes the evidence-backed content of the technical documents and points readers to implemented local sources.
+Source basis: This document summarizes the evidence-backed content of the technical documents and points readers to implemented sources.
 
 ## Project Overview
 
@@ -20,7 +20,9 @@ This final delivery package presents the system as a Docker Compose deployable H
 
 ## Handover Summary
 
-The six-document package is intended to let managers, reviewers, operators, and external partners understand what has been delivered, how the parts fit together, how to deploy and verify the stack, and which items still require runtime validation or production hardening.
+The six-document package gives managers, reviewers, operators, and external partners a clear view of what has been delivered, how the parts fit together, how to deploy and verify the stack, and which responsibilities apply to runtime validation and production hardening.
+
+The handover table explains how the six documents work together as a final delivery set.
 
 | Document | Primary use |
 | --- | --- |
@@ -31,9 +33,13 @@ The six-document package is intended to let managers, reviewers, operators, and 
 | Docker Deployment Report | Compose topology, setup, environment groups, health checks, backup/recovery, redeployment, troubleshooting, and hardening. |
 | Final System Documentation | End-to-end reader guide, workflows, operations, acceptance/demo checklists, and final delivery notes. |
 
+The document set is complementary: architecture explains boundaries, design explains implementation, deployment explains operation, and final documentation ties the delivery together.
+
 ## Delivery Artifact List
 
 The formal deliverables are the six DOCX files. Source Markdown, the evidence map, diagrams, and generator script are included for maintainability and reproducibility.
+
+The artifact table identifies the maintained deliverables and the source materials that keep them reproducible.
 
 | Artifact | Purpose |
 | --- | --- |
@@ -43,6 +49,8 @@ The formal deliverables are the six DOCX files. Source Markdown, the evidence ma
 | Generation script | docs/final-delivery/source/generate_delivery_docs.py regenerates DOCX, Markdown, and diagrams. |
 | Diagram assets | docs/final-delivery/assets/*.png contains architecture, data-flow, deployment, topology, and OVOS lifecycle diagrams. |
 | Application source | HumanEnerDIA production source tree plus separate OVOS-EnMS repository remain the authoritative technical sources. |
+
+The artifact list confirms that both final DOCX deliverables and maintainable source material are part of the handover.
 
 ## Reader Guide
 
@@ -56,6 +64,8 @@ The formal deliverables are the six DOCX files. Source Markdown, the evidence ma
 
 This quick-start summarizes the handover path. It does not replace the deployment report or the live verification scripts.
 
+The quick-start table condenses installation and verification into a high-level sequence for orientation.
+
 | Step | Action | Outcome |
 | --- | --- | --- |
 | 1 | Review .env.example and run ./setup.sh with the target server host/IP if needed. | .env is created locally and first-run secrets are generated. |
@@ -65,9 +75,13 @@ This quick-start summarizes the handover path. It does not replace the deploymen
 | 5 | Run verify.sh when services are running. | Gateway, analytics, and optional OVOS live checks are performed. |
 | 6 | Open portal, Grafana, analytics UI/API docs, and assistant endpoints as needed. | Stakeholder/demo access points are ready for review. |
 
+The quick-start provides orientation only. Operators should still use the deployment report for detailed configuration, hardening, and recovery decisions.
+
 ## Installation And Access
 
 For a local or evaluation deployment, use the guided setup script from the production repository checkout or approved delivery bundle. For remote browser access, pass a server host or IP so generated URLs match the expected access path. Generated credentials are stored in .env and must be kept private.
+
+The access table shows the default endpoints readers can use after deployment and verification.
 
 | Access point | Default URL | Notes |
 | --- | --- | --- |
@@ -79,7 +93,11 @@ For a local or evaluation deployment, use the guided setup script from the produ
 | Node-RED | http://<host>:1881 or http://<host>:8080/nodered/ | Admin UI protected by Node-RED credentials |
 | OVOS bridge | http://<host>:5000/health | Available when the separate OVOS-EnMS runtime is deployed |
 
+Access endpoints should be verified after startup and adjusted for DNS, TLS, firewall, and target-host configuration in production.
+
 ## Main Workflows
+
+The workflow table summarizes the operational paths users and operators will exercise most often.
 
 | Workflow | Implementation path | Result |
 | --- | --- | --- |
@@ -91,6 +109,8 @@ For a local or evaluation deployment, use the guided setup script from the produ
 | Ask text help questions | chatbot Express proxy -> Rasa -> custom action QA retrieval | Knowledge/help answers from qa_data.json categories. |
 | Ask operational assistant questions | OVOS REST bridge -> messagebus -> EnMS skill -> analytics API | Voice/text operational responses with structured data. |
 | Generate reports | analytics report endpoints | Legacy monthly EnPI PDF and V2 PDF paths are available. |
+
+The workflows show how data and users move through the system, which is useful for demonstrations, support planning, and acceptance testing.
 
 ## Operator Guide
 
@@ -107,6 +127,8 @@ Analytics capabilities include baseline training/prediction/deviation, KPI funct
 
 Dashboards are configured in Grafana JSON and provisioned through the Grafana provisioning directory. The Rasa chatbot is a text help/knowledge assistant, while OVOS-EnMS is the operational natural-language assistant integrated with live backend APIs.
 
+This table distinguishes dashboards, analytics UI, text chatbot behavior, and OVOS operational assistant behavior.
+
 | Dashboard or assistant | Purpose |
 | --- | --- |
 | Grafana dashboards | Operational, executive, cost, carbon, ISO 50001, anomaly, model, production, and predictive views. |
@@ -114,9 +136,13 @@ Dashboards are configured in Grafana JSON and provisioned through the Grafana pr
 | Rasa chatbot | Text knowledge/help assistant using QA categories and custom retrieval action. |
 | OVOS-EnMS | Operational assistant for energy, power, machine status, rankings, anomalies, forecasts, baselines, KPIs, reports, help, and health checks. |
 
+The table clarifies that dashboards, API views, Rasa help, and OVOS operational queries serve different user needs and have different validation requirements.
+
 ## Maintenance And Troubleshooting
 
 Maintenance should focus on credential rotation, backup verification, dashboard export/commit policy, disk usage, restart counts, recent errors, image/base dependency review, and firewall/public route review. Production hardening requires operator policy beyond the repository defaults.
+
+The maintenance table summarizes recurring operator responsibilities after installation.
 
 | Maintenance area | Recommended review |
 | --- | --- |
@@ -127,29 +153,37 @@ Maintenance should focus on credential rotation, backup verification, dashboard 
 | OVOS | Confirm /health messagebus_connected and smoke query when assistant is required. |
 | Docs | Update final documents when route, schema, compose, or packaging behavior changes. |
 
+These responsibilities form the ongoing operating model after initial installation.
+
 ## Final Delivery Notes
 
 - The documentation package relies on the GitHub production source tree and the separate OVOS-EnMS repository, not on untracked local release artifacts.
 - .env is not shipped and must not be disclosed.
 - The optional Qwen GGUF model path and LLM fallback controls are documented from the OVOS-EnMS code/config; model availability must be verified in the deployed OVOS-EnMS runtime.
-- Runtime health must be verified on the actual target deployment before stakeholder demonstration or handover.
+- Runtime health verification belongs to the actual target deployment used for demonstration or handover.
 
 ## Acceptance Checklist
 
-The following checks define the final documentation package acceptance state for stakeholder review.
+The following checks summarize the deliverable acceptance state for the documentation set.
+
+The acceptance table records the deliverable and traceability checks used to confirm the documentation set.
 
 | Check | Expected result |
 | --- | --- |
 | Documentation files exist | All six required DOCX files are present under docs/final-delivery/. |
-| Source alignment | No references to untracked release artifacts, missing release scripts, absent Compose services, or local absolute paths. |
+| Traceability | Source references point to tracked delivery files, implementation code, configuration, and validation evidence. |
 | Compose validation | docker compose config --quiet passes for HumanEnerDIA production; OVOS-EnMS Compose validates separately. |
 | DOCX integrity | All DOCX files open as valid ZIP/DOCX packages and contain embedded media where expected. |
 | Secrets hygiene | Generated docs and sources are scanned for sensitive placeholders and private values. |
-| Stakeholder limitations | Runtime, audit, OVOS boundary, and production-hardening limitations remain visible. |
+| Scope boundaries | Runtime validation, audit use, OVOS deployment, and production hardening are clearly defined. |
+
+The checklist confirms document completeness and traceability. Live runtime acceptance still depends on checks performed against the target deployment.
 
 ## Demo-Readiness Checklist
 
-Before a live stakeholder demonstration, use this checklist alongside the deployment report and verify.sh. These checks are operational and must be performed on the actual target deployment.
+For a live demonstration, use this checklist alongside the deployment report and verify.sh. These checks are operational and must be performed on the actual target deployment.
+
+The demo-readiness table lists live checks that must be completed on the actual target deployment before a demonstration.
 
 | Area | Readiness action |
 | --- | --- |
@@ -160,23 +194,31 @@ Before a live stakeholder demonstration, use this checklist alongside the deploy
 | Assistant | Run at least one machine status query and one KPI/report-style query through the OVOS bridge if OVOS is in scope. |
 | Known cautions | Be ready to explain demo data, partial V2 report semantics, and production hardening steps. |
 
+These checks help ensure a demonstration uses current data, healthy services, and verified assistant behavior where OVOS is included.
+
 ## Limitations And Assumptions
 
-The following items should be reviewed before stakeholder distribution. They are documented to avoid overstating the current implementation.
+This section summarizes the current validation status, scope boundaries, and operational considerations for the delivered system.
+
+The limitations table defines scope boundaries that affect validation, audit use, optional assistant behavior, and production readiness.
 
 | Item | Status |
 | --- | --- |
-| Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
+| Runtime verification | Compose validation is confirmed where stated. Live health checks are deployment-specific and require a running target environment. |
 | OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and companion assistant runtime. |
 | OVOS optional LLM fallback | The OVOS-EnMS Dockerfile installs LLM fallback dependencies only when INSTALL_LLM_FALLBACK=true. Model availability must be verified in the OVOS-EnMS repository/runtime. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
-| Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
+| Reports V2 | V2 report code is implemented, but some service calculations use derived, proportional, or placeholder values. Formal audit use requires independent validation of formulas, source data, tariff factors, carbon factors, and generated report semantics. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
 | Security posture | The codebase provides secret placeholders, generated first-run credentials, JWT/bcrypt auth, health checks, and hardening guidance. Public production exposure still requires operator DNS/TLS/firewall/credential work. |
+
+Together, these points define the verified scope of the current delivery and the operational responsibilities required before production use. They preserve a clear distinction between implemented capability, deployment configuration, and assurance activities that belong to the target operating environment.
 
 ## Source References
 
 The table below lists the main source material used for this document. It is not a full file inventory; it identifies the sources behind the material claims.
+
+The source reference table links the document's major claims to the tracked files or validation evidence used to support them.
 
 | Topic | Source material |
 | --- | --- |
@@ -186,3 +228,5 @@ The table below lists the main source material used for this document. It is not
 | Dashboards and reports | grafana/provisioning/; grafana/dashboards/; analytics/api/routes/reports.py; analytics/reports/; analytics/reports_v2/ |
 | OVOS-EnMS | OVOS-EnMS repository: README.md; enms-ovos-skill/README.md; enms-ovos-skill/bridge/ovos_rest_bridge.py; enms-ovos-skill/enms_ovos_skill/__init__.py |
 | Delivery package sources | docs/final-delivery/source/; docs/final-delivery/assets/ |
+
+These references provide traceability for technical claims. They are intended to support maintenance and verification without exposing secrets or local runtime state.

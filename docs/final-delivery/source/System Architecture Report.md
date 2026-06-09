@@ -8,7 +8,7 @@ Status: Final stakeholder-ready documentation package
 Purpose: Describe the implemented HumanEnerDIA / EnMS architecture and the OVOS-EnMS integration boundary.
 Audience: Project managers, technical reviewers, deployment stakeholders, and external partners.
 
-Source basis: Claims are tied to local source code, Docker configuration, SQL initialization files, and verified compose validation.
+Source basis: Claims are tied to tracked source code, Docker configuration, SQL initialization files, and verified compose validation.
 
 ## Executive Summary
 
@@ -24,15 +24,21 @@ The OVOS-EnMS component is a separate assistant runtime that connects to the Hum
 
 The system has three boundaries that must remain distinct in delivery documentation. HumanEnerDIA / EnMS is the energy management backend and visualization stack. OVOS-EnMS is the voice/natural-language assistant layer that integrates with the analytics API. The Rasa chatbot is a text-oriented help and knowledge path, not the same runtime as the OVOS skill.
 
+The table below defines the delivery boundaries so readers can distinguish the EnMS platform, the companion OVOS runtime, and the external users or integrators that interact with them.
+
 | Boundary | Included components | Evidence |
 | --- | --- | --- |
 | HumanEnerDIA / EnMS | Nginx, portal, analytics, PostgreSQL/TimescaleDB, MQTT, Node-RED, Grafana, simulator, auth-service, Rasa/chatbot services | docker-compose.yml |
 | OVOS-EnMS | OVOS runtime, REST bridge, messagebus, EnMS skill, parser, validator, API client, response formatter | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/__init__.py |
 | External users/integrators | Browser users, API clients, OVOS clients, operators, WASABI reviewers | README.md; verify.sh; docs/final-delivery/ |
 
+Operationally, this boundary view prevents the EnMS platform, text chatbot, and OVOS assistant from being described as one inseparable runtime. That distinction matters when deploying only EnMS, only OVOS, or the full stack.
+
 ## Component Responsibilities
 
 The architecture separates gateway, domain API, storage, ingestion, visualization, simulation, authentication, text-help chatbot, and voice/natural-language assistant concerns. This separation is visible in the Compose service list and in the route/service/module layout.
+
+Read this table as a responsibility map: each row identifies the architectural owner for a capability and the source material that supports that assignment.
 
 | Component | Responsibility | Source basis |
 | --- | --- | --- |
@@ -47,9 +53,13 @@ The architecture separates gateway, domain API, storage, ingestion, visualizatio
 | chatbot/Rasa | Text help chatbot and custom Rasa action backed by qa_data.json. | chatbot/server/index.js; chatbot/rasa/actions/actions.py. |
 | OVOS-EnMS | Separate natural-language/voice assistant runtime that calls a HumanEnerDIA-compatible API. | OVOS-EnMS repository: bridge, skill, parser, validator, API client, formatter. |
 
+The responsibilities show that HumanEnerDIA is modular: gateway, storage, ingestion, analytics, visualization, authentication, chatbot, and assistant functions can be discussed and verified separately.
+
 ## Runtime Services
 
-The base runtime service inventory below is taken from docker-compose.yml and verified by docker compose config --quiet during this documentation pass.
+The base runtime service inventory below is taken from docker-compose.yml and validated with docker compose config --quiet for the current delivery state.
+
+The service inventory explains what runs in the base Compose deployment and what role each service plays in the operational stack.
 
 | Service | Image or build context | External port/path | Responsibility | Healthcheck |
 | --- | --- | --- | --- | --- |
@@ -66,9 +76,13 @@ The base runtime service inventory below is taken from docker-compose.yml and ve
 | rasa | build ./chatbot/rasa | 5005 | Rasa NLU text chatbot server | Yes |
 | chatbot | build ./chatbot | 5006 | Express backend and built chatbot frontend proxying to Rasa and OVOS | Yes |
 
+This inventory confirms that the base EnMS deployment is a multi-service stack. Operators should use it to plan resource allocation, health checks, firewall policy, and troubleshooting ownership.
+
 ## Dependency And Request Flow
 
 The main runtime dependencies are directional: clients enter through gateway or assistant bridge paths, domain services call databases and supporting middleware, and telemetry flows from producers into storage before it is consumed by dashboards, APIs, reports, and assistants.
+
+The dependency flows show how requests and data move through the stack from the point of entry to storage, analytics, dashboards, and assistant responses.
 
 | Flow | Dependency chain |
 | --- | --- |
@@ -79,6 +93,8 @@ The main runtime dependencies are directional: clients enter through gateway or 
 | Rasa help path | portal chatbot -> chatbot Express backend -> Rasa server -> Rasa action server -> qa_data.json |
 | OVOS operational path | REST bridge or portal proxy -> OVOS messagebus -> EnMS skill -> HumanEnerDIA-compatible analytics API -> structured response |
 
+The flow relationships show where failures will propagate. For example, stale telemetry affects dashboards and assistant answers, while gateway routing issues can affect multiple browser-facing paths.
+
 ## Data And Message Flow
 
 ![Figure 2. Telemetry ingestion and analytics data flow.](../assets/telemetry-data-flow.png)
@@ -86,6 +102,8 @@ The main runtime dependencies are directional: clients enter through gateway or 
 Synthetic factory data or external device data enters through MQTT. Node-RED subscribes to factory/#, parses the topic structure, routes by payload type, validates required fields, and writes energy, production, environmental, and status data into PostgreSQL.
 
 TimescaleDB hypertables and continuous aggregates provide raw and aggregated time-series views. The analytics service reads from those tables and aggregate views to support KPIs, baselines, forecasts, anomalies, reports, Grafana dashboards, and OVOS-facing responses.
+
+This table follows telemetry through each processing stage, from publication to storage and then to downstream consumers.
 
 | Stage | Observed implementation | Evidence |
 | --- | --- | --- |
@@ -95,9 +113,13 @@ TimescaleDB hypertables and continuous aggregates provide raw and aggregated tim
 | Storage | energy_readings, production_data, and environmental_data are converted to TimescaleDB hypertables with continuous aggregates | database/init/02-schema.sql; database/init/03-timescaledb-setup.sql; database/init/04-functions.sql |
 | Consumption | Analytics API, Grafana dashboards, portal, chatbot, and OVOS integration consume database-backed data | analytics/main.py |
 
+The data flow emphasizes that KPIs and reports depend on successful ingestion, storage, and aggregate refresh. It also clarifies where external device integration would connect.
+
 ## External And Internal Interfaces
 
 External browser access normally enters through Nginx. Direct service ports are exposed for operations and development; production exposure should be restricted by firewall or reverse proxy policy.
+
+The interface list identifies the main access routes and clarifies which paths are intended for browsers, APIs, operations tools, or the optional assistant bridge.
 
 | Interface | Route or endpoint | Evidence/notes |
 | --- | --- | --- |
@@ -112,6 +134,8 @@ External browser access normally enters through Nginx. Direct service ports are 
 | OVOS proxy via EnMS | /api/ovos/* -> /api/v1/ovos/* | nginx/conf.d/default.conf; analytics/api/routes/ovos_voice.py |
 | OVOS direct bridge | POST /query, POST /query/voice, GET /health | OVOS-EnMS repository: enms-ovos-skill/bridge/ovos_rest_bridge.py |
 
+The interface list supports access planning. Public deployments should prefer controlled gateway routes and restrict direct service ports unless an operational need is approved.
+
 ## OVOS-EnMS Integration
 
 ![Figure 3. OVOS request and response lifecycle.](../assets/ovos-query-lifecycle.png)
@@ -124,12 +148,16 @@ HumanEnerDIA also exposes /api/v1/ovos/voice/query and /api/v1/ovos/voice/health
 
 The GitHub production tree supports a HumanEnerDIA base deployment. OVOS-EnMS should be described as a companion runtime sourced from its own repository unless and until a production Compose overlay is tracked in the HumanEnerDIA production repository.
 
+The deployment variants table separates evaluation, base production, companion OVOS, and hardened production responsibilities.
+
 | Variant | Source | Boundary statement |
 | --- | --- | --- |
 | Base production Compose | docker-compose.yml in GitHub production | HumanEnerDIA services only. No OVOS service appears in the current production service list. |
 | Separate OVOS-EnMS runtime | OVOS-EnMS repository docker-compose.yml | Companion assistant runtime exposing bridge/messagebus ports and connecting to a HumanEnerDIA-compatible API. |
-| Evaluation/demo deployment | setup.sh with generated first-run secrets and simulator auto-start | Suitable for review and demonstration after health checks pass; not a substitute for production hardening. |
+| Evaluation/demo deployment | setup.sh with generated first-run secrets and simulator auto-start | Suitable for review and demonstration after health checks pass; production hardening remains a separate deployment responsibility. |
 | Production-hardened deployment | Operator-controlled DNS/TLS/firewall/backups/monitoring | Supported by configuration hooks but not automatically completed by the repository. |
+
+These variants allow WASABI stakeholders and operators to choose the correct package without assuming that OVOS is always bundled into the EnMS runtime.
 
 ## Security And Network Boundaries
 
@@ -146,31 +174,41 @@ Authentication is implemented by auth-service using bcrypt password hashing, JWT
 
 The following risks are not defects in the documentation package; they are deployment and governance points that should remain visible in stakeholder handover material.
 
+The operational risk table summarizes deployment choices that require operator governance in a production environment.
+
 | Risk area | Observed source basis | Operational action |
 | --- | --- | --- |
 | Directly mapped internal ports | PostgreSQL, MQTT, Redis, Grafana, Node-RED, analytics, auth, Rasa, chatbot, simulator ports are mapped for access/operations. | Restrict with firewall or upstream network policy before public exposure. |
 | Runtime data persistence | Named Docker volumes retain database, Grafana, MQTT, Redis, and Node-RED data. | Back up before destructive redeployments or volume removal. |
 | Credentials | .env is generated locally and ignored; .env.example contains placeholders. | Rotate generated credentials and never disclose .env values. |
-| Report semantics | Some V2 report calculations use estimates/placeholders. | Label audit-grade use as requiring review and validation. |
+| Report semantics | Some V2 report calculations use estimates/placeholders. | Formal audit use requires independent formula, source-data, tariff-factor, and carbon-factor validation. |
 | OVOS availability | Production base Compose does not start OVOS. | Deploy and verify OVOS-EnMS separately when assistant access is in scope. |
+
+The listed risks are manageable with normal production controls: firewalling, credential rotation, backups, monitoring, and explicit assistant deployment.
 
 ## Limitations And Assumptions
 
-The following items should be reviewed before stakeholder distribution. They are documented to avoid overstating the current implementation.
+This section summarizes the current validation status, scope boundaries, and operational considerations for the delivered system.
+
+The limitations table defines scope boundaries that affect validation, audit use, optional assistant behavior, and production readiness.
 
 | Item | Status |
 | --- | --- |
-| Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
+| Runtime verification | Compose validation is confirmed where stated. Live health checks are deployment-specific and require a running target environment. |
 | OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and companion assistant runtime. |
 | OVOS optional LLM fallback | The OVOS-EnMS Dockerfile installs LLM fallback dependencies only when INSTALL_LLM_FALLBACK=true. Model availability must be verified in the OVOS-EnMS repository/runtime. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
-| Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
+| Reports V2 | V2 report code is implemented, but some service calculations use derived, proportional, or placeholder values. Formal audit use requires independent validation of formulas, source data, tariff factors, carbon factors, and generated report semantics. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
 | Security posture | The codebase provides secret placeholders, generated first-run credentials, JWT/bcrypt auth, health checks, and hardening guidance. Public production exposure still requires operator DNS/TLS/firewall/credential work. |
+
+Together, these points define the verified scope of the current delivery and the operational responsibilities required before production use. They preserve a clear distinction between implemented capability, deployment configuration, and assurance activities that belong to the target operating environment.
 
 ## Source References
 
 The table below lists the main source material used for this document. It is not a full file inventory; it identifies the sources behind the material claims.
+
+The source reference table links the document's major claims to the tracked files or validation evidence used to support them.
 
 | Topic | Source material |
 | --- | --- |
@@ -181,3 +219,5 @@ The table below lists the main source material used for this document. It is not
 | Analytics API | analytics/main.py |
 | OVOS bridge and skill | OVOS-EnMS repository: enms-ovos-skill/bridge/ovos_rest_bridge.py; OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/__init__.py |
 | Compose validation | docker compose config --quiet returned success for the HumanEnerDIA production tree and the OVOS-EnMS repository compose file |
+
+These references provide traceability for technical claims. They are intended to support maintenance and verification without exposing secrets or local runtime state.
