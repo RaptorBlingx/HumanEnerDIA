@@ -2,8 +2,30 @@
 
 HumanEnerDIA is a Docker Compose stack for industrial energy management. It
 includes the web portal, analytics service, authentication service, Grafana
-dashboards, Node-RED ingestion, MQTT, Redis, PostgreSQL/TimescaleDB, and a demo
-factory simulator.
+dashboards, Node-RED ingestion, MQTT, Redis, PostgreSQL/TimescaleDB, a demo
+factory simulator, and optional integration with a separately running OVOS
+assistant.
+
+## WASABI Products
+
+The release is split into three downloadable products:
+
+- `HumanEnerDIA-EnMS-v1.0.0`: the EnMS platform only.
+- `HumanEnerDIA-OVOS-skill-v1.0.0`: the OVOS runtime and HumanEnerDIA skill only.
+- `HumanEnerDIA-full-stack-v1.0.0`: EnMS plus embedded OVOS in one bundle.
+
+For separate EnMS and OVOS deployments, start the EnMS package first, then
+start the OVOS package with:
+
+```bash
+./setup.sh --enms-api-url http://<enms-host>:8001/api/v1
+```
+
+To let the EnMS portal call the separate OVOS bridge, configure EnMS with:
+
+```bash
+./setup.sh --ovos-bridge-host <ovos-host> --ovos-bridge-port 5000
+```
 
 ## Requirements
 
@@ -28,6 +50,12 @@ will open:
 ./setup.sh --server-ip energy-demo.local
 ```
 
+To configure the optional separate OVOS bridge during EnMS setup:
+
+```bash
+./setup.sh --server-ip energy-demo.local --ovos-bridge-host ovos-demo.local --ovos-bridge-port 5000
+```
+
 `setup.sh` creates `.env` when needed, generates local first-run secrets,
 validates Docker Compose, builds the images, and starts the stack. Generated
 credentials are stored in `.env`; keep that file private and rotate the values
@@ -39,6 +67,7 @@ before public exposure.
 - Grafana: `http://localhost:8080/grafana`
 - Analytics UI: `http://localhost:8080/analytics/ui/`
 - Analytics API health: `http://localhost:8001/api/v1/health`
+- API URL for a separate OVOS package: `http://localhost:8001/api/v1`
 
 ## Verify
 
