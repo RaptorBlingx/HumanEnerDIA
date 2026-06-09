@@ -1,14 +1,14 @@
 # Energy Management System Reports and KPI Reports
 
 Project: WASABI / HumanEnerDIA / OVOS-EnMS
-Version: 1.0
-Date: 2026-06-08
-Status: Final delivery documentation package
+Version: 1.1
+Date: 2026-06-09
+Status: Final stakeholder-ready documentation package
 
 Purpose: Document implemented energy data, KPI, dashboard, and report capabilities with formulas and evidence.
 Audience: Energy managers, project reviewers, operators, analytics maintainers, and external partners.
 
-Evidence rule: KPI formulas are included only where defined in SQL functions, code, dashboard queries, or existing local documentation.
+Source basis: KPI formulas are included only where defined in SQL functions, code, dashboard queries, or existing local documentation.
 
 ## Energy Data Model
 
@@ -40,6 +40,21 @@ The following KPI formulas are implemented as database functions and wrapped by 
 | Carbon intensity/emissions | Energy multiplied by active carbon factor, with default factor fallback | calculate_carbon_intensity() queries carbon_factors | database/init/04-functions.sql; /api/v1/kpi/carbon |
 | Combined KPI response | Aggregates SEC, peak demand, load factor, cost, and carbon | calculate_all_kpis() and KPIService.calculate_all_kpis() | database/init/04-functions.sql; analytics/services/kpi_service.py |
 
+## KPI Catalog And Classification
+
+This catalog distinguishes implemented KPI formulas from configured dashboard/reporting views and route-level estimates. It is intentionally conservative so stakeholder readers can see which measures are calculation-backed and which require review before formal use.
+
+| KPI/reporting item | Classification | Implementation basis | Caution |
+| --- | --- | --- | --- |
+| SEC | Supported by implementation | calculate_sec SQL function and /api/v1/kpi/sec route | Requires energy and production aggregate data for the selected period. |
+| Peak demand | Supported by implementation | calculate_peak_demand SQL function and route | Uses 15-minute aggregate peak_demand_kw. |
+| Load factor | Supported by implementation | calculate_load_factor SQL function and route | Depends on average/max power availability. |
+| Energy cost | Supported by implementation | calculate_energy_cost SQL function and service wrapper | Uses active tariff rows when present and default fallback in SQL. |
+| Carbon intensity/emissions | Supported by implementation | calculate_carbon_intensity SQL function and carbon route | Uses carbon_factors with fallback factor; not independent emissions assurance. |
+| Factory KPI rollups | Implemented/configured | /api/v1/kpi/factory/{factory_id} and /api/v1/kpi/factories | Some route-level estimates use constants or aggregate assumptions; review before audit use. |
+| Model performance KPIs | Implemented/configured | model_performance routes and dashboards | R2/RMSE/MAPE-style metrics depend on recorded model history. |
+| Operational efficiency/OEE | Configured dashboard/reporting view | Grafana operational-efficiency dashboards and production route | Dashboard SQL should be reviewed before formal operational reporting. |
+
 ## Analytics Endpoints And Modules
 
 | Capability area | Implemented routes/modules | Notes |
@@ -70,6 +85,12 @@ Grafana provisioning and dashboard JSON files are present. The dashboard invento
 | SOTA Real-Time Production | Live factory status, active machines, current power |
 | SOTA Executive Summary | Operational concerns, 12-month energy trend, energy intensity, monthly summary |
 
+## Dashboard Interpretation Notes
+
+Dashboards should be treated as operational and review views over the tracked SQL/panel configuration. They are valuable for demonstration, monitoring, and stakeholder walkthroughs, but a formal audit should trace each panel query to source tables, time filters, tariff/factor assumptions, and data freshness.
+
+There are duplicate upper/lowercase dashboard JSON variants for several SOTA dashboards in the production tree. The documentation records the configured dashboard capability without treating duplicated JSON files as separate business capabilities.
+
 ## Node-RED Ingestion Pipeline
 
 The tracked Node-RED flow subscribes to MQTT topic factory/# and includes function nodes for topic parsing, route selection, payload validation, database preparation, success counting, error catching, and a 30-second statistics dashboard update. Credential files are intentionally not inspected or reproduced in this package.
@@ -94,6 +115,43 @@ Important caution: the V2 generator is implemented, but some values are derived 
 | V2 PDF report | POST /v2/generate, GET /v2/download/{report_id}, GET /v2/status | analytics/api/routes/reports.py; analytics/reports_v2/services/report_service.py |
 | V2 templates | Base, header/footer, KPI cards, chart containers, cover, executive dashboard, energy overview, machine ranking/profile, cost, carbon sections | analytics/reports_v2/templates/ |
 
+## Report Workflow
+
+The report workflow separates API request handling, data gathering, chart/template generation, PDF creation, and download/preview behavior. The workflow is implemented, but report semantics must still be reviewed before audit-grade distribution.
+
+| Step | Observed behavior | Source basis |
+| --- | --- | --- |
+| Legacy report request | Client calls /api/v1/reports/types, /preview, or /generate for monthly_enpi. | analytics/api/routes/reports.py |
+| Legacy data assembly | MonthlyEnPIReport builds summary, machine metrics, EnPI values, targets, achievements, and charts. | analytics/reports/monthly_enpi_report.py |
+| Legacy output | ReportLab PDF is returned by the route. | analytics/reports/base_report.py; analytics/api/routes/reports.py |
+| V2 report request | Client calls /api/v1/reports/v2/generate and later /v2/download/{report_id}. | analytics/api/routes/reports.py |
+| V2 generation | ReportService coordinates data fetch, components, charts, HTML/PDF generation, and temporary output path. | analytics/reports_v2/services/report_service.py |
+| V2 caution | Some data fetcher/service values are estimated or placeholder-like. | analytics/reports_v2/services/data_fetcher.py; report_service.py |
+
+## Data-Quality Assumptions
+
+KPI and report outputs assume data freshness, correctly associated machine/factory records, synchronized timestamps, and appropriate tariff/carbon-factor records. These assumptions are not always enforceable by the codebase alone and should be part of operational handover.
+
+| Assumption | Reason |
+| --- | --- |
+| Clock/time range | KPI, baseline, forecast, and dashboard results assume timestamps are correctly generated and synchronized. |
+| Telemetry completeness | SEC and production-linked KPIs require both energy and production data; missing production affects denominator quality. |
+| Topic consistency | Node-RED routing assumes MQTT topics match expected factory/# structure and payload type handling. |
+| Tariff/factor validity | Cost and carbon outputs depend on active tariff and carbon-factor records or configured fallback factors. |
+| Simulator vs real data | Seed/demo simulator data is suitable for demonstration but should be separated from live factory evidence. |
+| Aggregate freshness | Continuous aggregates and dashboards depend on database refresh behavior and current ingested data. |
+
+## Audit-Use Cautions
+
+The system implements carbon, cost, EnPI, SEC, forecasting, anomaly, and report capabilities where code/config evidence exists. That does not automatically make every generated output suitable for regulatory, financial, or audited sustainability reporting without governance review.
+
+| Caution | Stakeholder guidance |
+| --- | --- |
+| Audit-grade KPI use | Do not treat generated reports as audited energy statements without validating formulas, data sources, tariff/factor records, and reporting period boundaries. |
+| Carbon reporting | Carbon/emissions values are implemented where functions/routes/dashboards exist, but formal emissions reporting requires verified factors, scope definitions, and governance outside this codebase. |
+| Demo seed data | Seeded factories and machines should be labeled as demonstration data unless replaced by real facility data. |
+| Placeholder calculations | Where V2 reports or dashboard panels derive estimates, identify them in stakeholder review rather than presenting them as certified calculations. |
+
 ## Implemented, Configured, Partial, And Demo Data Distinctions
 
 | Capability | Classification | Reason |
@@ -113,18 +171,18 @@ The following items should be reviewed before stakeholder distribution. They are
 | Item | Status |
 | --- | --- |
 | Runtime verification | This documentation package records compose validation. Live health checks require a running deployment and are not implied unless run separately. |
-| OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and as an embedded component in the full-stack release archive. |
-| OVOS release artifact | Release notes state optional GGUF model weights are not bundled by default. |
+| OVOS deployment boundary | The GitHub production base docker-compose.yml does not define an OVOS service. OVOS-EnMS is documented as a separate source repository and companion assistant runtime. |
+| OVOS optional LLM fallback | The OVOS-EnMS Dockerfile installs LLM fallback dependencies only when INSTALL_LLM_FALLBACK=true. Model availability must be verified in the OVOS-EnMS repository/runtime. |
 | Third-party EnMS support | OVOS portability is through a HumanEnerDIA-compatible API or adapter/proxy, not zero-code support for arbitrary vendor APIs. |
 | Reports V2 | V2 report code is implemented, but some service calculations use derived/proportional or placeholder values; final stakeholders should review report semantics before audit use. |
 | Simulator inventory | The simulator code supports boiler in addition to compressor, HVAC, motor, pump, and injection molding. One simulator info response still lists five machine types. |
 | Security posture | The codebase provides secret placeholders, generated first-run credentials, JWT/bcrypt auth, health checks, and hardening guidance. Public production exposure still requires operator DNS/TLS/firewall/credential work. |
 
-## Evidence References
+## Source References
 
-The table below lists the main local evidence used for this document. It is not a full file inventory; it identifies the sources behind the material claims.
+The table below lists the main source material used for this document. It is not a full file inventory; it identifies the sources behind the material claims.
 
-| Topic | Evidence |
+| Topic | Source material |
 | --- | --- |
 | KPI functions | database/init/04-functions.sql |
 | KPI routes and service | analytics/api/routes/kpi.py; analytics/services/kpi_service.py |

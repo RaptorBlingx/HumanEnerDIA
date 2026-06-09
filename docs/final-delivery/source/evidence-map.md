@@ -1,7 +1,7 @@
 # Evidence Map
 
 Project: WASABI / HumanEnerDIA / OVOS-EnMS
-Generated: 2026-06-08
+Generated: 2026-06-09
 
 This file maps recurring documentation claims to local evidence. It intentionally avoids .env values and credential-bearing runtime files.
 
@@ -26,7 +26,7 @@ This file maps recurring documentation claims to local evidence. It intentionall
 | ovos_readme | OVOS-EnMS repository: README.md; enms-ovos-skill/README.md |
 | ovos_skill | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/__init__.py |
 | ovos_validator | OVOS-EnMS repository: enms-ovos-skill/enms_ovos_skill/lib/validator.py |
-| release_notes | releases/HumanEnerDIA-full-stack-v1.0.0-release-notes.md |
+| readme | README.md |
 | reports | analytics/api/routes/reports.py; analytics/reports/; analytics/reports_v2/ |
 | seed_data | database/init/06-seed-data.sql |
 | setup | setup.sh |
