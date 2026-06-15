@@ -26,7 +26,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     postgresql-client \
     curl \
-    ffmpeg \
     libglib2.0-0 \
     libnss3 \
     libnspr4 \

@@ -54,9 +54,6 @@
         apiUrl: window.location.port === '8001' 
             ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/query'  // Direct (when testing from :8001)
             : '/api/ovos/voice/query',     // Via nginx proxy (production - relative path)
-        transcribeUrl: window.location.port === '8001'
-            ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/transcribe'
-            : '/api/ovos/voice/transcribe',
         healthUrl: window.location.port === '8001' 
             ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/health'  // Direct (when testing from :8001)
             : '/api/ovos/voice/health',    // Via nginx proxy (production - relative path)
@@ -69,7 +66,7 @@
         createAnomalyUrl: window.location.port === '8001'
             ? 'http://' + window.location.hostname + ':8001/api/v1/anomaly/create'
             : '/api/analytics/api/v1/anomaly/create',
-        welcomeMessage: 'Hello! I\'m your ASSA ABLOY partner press-shop assistant. Ask about Bret, Raster, Dimeco, production quantities, group energy, or press-shop KPIs. Say "Jarvis" to activate hands-free!',
+        welcomeMessage: 'Hello! I\'m your ASSA ABLOY partner press-shop assistant. For voice, use group one for Bret, group two for Raster, and group three for Dimeco. Ask about production, group energy, or press-shop KPIs. Say "Jarvis" to activate hands-free!',
         placeholder: 'Ask about the partner press shop...',
         title: 'ASSA ABLOY Press-Shop Assistant',
         subtitle: 'Energy Management',
@@ -99,7 +96,6 @@
     const STREAMING_MAX_DELAY_MS = 70;
     const STREAMING_TARGET_TOTAL_MS = 2200;
     const PILOT_VOICE_TIMING_ENABLED = ['assistant', 'pilot'].includes(pilotMode);
-    let useServerStt = (localStorage.getItem('humanenerdia_stt_engine') || 'whisper') !== 'browser';
     const PILOT_TTS_RATE = Math.min(
         1.3,
         Math.max(0.85, Number(localStorage.getItem('humanenerdia_pilot_tts_rate')) || 1.0)
@@ -884,7 +880,7 @@
                             <!-- Quick Reply Buttons in Chat -->
                             <div class="ovos-quick-replies">
                                 <button class="ovos-quick-btn" data-query="Show KPIs for the partner press shop">KPIs</button>
-                                <button class="ovos-quick-btn" data-query="Compare Bret, Raster, and Dimeco energy consumption">Compare Groups</button>
+                                <button class="ovos-quick-btn" data-query="Compare group one, group two, and group three energy consumption">Compare Groups</button>
                                 <button class="ovos-quick-btn" data-query="What are the top energy consumers in the ASSA ABLOY press shop?">Top Consumers</button>
                             </div>
                         </div>
@@ -2368,6 +2364,10 @@
             [/\bthe breakfast club\b/ig, 'the Bret press group'],
             [/\bbreakfast club\b/ig, 'Bret press group'],
             [/\bbreakfast group\b/ig, 'Bret press group'],
+            [/\bbreakfast press(?:es)?(?: group)?\b/ig, 'Bret press group'],
+            [/\bfor breakfast\b/ig, 'for Bret press group'],
+            [/\bgreat businesses\b/ig, 'Bret presses'],
+            [/\bfor the purposes\b/ig, 'for Bret presses'],
             [/\bbread press(?:es)?\b/ig, 'Bret presses'],
             [/\bbrett press(?:es)?\b/ig, 'Bret presses'],
             [/\bbrett\b/ig, 'Bret'],
@@ -2379,6 +2379,7 @@
             [/\bdynamo\b/ig, 'Dimeco'],
             [/\bdy meco\b/ig, 'Dimeco'],
             [/\bdie meco\b/ig, 'Dimeco'],
+            [/\bdinoco\b/ig, 'Dimeco'],
             [/\brasta\b/ig, 'Raster'],
             [/\brastor\b/ig, 'Raster'],
             [/\bflexy\b/ig, 'Flexi'],
@@ -2389,13 +2390,66 @@
             [/\brast one sixty\b/ig, 'Rast160'],
             [/\bbret one twenty five\b/ig, 'Bret125'],
             [/\bbret one sixty\b/ig, 'Bret160'],
-            [/\bbret two fifty\b/ig, 'Bret250']
+            [/\bbret two fifty\b/ig, 'Bret250'],
+            [/\b(?:press\s+)?group (?:one|won|1)\b/ig, 'Bret press group'],
+            [/\b(?:press\s+)?group (?:two|2|to|too)\b/ig, 'Raster press group'],
+            [/\b(?:press\s+)?group (?:three|tree|3)\b/ig, 'Dimeco press group'],
+            [/\b(?:first|left) (?:press\s+)?group\b/ig, 'Bret press group'],
+            [/\b(?:second|middle|center|centre) (?:press\s+)?group\b/ig, 'Raster press group'],
+            [/\b(?:third|right) (?:press\s+)?group\b/ig, 'Dimeco press group'],
+            [/\boption (?:one|1)\b/ig, 'Bret press group'],
+            [/\boption (?:two|2|to|too)\b/ig, 'Raster press group'],
+            [/\boption (?:three|3)\b/ig, 'Dimeco press group']
         ];
 
         replacements.forEach(([pattern, replacement]) => {
             normalized = normalized.replace(pattern, replacement);
         });
         return normalized.trim().replace(/\s+/g, ' ');
+    }
+
+    function scorePartnerSpeechCandidate(transcript, confidence = 0) {
+        const normalized = normalizePartnerSpeechTranscript(transcript);
+        const lower = normalized.toLowerCase();
+        let score = Number.isFinite(confidence) ? confidence * 10 : 0;
+
+        if (/\b(bret|raster|dimeco) press group\b/.test(lower)) score += 100;
+        if (/\b(bret|raster|dimeco)\b/.test(lower)) score += 40;
+        if (/\b(group|press|energy|consumption|production|kpi|sec|compare)\b/.test(lower)) score += 10;
+        if (/\b(group one|group two|group three|first group|second group|third group)\b/.test((transcript || '').toLowerCase())) {
+            score += 60;
+        }
+
+        return { transcript: normalized, score };
+    }
+
+    function selectPartnerSpeechAlternative(result) {
+        const candidates = [];
+        for (let index = 0; index < result.length; index++) {
+            candidates.push(scorePartnerSpeechCandidate(
+                result[index].transcript,
+                result[index].confidence
+            ));
+        }
+        candidates.sort((left, right) => right.score - left.score);
+        return candidates[0]?.transcript || '';
+    }
+
+    function needsPartnerGroupClarification(transcript) {
+        const lower = normalizePartnerSpeechTranscript(transcript).toLowerCase();
+        const hasKnownGroup = /\b(bret|raster|dimeco)\b/.test(lower);
+        const mentionsGroupTarget = /\b(group|press|presses|meter)\b/.test(lower);
+        const asksGroupMetric = /\b(energy|consumption|production|produce|output|kpi|sec|compare)\b/.test(lower);
+        const explicitlyAsksTotal = /\b(total|overall|all groups|whole shop|press shop)\b/.test(lower);
+        return mentionsGroupTarget && asksGroupMetric && !hasKnownGroup && !explicitlyAsksTotal;
+    }
+
+    function askForPartnerGroupClarification() {
+        const prompt = 'I could not safely identify the press group. Please say group one for Bret, group two for Raster, or group three for Dimeco.';
+        addMessage(prompt, false, false);
+        if (audioEnabled && window.speechSynthesis) {
+            speakText(prompt, { pilot: PILOT_VOICE_TIMING_ENABLED });
+        }
     }
 
     async function sendMessage(text) {
@@ -2874,131 +2928,6 @@
     // Speech Recognition (Browser STT)
     let recognition = null;
     let isListening = false;
-    let mediaRecorder = null;
-    let mediaStream = null;
-    let recordedAudioChunks = [];
-    let discardServerRecording = false;
-
-    function getPreferredAudioMimeType() {
-        const candidates = [
-            'audio/webm;codecs=opus',
-            'audio/webm',
-            'audio/mp4',
-            'audio/ogg;codecs=opus'
-        ];
-        return candidates.find(type => window.MediaRecorder && MediaRecorder.isTypeSupported(type)) || '';
-    }
-
-    async function startServerTranscription() {
-        if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-            console.warn('MediaRecorder STT unavailable; falling back to browser speech recognition');
-            return false;
-        }
-
-        stopActivePlayback();
-        discardServerRecording = false;
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-            }
-        });
-
-        recordedAudioChunks = [];
-        const mimeType = getPreferredAudioMimeType();
-        mediaRecorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : undefined);
-
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data && event.data.size > 0) {
-                recordedAudioChunks.push(event.data);
-            }
-        };
-
-        mediaRecorder.onstop = () => {
-            if (discardServerRecording) {
-                discardServerRecording = false;
-                recordedAudioChunks = [];
-                mediaRecorder = null;
-                isListening = false;
-                return;
-            }
-            finishServerTranscription(mimeType).catch(error => {
-                console.error('Server STT failed:', error);
-                addMessage(`Voice transcription failed: ${error.message}`, false, true);
-            });
-        };
-
-        mediaRecorder.start();
-        isListening = true;
-
-        const micBtn = document.getElementById('ovos-mic');
-        micBtn.classList.add('listening');
-        micBtn.title = 'Recording with local Whisper... click to stop';
-        document.getElementById('ovos-input').placeholder = 'Recording with local Whisper... click to stop';
-        updateStatus('Recording', 'orange');
-        return true;
-    }
-
-    async function finishServerTranscription(mimeType) {
-        const micBtn = document.getElementById('ovos-mic');
-        const input = document.getElementById('ovos-input');
-        micBtn.classList.remove('listening');
-        micBtn.title = 'Click to speak';
-        input.placeholder = 'Transcribing locally...';
-        updateStatus('Transcribing', 'orange');
-
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(track => track.stop());
-            mediaStream = null;
-        }
-
-        const audioBlob = new Blob(recordedAudioChunks, { type: mimeType || 'audio/webm' });
-        recordedAudioChunks = [];
-
-        if (!audioBlob.size) {
-            input.placeholder = CONFIG.placeholder;
-            updateStatus('Connected', 'green');
-            addMessage('No voice audio was captured.', false, true);
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'voice-command.webm');
-
-        try {
-            const response = await fetch(CONFIG.transcribeUrl, {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-
-            if (!response.ok || !data.success || !data.normalized_text) {
-                throw new Error(data.detail || data.error || `STT failed with status ${response.status}`);
-            }
-
-            const transcript = normalizePartnerSpeechTranscript(data.normalized_text);
-            input.value = transcript;
-            console.log('[OVOS Widget] Local Whisper transcript:', {
-                raw: data.text,
-                normalized: transcript,
-                latency_ms: data.latency_ms,
-                model: data.model
-            });
-            updateStatus(`Whisper STT ${data.latency_ms}ms`, 'green');
-            setTimeout(() => sendMessage(transcript), 100);
-        } finally {
-            input.placeholder = CONFIG.placeholder;
-        }
-    }
-
-    function stopServerTranscription() {
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
-        }
-        mediaRecorder = null;
-        isListening = false;
-    }
 
     function initSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -3015,6 +2944,7 @@
         recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = true;
+        recognition.maxAlternatives = 5;
         recognition.lang = 'en-US';
 
         recognition.onstart = () => {
@@ -3058,7 +2988,7 @@
             let interimTranscript = '';
 
             for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
+                const transcript = selectPartnerSpeechAlternative(event.results[i]);
                 if (event.results[i].isFinal) {
                     finalTranscript += transcript;
                 } else {
@@ -3074,6 +3004,11 @@
             // Auto-send when final result received
             if (finalTranscript) {
                 const normalizedTranscript = normalizePartnerSpeechTranscript(finalTranscript);
+                if (needsPartnerGroupClarification(normalizedTranscript)) {
+                    input.value = '';
+                    askForPartnerGroupClarification();
+                    return;
+                }
                 setTimeout(() => {
                     sendMessage(normalizedTranscript);
                 }, 300);
@@ -3097,28 +3032,6 @@
     }
 
     function toggleListening() {
-        if (useServerStt) {
-            if (isListening && mediaRecorder) {
-                stopServerTranscription();
-                return;
-            }
-
-            startServerTranscription().then(started => {
-                if (!started) {
-                    useServerStt = false;
-                    localStorage.setItem('humanenerdia_stt_engine', 'browser');
-                    toggleListening();
-                }
-            }).catch(error => {
-                console.error('Failed to start local Whisper STT:', error);
-                addMessage(`Could not start local Whisper STT: ${error.message}. Falling back to browser STT.`, false, true);
-                useServerStt = false;
-                localStorage.setItem('humanenerdia_stt_engine', 'browser');
-                toggleListening();
-            });
-            return;
-        }
-
         if (!recognition) {
             if (!initSpeechRecognition()) {
                 addMessage('Voice input not supported in this browser. Try Chrome or Edge.', false, true);
@@ -3448,19 +3361,6 @@
                 } catch (stopError) {}
             }
         }
-
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            try {
-                discardServerRecording = true;
-                mediaRecorder.stop();
-            } catch (error) {}
-        }
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(track => track.stop());
-            mediaStream = null;
-        }
-        mediaRecorder = null;
-        recordedAudioChunks = [];
 
         if (wakeWordEnabled || wakeWordRecognition) {
             stopWakeWord();
