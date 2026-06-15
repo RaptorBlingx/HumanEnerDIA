@@ -15,13 +15,15 @@ Configuration via environment variables:
     OVOS_BRIDGE_TIMEOUT: Request timeout in seconds (default: 20)
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel
 from typing import Optional
+import asyncio
 import httpx
 import os
 import logging
 import re
+import tempfile
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -46,6 +48,10 @@ OVOS_BRIDGE_PORT = os.getenv("OVOS_BRIDGE_PORT", "5000")
 OVOS_BRIDGE_TIMEOUT = float(os.getenv("OVOS_BRIDGE_TIMEOUT", "20"))
 OVOS_BRIDGE_URL = f"http://{OVOS_BRIDGE_HOST}:{OVOS_BRIDGE_PORT}"
 PARTNER_PRESS_PILOT_DEFAULT = os.getenv("PARTNER_PRESS_PILOT_DEFAULT", "false").lower() == "true"
+LOCAL_WHISPER_MODEL = os.getenv("LOCAL_WHISPER_MODEL", "base.en")
+LOCAL_WHISPER_DEVICE = os.getenv("LOCAL_WHISPER_DEVICE", "cpu")
+LOCAL_WHISPER_COMPUTE_TYPE = os.getenv("LOCAL_WHISPER_COMPUTE_TYPE", "int8")
+LOCAL_WHISPER_BEAM_SIZE = int(os.getenv("LOCAL_WHISPER_BEAM_SIZE", "5"))
 SIMULATED_PILOT_FACTORY_ID = os.getenv(
     "SIMULATED_PILOT_FACTORY_ID",
     "11111111-1111-1111-1111-111111111111",
@@ -56,6 +62,16 @@ SIMULATED_PILOT_OPPORTUNITY_PERIOD = os.getenv("SIMULATED_PILOT_OPPORTUNITY_PERI
 SIMULATED_PILOT_REPORT_YEAR = int(os.getenv("SIMULATED_PILOT_REPORT_YEAR", "2026"))
 SIMULATED_PILOT_REPORT_MONTH = int(os.getenv("SIMULATED_PILOT_REPORT_MONTH", "4"))
 enpi_tracker = EnPITracker()
+_whisper_model = None
+_whisper_model_lock = asyncio.Lock()
+
+PARTNER_STT_PROMPT = (
+    "ASSA ABLOY Partner Press Shop. HumanEnerDIA. OVOS. "
+    "Bret Presses Meter Group. Raster Presses Meter Group. Dimeco Presses Meter Group. "
+    "Bret Transformer Meter TRAFO 3. Bret125-1. Bret160-1. Bret250-1. Bret250-2. "
+    "Dimeco80-1. Dimeco80-2. Flexi-1. Rast125-1. Rast125-2. Rast160-1. "
+    "Rast250-1. Rast250-2. Schu80-1. SQDC. SEC. kWh."
+)
 
 
 # ============================================================================
@@ -110,6 +126,18 @@ class VoiceBridgeHealth(BaseModel):
     error: Optional[str] = None
 
 
+class VoiceTranscriptionResponse(BaseModel):
+    success: bool
+    text: str
+    normalized_text: str
+    engine: str
+    model: str
+    language: Optional[str] = None
+    duration_seconds: Optional[float] = None
+    latency_ms: int
+    error: Optional[str] = None
+
+
 def _normalize_query(text: str) -> str:
     return " ".join((text or "").lower().strip().split())
 
@@ -148,6 +176,64 @@ def _normalize_partner_speech_text(text: str) -> str:
     for pattern, replacement in replacements:
         normalized = re.sub(pattern, replacement, normalized, flags=re.IGNORECASE)
     return " ".join(normalized.split())
+
+
+async def _get_whisper_model():
+    """Lazy-load local faster-whisper so normal API startup stays fast."""
+    global _whisper_model
+    if _whisper_model is not None:
+        return _whisper_model
+
+    async with _whisper_model_lock:
+        if _whisper_model is not None:
+            return _whisper_model
+
+        try:
+            from faster_whisper import WhisperModel
+        except ImportError as exc:
+            raise RuntimeError(
+                "faster-whisper is not installed in the analytics container"
+            ) from exc
+
+        def _load_model():
+            return WhisperModel(
+                LOCAL_WHISPER_MODEL,
+                device=LOCAL_WHISPER_DEVICE,
+                compute_type=LOCAL_WHISPER_COMPUTE_TYPE,
+            )
+
+        logger.info(
+            "Loading local Whisper STT model %s on %s/%s",
+            LOCAL_WHISPER_MODEL,
+            LOCAL_WHISPER_DEVICE,
+            LOCAL_WHISPER_COMPUTE_TYPE,
+        )
+        _whisper_model = await asyncio.to_thread(_load_model)
+        logger.info("Local Whisper STT model loaded")
+        return _whisper_model
+
+
+async def _transcribe_with_local_whisper(audio_path: str) -> dict:
+    model = await _get_whisper_model()
+
+    def _run_transcription():
+        segments, info = model.transcribe(
+            audio_path,
+            language="en",
+            beam_size=LOCAL_WHISPER_BEAM_SIZE,
+            temperature=0.0,
+            condition_on_previous_text=False,
+            vad_filter=True,
+            initial_prompt=PARTNER_STT_PROMPT,
+        )
+        text = " ".join(segment.text.strip() for segment in segments if segment.text.strip())
+        return {
+            "text": text.strip(),
+            "language": getattr(info, "language", None),
+            "duration_seconds": getattr(info, "duration", None),
+        }
+
+    return await asyncio.to_thread(_run_transcription)
 
 
 def _is_enpi_query(text: str) -> bool:
@@ -924,6 +1010,69 @@ async def voice_query(request: VoiceQueryRequest):
             tts_latency_ms=0,
             timestamp=datetime.now().isoformat(),
             bridge_url=OVOS_BRIDGE_URL
+        )
+
+
+@router.post("/transcribe", response_model=VoiceTranscriptionResponse)
+async def transcribe_voice_audio(audio: UploadFile = File(...)):
+    """
+    Transcribe recorded browser audio using local faster-whisper.
+
+    This is the experimental STT path for the Romania/ASSA ABLOY demo. It keeps
+    transcription on our server and avoids the browser Web Speech recognizer.
+    """
+    start_time = datetime.now()
+    suffix = Path(audio.filename or "voice.webm").suffix or ".webm"
+
+    try:
+        audio_bytes = await audio.read()
+        if not audio_bytes:
+            raise HTTPException(status_code=400, detail="No audio data received")
+        if len(audio_bytes) > 20 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="Audio upload is too large")
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+            temp_file.write(audio_bytes)
+            temp_path = temp_file.name
+
+        try:
+            transcription = await _transcribe_with_local_whisper(temp_path)
+        finally:
+            try:
+                os.unlink(temp_path)
+            except OSError:
+                pass
+
+        raw_text = transcription.get("text", "")
+        normalized_text = _normalize_partner_speech_text(raw_text)
+        latency_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+
+        return VoiceTranscriptionResponse(
+            success=bool(normalized_text),
+            text=raw_text,
+            normalized_text=normalized_text,
+            engine="faster-whisper",
+            model=LOCAL_WHISPER_MODEL,
+            language=transcription.get("language"),
+            duration_seconds=transcription.get("duration_seconds"),
+            latency_ms=latency_ms,
+            error=None if normalized_text else "No speech was recognized",
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Local Whisper transcription failed: %s", exc, exc_info=True)
+        latency_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+        return VoiceTranscriptionResponse(
+            success=False,
+            text="",
+            normalized_text="",
+            engine="faster-whisper",
+            model=LOCAL_WHISPER_MODEL,
+            language=None,
+            duration_seconds=None,
+            latency_ms=latency_ms,
+            error=str(exc),
         )
 
 

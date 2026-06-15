@@ -54,6 +54,9 @@
         apiUrl: window.location.port === '8001' 
             ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/query'  // Direct (when testing from :8001)
             : '/api/ovos/voice/query',     // Via nginx proxy (production - relative path)
+        transcribeUrl: window.location.port === '8001'
+            ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/transcribe'
+            : '/api/ovos/voice/transcribe',
         healthUrl: window.location.port === '8001' 
             ? 'http://' + window.location.hostname + ':8001/api/v1/ovos/voice/health'  // Direct (when testing from :8001)
             : '/api/ovos/voice/health',    // Via nginx proxy (production - relative path)
@@ -96,6 +99,7 @@
     const STREAMING_MAX_DELAY_MS = 70;
     const STREAMING_TARGET_TOTAL_MS = 2200;
     const PILOT_VOICE_TIMING_ENABLED = ['assistant', 'pilot'].includes(pilotMode);
+    let useServerStt = (localStorage.getItem('humanenerdia_stt_engine') || 'whisper') !== 'browser';
     const PILOT_TTS_RATE = Math.min(
         1.3,
         Math.max(0.85, Number(localStorage.getItem('humanenerdia_pilot_tts_rate')) || 1.0)
@@ -2870,6 +2874,131 @@
     // Speech Recognition (Browser STT)
     let recognition = null;
     let isListening = false;
+    let mediaRecorder = null;
+    let mediaStream = null;
+    let recordedAudioChunks = [];
+    let discardServerRecording = false;
+
+    function getPreferredAudioMimeType() {
+        const candidates = [
+            'audio/webm;codecs=opus',
+            'audio/webm',
+            'audio/mp4',
+            'audio/ogg;codecs=opus'
+        ];
+        return candidates.find(type => window.MediaRecorder && MediaRecorder.isTypeSupported(type)) || '';
+    }
+
+    async function startServerTranscription() {
+        if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+            console.warn('MediaRecorder STT unavailable; falling back to browser speech recognition');
+            return false;
+        }
+
+        stopActivePlayback();
+        discardServerRecording = false;
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            }
+        });
+
+        recordedAudioChunks = [];
+        const mimeType = getPreferredAudioMimeType();
+        mediaRecorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : undefined);
+
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) {
+                recordedAudioChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+            if (discardServerRecording) {
+                discardServerRecording = false;
+                recordedAudioChunks = [];
+                mediaRecorder = null;
+                isListening = false;
+                return;
+            }
+            finishServerTranscription(mimeType).catch(error => {
+                console.error('Server STT failed:', error);
+                addMessage(`Voice transcription failed: ${error.message}`, false, true);
+            });
+        };
+
+        mediaRecorder.start();
+        isListening = true;
+
+        const micBtn = document.getElementById('ovos-mic');
+        micBtn.classList.add('listening');
+        micBtn.title = 'Recording with local Whisper... click to stop';
+        document.getElementById('ovos-input').placeholder = 'Recording with local Whisper... click to stop';
+        updateStatus('Recording', 'orange');
+        return true;
+    }
+
+    async function finishServerTranscription(mimeType) {
+        const micBtn = document.getElementById('ovos-mic');
+        const input = document.getElementById('ovos-input');
+        micBtn.classList.remove('listening');
+        micBtn.title = 'Click to speak';
+        input.placeholder = 'Transcribing locally...';
+        updateStatus('Transcribing', 'orange');
+
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+        }
+
+        const audioBlob = new Blob(recordedAudioChunks, { type: mimeType || 'audio/webm' });
+        recordedAudioChunks = [];
+
+        if (!audioBlob.size) {
+            input.placeholder = CONFIG.placeholder;
+            updateStatus('Connected', 'green');
+            addMessage('No voice audio was captured.', false, true);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'voice-command.webm');
+
+        try {
+            const response = await fetch(CONFIG.transcribeUrl, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success || !data.normalized_text) {
+                throw new Error(data.detail || data.error || `STT failed with status ${response.status}`);
+            }
+
+            const transcript = normalizePartnerSpeechTranscript(data.normalized_text);
+            input.value = transcript;
+            console.log('[OVOS Widget] Local Whisper transcript:', {
+                raw: data.text,
+                normalized: transcript,
+                latency_ms: data.latency_ms,
+                model: data.model
+            });
+            updateStatus(`Whisper STT ${data.latency_ms}ms`, 'green');
+            setTimeout(() => sendMessage(transcript), 100);
+        } finally {
+            input.placeholder = CONFIG.placeholder;
+        }
+    }
+
+    function stopServerTranscription() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        mediaRecorder = null;
+        isListening = false;
+    }
 
     function initSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2968,6 +3097,28 @@
     }
 
     function toggleListening() {
+        if (useServerStt) {
+            if (isListening && mediaRecorder) {
+                stopServerTranscription();
+                return;
+            }
+
+            startServerTranscription().then(started => {
+                if (!started) {
+                    useServerStt = false;
+                    localStorage.setItem('humanenerdia_stt_engine', 'browser');
+                    toggleListening();
+                }
+            }).catch(error => {
+                console.error('Failed to start local Whisper STT:', error);
+                addMessage(`Could not start local Whisper STT: ${error.message}. Falling back to browser STT.`, false, true);
+                useServerStt = false;
+                localStorage.setItem('humanenerdia_stt_engine', 'browser');
+                toggleListening();
+            });
+            return;
+        }
+
         if (!recognition) {
             if (!initSpeechRecognition()) {
                 addMessage('Voice input not supported in this browser. Try Chrome or Edge.', false, true);
@@ -3297,6 +3448,19 @@
                 } catch (stopError) {}
             }
         }
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            try {
+                discardServerRecording = true;
+                mediaRecorder.stop();
+            } catch (error) {}
+        }
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+        }
+        mediaRecorder = null;
+        recordedAudioChunks = [];
 
         if (wakeWordEnabled || wakeWordRecognition) {
             stopWakeWord();
