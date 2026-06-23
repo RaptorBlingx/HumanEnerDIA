@@ -20,7 +20,6 @@ services:
       - nodered
       - analytics
       - query-service
-      - simulator
       - chatbot
       - auth-service
     networks:

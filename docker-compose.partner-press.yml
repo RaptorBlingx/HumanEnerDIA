@@ -25,7 +25,9 @@ services:
 
   simulator:
     command: ["sh", "-c", "echo 'Partner press pilot mode: simulator disabled'; tail -f /dev/null"]
-    restart: "no"
+    # Keep the no-data placeholder registered after Docker or host restarts.
+    # It does not generate or import any synthetic readings.
+    restart: unless-stopped
     environment:
       SIMULATOR_AUTO_START: "false"
       SIMULATOR_ENABLE_ANOMALIES: "false"
